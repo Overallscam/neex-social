@@ -92,6 +92,15 @@ let postIdCounter = 6;
 let commentIdCounter = 1;
 let comments = [];
 
+// Root route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Neex Social Backend API is running!', 
+        version: '1.0.0',
+        endpoints: ['/posts', '/users', '/register', '/login', '/messages']
+    });
+});
+
 app.post('/register', (req, res) => {
     const { username, password } = req.body;
     if (users.find(u => u.username === username)) {
