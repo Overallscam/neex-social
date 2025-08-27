@@ -11,6 +11,7 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-primary: #000;
@@ -24,7 +25,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg-primary);
       color: var(--text);
       min-height: 100vh;
@@ -41,19 +42,32 @@
       margin-bottom: 20px;
     }
     
-    .header h1 { color: var(--primary); }
+    .header h1 { 
+      color: var(--primary); 
+      font-weight: 700;
+      font-size: 28px;
+    }
+    
+    .header-nav {
+      display: flex;
+      gap: 15px;
+    }
     
     .nav-btn {
       background: none;
       border: none;
       color: var(--text-secondary);
       cursor: pointer;
-      padding: 10px;
+      padding: 12px;
       border-radius: 50%;
-      transition: color 0.2s;
+      transition: all 0.2s;
+      position: relative;
     }
     
-    .nav-btn:hover { color: var(--primary); }
+    .nav-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--primary);
+    }
     
     .composer {
       background: var(--bg-secondary);
@@ -332,20 +346,22 @@
         {
           id: 1,
           username: 'john_doe',
-          content: '🚀 Welcome to Neex Social! The future of social networking is here with advanced features like voice messages, stories, and real-time messaging!',
+          content: 'Welcome to Neex Social! The future of social networking is here with advanced features like voice messages, stories, and real-time messaging!',
           timestamp: '2h',
           likes: 15,
-          comments: 3,
+          comments: [],
           liked: false,
           image: null
         },
         {
           id: 2,
           username: 'tech_guru',
-          content: '🔥 Just discovered this amazing social platform! The rich text editor and multimedia support are incredible. #TechInnovation #SocialMedia',
+          content: 'Just discovered this amazing social platform! The rich text editor and multimedia support are incredible. #TechInnovation #SocialMedia',
           timestamp: '4h',
           likes: 28,
-          comments: 7,
+          comments: [
+            { id: 1, username: 'user1', content: 'Amazing features!', timestamp: 'now' }
+          ],
           liked: true,
           image: null
         }
@@ -356,6 +372,14 @@
       const [imagePreview, setImagePreview] = useState(null);
       const [isDarkMode, setIsDarkMode] = useState(true);
       const [notifications, setNotifications] = useState([]);
+      const [isAnonymous, setIsAnonymous] = useState(false);
+      const [showComments, setShowComments] = useState({});
+      const [commentInputs, setCommentInputs] = useState({});
+      const [showChat, setShowChat] = useState(false);
+      const [chatMessages, setChatMessages] = useState([]);
+      const [chatInput, setChatInput] = useState('');
+      const [followers, setFollowers] = useState({});
+      const [following, setFollowing] = useState({});
 
       useEffect(() => {
         document.body.className = isDarkMode ? '' : 'light';
@@ -381,19 +405,21 @@
         if (newPost.trim() || selectedImage) {
           const post = {
             id: Date.now(),
-            username: username,
+            username: isAnonymous ? 'Anonymous' : username,
             content: newPost,
             timestamp: 'now',
             likes: 0,
-            comments: 0,
+            comments: [],
             liked: false,
-            image: imagePreview
+            image: imagePreview,
+            isAnonymous: isAnonymous
           };
           setPosts([post, ...posts]);
           setNewPost('');
           setSelectedImage(null);
           setImagePreview(null);
-          addNotification('Post shared successfully! 📝', 'success');
+          setIsAnonymous(false);
+          addNotification(isAnonymous ? 'Anonymous post shared! 🕶️' : 'Post shared successfully! 📝', 'success');
         }
       };
 
@@ -427,6 +453,64 @@
       const toggleTheme = () => {
         setIsDarkMode(!isDarkMode);
         addNotification(`Switched to ${isDarkMode ? 'light' : 'dark'} mode! 🎨`, 'info');
+      };
+
+      // Comment functionality
+      const toggleComments = (postId) => {
+        setShowComments(prev => ({
+          ...prev,
+          [postId]: !prev[postId]
+        }));
+      };
+
+      const addComment = (postId) => {
+        const comment = commentInputs[postId];
+        if (comment && comment.trim()) {
+          setPosts(posts.map(post => 
+            post.id === postId 
+              ? { 
+                  ...post, 
+                  comments: [...(post.comments || []), {
+                    id: Date.now(),
+                    username: username,
+                    content: comment,
+                    timestamp: 'now'
+                  }]
+                }
+              : post
+          ));
+          setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+        }
+      };
+
+      // Follow functionality
+      const toggleFollow = (targetUser) => {
+        if (following[targetUser]) {
+          setFollowing(prev => ({ ...prev, [targetUser]: false }));
+          setFollowers(prev => ({ ...prev, [targetUser]: (prev[targetUser] || 1) - 1 }));
+          addNotification(`Unfollowed @${targetUser}`, 'info');
+        } else {
+          setFollowing(prev => ({ ...prev, [targetUser]: true }));
+          setFollowers(prev => ({ ...prev, [targetUser]: (prev[targetUser] || 0) + 1 }));
+          addNotification(`Now following @${targetUser}! 👥`, 'success');
+        }
+      };
+
+      // Chat functionality
+      const toggleChat = () => {
+        setShowChat(!showChat);
+      };
+
+      const sendMessage = () => {
+        if (chatInput.trim()) {
+          setChatMessages(prev => [...prev, {
+            id: Date.now(),
+            username: username,
+            content: chatInput,
+            timestamp: new Date().toLocaleTimeString()
+          }]);
+          setChatInput('');
+        }
       };
 
       if (!loggedIn) {
@@ -477,16 +561,19 @@
 
           {/* Header */}
           <div className="header">
-            <h1>🚀 Neex Social</h1>
-            <div>
-              <button className="nav-btn" title="Messages">
-                <i className="fas fa-envelope"></i>
+            <h1>Neex Social</h1>
+            <div className="header-nav">
+              <button className="nav-btn" onClick={toggleChat} title="Messages">
+                <i className="fas fa-comment"></i>
               </button>
               <button className="nav-btn" title="Notifications">
                 <i className="fas fa-bell"></i>
               </button>
               <button className="nav-btn" title="Profile">
                 <i className="fas fa-user"></i>
+              </button>
+              <button className="nav-btn" onClick={toggleTheme} title="Theme">
+                <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"}></i>
               </button>
             </div>
           </div>
@@ -567,6 +654,14 @@
               </div>
               
               <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '14px'}}>
+                  <input 
+                    type="checkbox" 
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                  />
+                  Anonymous
+                </label>
                 <span style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
                   {newPost.length}/280
                 </span>
@@ -586,11 +681,32 @@
             {posts.map(post => (
               <div key={post.id} className="post">
                 <div className="post-header">
-                  <div className="avatar">
-                    {post.username.charAt(0).toUpperCase()}
+                  <div className="avatar" style={{
+                    background: post.isAnonymous ? '#666' : 'var(--primary)'
+                  }}>
+                    {post.isAnonymous ? '?' : post.username.charAt(0).toUpperCase()}
                   </div>
                   <div className="post-info">
-                    <h4>@{post.username}</h4>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                      <h4>@{post.username}</h4>
+                      {post.username !== username && !post.isAnonymous && (
+                        <button 
+                          className={`follow-btn ${following[post.username] ? 'following' : ''}`}
+                          onClick={() => toggleFollow(post.username)}
+                          style={{
+                            padding: '4px 12px',
+                            fontSize: '12px',
+                            borderRadius: '15px',
+                            border: following[post.username] ? '1px solid var(--primary)' : '1px solid var(--border)',
+                            background: following[post.username] ? 'transparent' : 'var(--primary)',
+                            color: following[post.username] ? 'var(--primary)' : 'white',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {following[post.username] ? 'Following' : 'Follow'}
+                        </button>
+                      )}
+                    </div>
                     <span>{post.timestamp}</span>
                   </div>
                 </div>
@@ -602,9 +718,12 @@
                 )}
                 
                 <div className="post-actions">
-                  <button className="action-btn">
+                  <button 
+                    className="action-btn"
+                    onClick={() => toggleComments(post.id)}
+                  >
                     <i className="fas fa-comment"></i>
-                    <span>{post.comments}</span>
+                    <span>{post.comments ? post.comments.length : 0}</span>
                   </button>
                   <button 
                     className={`action-btn ${post.liked ? 'liked' : ''}`}
@@ -620,9 +739,184 @@
                     <i className="fas fa-share"></i>
                   </button>
                 </div>
+
+                {/* Comments Section */}
+                {showComments[post.id] && (
+                  <div className="comments-section" style={{
+                    borderTop: '1px solid var(--border)',
+                    paddingTop: '15px',
+                    marginTop: '15px'
+                  }}>
+                    <div className="comment-input" style={{
+                      display: 'flex',
+                      gap: '10px',
+                      marginBottom: '15px'
+                    }}>
+                      <input
+                        type="text"
+                        placeholder="Write a comment..."
+                        value={commentInputs[post.id] || ''}
+                        onChange={(e) => setCommentInputs(prev => ({
+                          ...prev,
+                          [post.id]: e.target.value
+                        }))}
+                        onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '20px',
+                          background: 'var(--bg-primary)',
+                          color: 'var(--text)'
+                        }}
+                      />
+                      <button 
+                        onClick={() => addComment(post.id)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '20px',
+                          border: 'none',
+                          background: 'var(--primary)',
+                          color: 'white',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Post
+                      </button>
+                    </div>
+                    
+                    {post.comments && post.comments.map(comment => (
+                      <div key={comment.id} style={{
+                        display: 'flex',
+                        gap: '10px',
+                        marginBottom: '10px',
+                        padding: '8px',
+                        background: 'var(--bg-primary)',
+                        borderRadius: '8px'
+                      }}>
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: 'var(--primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px'
+                        }}>
+                          {comment.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{fontWeight: '500', fontSize: '14px'}}>
+                            @{comment.username}
+                          </div>
+                          <div style={{fontSize: '14px', marginTop: '2px'}}>
+                            {comment.content}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
+
+          {/* Chat Modal */}
+          {showChat && (
+            <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              width: '350px',
+              height: '400px',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              zIndex: 1000
+            }}>
+              <div style={{
+                padding: '15px',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <h4>Chat</h4>
+                <button 
+                  onClick={toggleChat}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              
+              <div style={{
+                flex: 1,
+                padding: '10px',
+                overflowY: 'auto'
+              }}>
+                {chatMessages.map(msg => (
+                  <div key={msg.id} style={{
+                    marginBottom: '10px',
+                    padding: '8px',
+                    background: msg.username === username ? 'var(--primary)' : 'var(--bg-primary)',
+                    borderRadius: '8px',
+                    marginLeft: msg.username === username ? '20px' : '0',
+                    marginRight: msg.username === username ? '0' : '20px'
+                  }}>
+                    <div style={{fontSize: '12px', opacity: 0.8}}>
+                      {msg.username} • {msg.timestamp}
+                    </div>
+                    <div>{msg.content}</div>
+                  </div>
+                ))}
+              </div>
+              
+              <div style={{
+                padding: '10px',
+                borderTop: '1px solid var(--border)',
+                display: 'flex',
+                gap: '8px'
+              }}>
+                <input
+                  type="text"
+                  placeholder="Type a message..."
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  style={{
+                    flex: 1,
+                    padding: '8px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '20px',
+                    background: 'var(--bg-primary)',
+                    color: 'var(--text)'
+                  }}
+                />
+                <button 
+                  onClick={sendMessage}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    background: 'var(--primary)',
+                    color: 'white',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <i className="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div style={{textAlign: 'center', padding: '40px 20px', color: 'var(--text-secondary)'}}>
