@@ -342,6 +342,15 @@
       const [loggedIn, setLoggedIn] = useState(false);
       const [username, setUsername] = useState('');
       const [password, setPassword] = useState('');
+      const [isRegistering, setIsRegistering] = useState(false);
+      const [registeredUsers, setRegisteredUsers] = useState(() => {
+        const saved = localStorage.getItem('neex_users');
+        return saved ? JSON.parse(saved) : [
+          { username: 'john_doe', password: '123' },
+          { username: 'tech_guru', password: '123' },
+          { username: 'demo', password: 'demo' }
+        ];
+      });
       const [posts, setPosts] = useState([
         {
           id: 1,
@@ -376,20 +385,80 @@
       const [showComments, setShowComments] = useState({});
       const [commentInputs, setCommentInputs] = useState({});
       const [showChat, setShowChat] = useState(false);
-      const [chatMessages, setChatMessages] = useState([]);
+      const [chatMessages, setChatMessages] = useState([
+        {
+          id: 1,
+          username: 'john_doe',
+          content: 'Welcome to Neex Social chat! 👋',
+          timestamp: '10:30 AM'
+        },
+        {
+          id: 2,
+          username: 'tech_guru',
+          content: 'This is amazing! Love the new features.',
+          timestamp: '10:32 AM'
+        },
+        {
+          id: 3,
+          username: 'demo',
+          content: 'You can browse as a guest or sign up to participate!',
+          timestamp: '10:35 AM'
+        }
+      ]);
       const [chatInput, setChatInput] = useState('');
       const [followers, setFollowers] = useState({});
       const [following, setFollowing] = useState({});
 
       useEffect(() => {
         document.body.className = isDarkMode ? '' : 'light';
+        
+        // Check for saved login
+        const savedUser = localStorage.getItem('neex_current_user');
+        if (savedUser) {
+          setUsername(savedUser);
+          setLoggedIn(true);
+        }
       }, [isDarkMode]);
+
+      // Save users to localStorage whenever registeredUsers changes
+      useEffect(() => {
+        localStorage.setItem('neex_users', JSON.stringify(registeredUsers));
+      }, [registeredUsers]);
 
       const handleLogin = () => {
         if (username && password) {
-          setLoggedIn(true);
-          addNotification('Welcome to Neex Social! 🎉', 'success');
+          const user = registeredUsers.find(u => u.username === username && u.password === password);
+          if (user) {
+            setLoggedIn(true);
+            localStorage.setItem('neex_current_user', username);
+            addNotification('Welcome back to Neex Social! 🎉', 'success');
+          } else {
+            addNotification('Invalid username or password!', 'error');
+          }
         }
+      };
+
+      const handleRegister = () => {
+        if (username && password) {
+          if (registeredUsers.find(u => u.username === username)) {
+            addNotification('Username already exists!', 'error');
+            return;
+          }
+          
+          const newUser = { username, password };
+          setRegisteredUsers(prev => [...prev, newUser]);
+          setLoggedIn(true);
+          localStorage.setItem('neex_current_user', username);
+          addNotification('Account created successfully! Welcome to Neex Social! 🎉', 'success');
+        }
+      };
+
+      const handleLogout = () => {
+        setLoggedIn(false);
+        setUsername('');
+        setPassword('');
+        localStorage.removeItem('neex_current_user');
+        addNotification('Logged out successfully!', 'info');
       };
 
       const addNotification = (message, type = 'info') => {
@@ -502,7 +571,7 @@
       };
 
       const sendMessage = () => {
-        if (chatInput.trim()) {
+        if (chatInput.trim() && loggedIn) {
           setChatMessages(prev => [...prev, {
             id: Date.now(),
             username: username,
@@ -512,43 +581,6 @@
           setChatInput('');
         }
       };
-
-      if (!loggedIn) {
-        return (
-          <div className="app">
-            <div className="login-form">
-              <h1>🚀 Neex Social</h1>
-              <p style={{marginBottom: '30px', color: 'var(--text-secondary)'}}>
-                Advanced Social Media Platform
-              </p>
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-              />
-              <button className="login-btn" onClick={handleLogin}>
-                <i className="fas fa-sign-in-alt" style={{marginRight: '8px'}}></i>
-                Sign In
-              </button>
-              <div style={{marginTop: '20px', fontSize: '14px', color: 'var(--text-secondary)'}}>
-                <p>✨ Features included:</p>
-                <p>• Rich Text Editor • Voice Messages • Stories</p>
-                <p>• Direct Messages • Video Support • Hashtags</p>
-                <p>• User Mentions • Advanced Filters • Much more!</p>
-              </div>
-            </div>
-          </div>
-        );
-      }
 
       return (
         <div className="app">
@@ -569,17 +601,131 @@
               <button className="nav-btn" title="Notifications">
                 <i className="fas fa-bell"></i>
               </button>
-              <button className="nav-btn" title="Profile">
-                <i className="fas fa-user"></i>
-              </button>
+              {loggedIn ? (
+                <>
+                  <button className="nav-btn" title="Profile">
+                    <i className="fas fa-user"></i>
+                  </button>
+                  <button className="nav-btn" onClick={handleLogout} title="Logout">
+                    <i className="fas fa-sign-out-alt"></i>
+                  </button>
+                </>
+              ) : (
+                <button className="nav-btn" onClick={() => setIsRegistering(!isRegistering)} title="Login">
+                  <i className="fas fa-sign-in-alt"></i>
+                </button>
+              )}
               <button className="nav-btn" onClick={toggleTheme} title="Theme">
                 <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"}></i>
               </button>
             </div>
           </div>
 
-          {/* Composer */}
-          <div className="composer">
+          {/* Login/Register Modal */}
+          {!loggedIn && isRegistering && (
+            <div style={{
+              position: 'fixed',
+              top: '0',
+              left: '0',
+              right: '0',
+              bottom: '0',
+              background: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}>
+              <div style={{
+                background: 'var(--bg-secondary)',
+                padding: '30px',
+                borderRadius: '12px',
+                border: '1px solid var(--border)',
+                width: '400px',
+                maxWidth: '90vw'
+              }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                  <h2>Join Neex Social</h2>
+                  <button 
+                    onClick={() => setIsRegistering(false)}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginBottom: '15px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    background: 'var(--bg-primary)',
+                    color: 'var(--text)'
+                  }}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginBottom: '20px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    background: 'var(--bg-primary)',
+                    color: 'var(--text)'
+                  }}
+                />
+                
+                <div style={{display: 'flex', gap: '10px'}}>
+                  <button 
+                    onClick={handleLogin}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: 'transparent',
+                      border: '1px solid var(--primary)',
+                      color: 'var(--primary)',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    onClick={handleRegister}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: 'var(--primary)',
+                      border: 'none',
+                      color: 'white',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Register
+                  </button>
+                </div>
+                
+                <p style={{marginTop: '15px', fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'center'}}>
+                  Browse posts and chat without signing up, or register to post content!
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Composer - Only show if logged in */}
+          {loggedIn && (
+            <div className="composer">
             <textarea
               placeholder="What's happening?"
               value={newPost}
@@ -675,6 +821,38 @@
               </div>
             </div>
           </div>
+          )}
+
+          {/* Guest prompt for non-logged users */}
+          {!loggedIn && (
+            <div style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              padding: '20px',
+              margin: '20px 0',
+              textAlign: 'center'
+            }}>
+              <h3>👋 Welcome to Neex Social!</h3>
+              <p style={{color: 'var(--text-secondary)', margin: '10px 0'}}>
+                You can browse posts and chat without signing up
+              </p>
+              <button 
+                onClick={() => setIsRegistering(true)}
+                style={{
+                  background: 'var(--primary)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  marginTop: '10px'
+                }}
+              >
+                Sign Up to Post Content
+              </button>
+            </div>
+          )}
 
           {/* Feed */}
           <div className="feed">
@@ -689,7 +867,7 @@
                   <div className="post-info">
                     <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
                       <h4>@{post.username}</h4>
-                      {post.username !== username && !post.isAnonymous && (
+                      {loggedIn && post.username !== username && !post.isAnonymous && (
                         <button 
                           className={`follow-btn ${following[post.username] ? 'following' : ''}`}
                           onClick={() => toggleFollow(post.username)}
@@ -752,37 +930,61 @@
                       gap: '10px',
                       marginBottom: '15px'
                     }}>
-                      <input
-                        type="text"
-                        placeholder="Write a comment..."
-                        value={commentInputs[post.id] || ''}
-                        onChange={(e) => setCommentInputs(prev => ({
-                          ...prev,
-                          [post.id]: e.target.value
-                        }))}
-                        onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
-                        style={{
-                          flex: 1,
-                          padding: '8px 12px',
-                          border: '1px solid var(--border)',
-                          borderRadius: '20px',
-                          background: 'var(--bg-primary)',
-                          color: 'var(--text)'
-                        }}
-                      />
-                      <button 
-                        onClick={() => addComment(post.id)}
-                        style={{
-                          padding: '8px 16px',
-                          borderRadius: '20px',
-                          border: 'none',
-                          background: 'var(--primary)',
-                          color: 'white',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Post
-                      </button>
+                      {loggedIn ? (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Write a comment..."
+                            value={commentInputs[post.id] || ''}
+                            onChange={(e) => setCommentInputs(prev => ({
+                              ...prev,
+                              [post.id]: e.target.value
+                            }))}
+                            onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              border: '1px solid var(--border)',
+                              borderRadius: '20px',
+                              background: 'var(--bg-primary)',
+                              color: 'var(--text)'
+                            }}
+                          />
+                          <button 
+                            onClick={() => addComment(post.id)}
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '20px',
+                              border: 'none',
+                              background: 'var(--primary)',
+                              color: 'white',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Post
+                          </button>
+                        </>
+                      ) : (
+                        <p style={{
+                          color: 'var(--text-secondary)',
+                          fontStyle: 'italic',
+                          textAlign: 'center',
+                          width: '100%'
+                        }}>
+                          <button 
+                            onClick={() => setIsRegistering(true)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--primary)',
+                              cursor: 'pointer',
+                              textDecoration: 'underline'
+                            }}
+                          >
+                            Sign in
+                          </button> to comment
+                        </p>
+                      )}
                     </div>
                     
                     {post.comments && post.comments.map(comment => (
@@ -886,34 +1088,58 @@
                 display: 'flex',
                 gap: '8px'
               }}>
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  style={{
-                    flex: 1,
-                    padding: '8px',
-                    border: '1px solid var(--border)',
-                    borderRadius: '20px',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text)'
-                  }}
-                />
-                <button 
-                  onClick={sendMessage}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '20px',
-                    border: 'none',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <i className="fas fa-paper-plane"></i>
-                </button>
+                {loggedIn ? (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Type a message..."
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '20px',
+                        background: 'var(--bg-primary)',
+                        color: 'var(--text)'
+                      }}
+                    />
+                    <button 
+                      onClick={sendMessage}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '20px',
+                        border: 'none',
+                        background: 'var(--primary)',
+                        color: 'white',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <i className="fas fa-paper-plane"></i>
+                    </button>
+                  </>
+                ) : (
+                  <p style={{
+                    width: '100%',
+                    textAlign: 'center',
+                    color: 'var(--text-secondary)',
+                    fontSize: '14px'
+                  }}>
+                    <button 
+                      onClick={() => setIsRegistering(true)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      Sign in
+                    </button> to send messages
+                  </p>
+                )}
               </div>
             </div>
           )}
