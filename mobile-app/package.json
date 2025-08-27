@@ -1,0 +1,38 @@
+{
+  "name": "neex-social",
+  "displayName": "Neex Social",
+  "version": "1.0.0",
+  "description": "Advanced Social Media Platform",
+  "main": "index.js",
+  "scripts": {
+    "build": "cordova build android",
+    "serve": "cordova serve",
+    "prepare": "cordova prepare"
+  },
+  "keywords": [
+    "social media",
+    "cordova",
+    "phonegap",
+    "mobile"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "cordova": "^12.0.0",
+    "cordova-android": "^12.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-splashscreen": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-media": {},
+      "cordova-plugin-camera": {}
+    }
+  }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Page</title>
+</head>
+<body>
+  <div id="root">
+    <h1>Test - App Loading...</h1>
+    <p>If you see this, the server is working!</p>
+  </div>
+  
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <script type="text/babel">
+    function App() {
+      return (
+        <div style={{padding: '20px', fontFamily: 'Arial'}}>
+          <h1>🎉 Social Media App Test</h1>
+          <p>React is working correctly!</p>
+          <button onClick={() => alert('Button works!')}>
+            Test Button
+          </button>
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
