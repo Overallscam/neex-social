@@ -338,6 +338,9 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
+    // API Configuration
+    const API_BASE_URL = 'https://neex-social-production.up.railway.app';
+
     function App() {
       const [loggedIn, setLoggedIn] = useState(false);
       const [username, setUsername] = useState('');
@@ -351,30 +354,8 @@
           { username: 'demo', password: 'demo' }
         ];
       });
-      const [posts, setPosts] = useState([
-        {
-          id: 1,
-          username: 'john_doe',
-          content: 'Welcome to Neex Social! The future of social networking is here with advanced features like voice messages, stories, and real-time messaging!',
-          timestamp: '2h',
-          likes: 15,
-          comments: [],
-          liked: false,
-          image: null
-        },
-        {
-          id: 2,
-          username: 'tech_guru',
-          content: 'Just discovered this amazing social platform! The rich text editor and multimedia support are incredible. #TechInnovation #SocialMedia',
-          timestamp: '4h',
-          likes: 28,
-          comments: [
-            { id: 1, username: 'user1', content: 'Amazing features!', timestamp: 'now' }
-          ],
-          liked: true,
-          image: null
-        }
-      ]);
+      const [posts, setPosts] = useState([]);
+      const [loading, setLoading] = useState(true);
       const [newPost, setNewPost] = useState('');
       const [showEmojiPicker, setShowEmojiPicker] = useState(false);
       const [selectedImage, setSelectedImage] = useState(null);
@@ -418,6 +399,13 @@
           setUsername(savedUser);
           setLoggedIn(true);
         }
+
+        // Load posts from backend
+        loadPosts();
+
+        // Auto-refresh posts every 30 seconds
+        const interval = setInterval(loadPosts, 30000);
+        return () => clearInterval(interval);
       }, [isDarkMode]);
 
       // Save users to localStorage whenever registeredUsers changes
@@ -425,31 +413,124 @@
         localStorage.setItem('neex_users', JSON.stringify(registeredUsers));
       }, [registeredUsers]);
 
-      const handleLogin = () => {
+      // API Functions
+      const loadPosts = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts`);
+          if (response.ok) {
+            const backendPosts = await response.json();
+            // Transform backend posts to frontend format
+            const transformedPosts = backendPosts.map(post => ({
+              ...post,
+              timestamp: formatTimestamp(post.date),
+              comments: [],
+              liked: false
+            }));
+            setPosts(transformedPosts);
+          }
+        } catch (error) {
+          console.log('Using offline mode');
+          // Fallback to sample data if backend unavailable
+          setPosts([
+            {
+              id: 1,
+              username: 'john_doe',
+              content: 'Welcome to Neex Social! Connect with friends and share your thoughts.',
+              timestamp: '2h',
+              likes: 15,
+              comments: [],
+              liked: false,
+              image: null
+            }
+          ]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const formatTimestamp = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        
+        if (diffHours < 1) return 'now';
+        if (diffHours < 24) return `${diffHours}h`;
+        return `${Math.floor(diffHours / 24)}d`;
+      };
+
+      const handleLogin = async () => {
         if (username && password) {
-          const user = registeredUsers.find(u => u.username === username && u.password === password);
-          if (user) {
-            setLoggedIn(true);
-            localStorage.setItem('neex_current_user', username);
-            addNotification('Welcome back to Neex Social! 🎉', 'success');
-          } else {
-            addNotification('Invalid username or password!', 'error');
+          try {
+            const response = await fetch(`${API_BASE_URL}/login`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+              setLoggedIn(true);
+              localStorage.setItem('neex_current_user', username);
+              addNotification('Welcome back to Neex Social! 🎉', 'success');
+            } else {
+              // Fallback to local storage for existing users
+              const user = registeredUsers.find(u => u.username === username && u.password === password);
+              if (user) {
+                setLoggedIn(true);
+                localStorage.setItem('neex_current_user', username);
+                addNotification('Welcome back to Neex Social! 🎉', 'success');
+              } else {
+                addNotification('Invalid username or password!', 'error');
+              }
+            }
+          } catch (error) {
+            // Fallback to local storage if backend unavailable
+            const user = registeredUsers.find(u => u.username === username && u.password === password);
+            if (user) {
+              setLoggedIn(true);
+              localStorage.setItem('neex_current_user', username);
+              addNotification('Welcome back to Neex Social! 🎉', 'success');
+            } else {
+              addNotification('Invalid username or password!', 'error');
+            }
           }
         }
       };
 
-      const handleRegister = () => {
+      const handleRegister = async () => {
         if (username && password) {
-          if (registeredUsers.find(u => u.username === username)) {
-            addNotification('Username already exists!', 'error');
-            return;
+          try {
+            const response = await fetch(`${API_BASE_URL}/register`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+              setLoggedIn(true);
+              localStorage.setItem('neex_current_user', username);
+              addNotification('Account created successfully! Welcome to Neex Social! 🎉', 'success');
+            } else {
+              const data = await response.json();
+              addNotification(data.message || 'Registration failed!', 'error');
+            }
+          } catch (error) {
+            // Fallback to local storage if backend unavailable
+            if (registeredUsers.find(u => u.username === username)) {
+              addNotification('Username already exists!', 'error');
+              return;
+            }
+            
+            const newUser = { username, password };
+            setRegisteredUsers(prev => [...prev, newUser]);
+            setLoggedIn(true);
+            localStorage.setItem('neex_current_user', username);
+            addNotification('Account created successfully! Welcome to Neex Social! 🎉', 'success');
           }
-          
-          const newUser = { username, password };
-          setRegisteredUsers(prev => [...prev, newUser]);
-          setLoggedIn(true);
-          localStorage.setItem('neex_current_user', username);
-          addNotification('Account created successfully! Welcome to Neex Social! 🎉', 'success');
         }
       };
 
@@ -470,38 +551,95 @@
         }, 3000);
       };
 
-      const handlePost = () => {
+      const handlePost = async () => {
         if (newPost.trim() || selectedImage) {
-          const post = {
-            id: Date.now(),
-            username: isAnonymous ? 'Anonymous' : username,
-            content: newPost,
-            timestamp: 'now',
-            likes: 0,
-            comments: [],
-            liked: false,
-            image: imagePreview,
-            isAnonymous: isAnonymous
-          };
-          setPosts([post, ...posts]);
-          setNewPost('');
-          setSelectedImage(null);
-          setImagePreview(null);
-          setIsAnonymous(false);
-          addNotification(isAnonymous ? 'Anonymous post shared! 🕶️' : 'Post shared successfully! 📝', 'success');
+          try {
+            const formData = new FormData();
+            formData.append('username', isAnonymous ? 'Anonymous' : username);
+            formData.append('content', newPost);
+            formData.append('isAnonymous', isAnonymous);
+            
+            if (selectedImage) {
+              formData.append('image', selectedImage);
+            }
+
+            const response = await fetch(`${API_BASE_URL}/posts`, {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (response.ok) {
+              const newPostData = await response.json();
+              // Reload posts to get the updated list
+              loadPosts();
+              setNewPost('');
+              setSelectedImage(null);
+              setImagePreview(null);
+              setIsAnonymous(false);
+              addNotification(isAnonymous ? 'Anonymous post shared! 🕶️' : 'Post shared successfully! 📝', 'success');
+            } else {
+              throw new Error('Failed to post');
+            }
+          } catch (error) {
+            // Fallback to local storage if backend unavailable
+            const post = {
+              id: Date.now(),
+              username: isAnonymous ? 'Anonymous' : username,
+              content: newPost,
+              timestamp: 'now',
+              likes: 0,
+              comments: [],
+              liked: false,
+              image: imagePreview,
+              isAnonymous: isAnonymous
+            };
+            setPosts([post, ...posts]);
+            setNewPost('');
+            setSelectedImage(null);
+            setImagePreview(null);
+            setIsAnonymous(false);
+            addNotification(isAnonymous ? 'Anonymous post shared! 🕶️' : 'Post shared successfully! 📝', 'success');
+          }
         }
       };
 
-      const handleLike = (postId) => {
-        setPosts(posts.map(post => 
-          post.id === postId 
-            ? { 
-                ...post, 
-                liked: !post.liked,
-                likes: post.liked ? post.likes - 1 : post.likes + 1
-              }
-            : post
-        ));
+      const handleLike = async (postId) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            // Update local state
+            setPosts(posts.map(post => 
+              post.id === postId 
+                ? { 
+                    ...post, 
+                    liked: !post.liked,
+                    likes: data.likes
+                  }
+                : post
+            ));
+          } else {
+            throw new Error('Failed to like');
+          }
+        } catch (error) {
+          // Fallback to local state if backend unavailable
+          setPosts(posts.map(post => 
+            post.id === postId 
+              ? { 
+                  ...post, 
+                  liked: !post.liked,
+                  likes: post.liked ? post.likes - 1 : post.likes + 1
+                }
+              : post
+          ));
+        }
       };
 
       const handleImageUpload = (e) => {
@@ -570,15 +708,43 @@
         setShowChat(!showChat);
       };
 
-      const sendMessage = () => {
+      const sendMessage = async () => {
         if (chatInput.trim() && loggedIn) {
-          setChatMessages(prev => [...prev, {
-            id: Date.now(),
-            username: username,
-            content: chatInput,
-            timestamp: new Date().toLocaleTimeString()
-          }]);
-          setChatInput('');
+          try {
+            const response = await fetch(`${API_BASE_URL}/messages`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                from: username,
+                to: 'public',
+                content: chatInput
+              }),
+            });
+
+            if (response.ok) {
+              // Add to local chat immediately for better UX
+              setChatMessages(prev => [...prev, {
+                id: Date.now(),
+                username: username,
+                content: chatInput,
+                timestamp: new Date().toLocaleTimeString()
+              }]);
+              setChatInput('');
+            } else {
+              throw new Error('Failed to send message');
+            }
+          } catch (error) {
+            // Fallback to local chat if backend unavailable
+            setChatMessages(prev => [...prev, {
+              id: Date.now(),
+              username: username,
+              content: chatInput,
+              timestamp: new Date().toLocaleTimeString()
+            }]);
+            setChatInput('');
+          }
         }
       };
 
@@ -856,7 +1022,27 @@
 
           {/* Feed */}
           <div className="feed">
-            {posts.map(post => (
+            {loading ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px',
+                color: 'var(--text-secondary)'
+              }}>
+                <i className="fas fa-spinner fa-spin" style={{fontSize: '24px', marginBottom: '10px'}}></i>
+                <p>Loading posts...</p>
+              </div>
+            ) : posts.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px',
+                color: 'var(--text-secondary)'
+              }}>
+                <i className="fas fa-comments" style={{fontSize: '48px', marginBottom: '20px', opacity: 0.5}}></i>
+                <h3>No posts yet!</h3>
+                <p>Be the first to share something amazing.</p>
+              </div>
+            ) : (
+              posts.map(post => (
               <div key={post.id} className="post">
                 <div className="post-header">
                   <div className="avatar" style={{
@@ -1021,7 +1207,8 @@
                   </div>
                 )}
               </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Chat Modal */}
