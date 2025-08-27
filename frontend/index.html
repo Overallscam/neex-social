@@ -520,6 +520,445 @@
       margin: 0;
     }
 
+    /* PROFILE DROPDOWN */
+    .profile-dropdown-container {
+      position: relative;
+    }
+
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text);
+    }
+
+    .profile-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--primary);
+    }
+
+    .dropdown-arrow {
+      transition: transform 0.3s ease;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    .dropdown-arrow.rotated {
+      transform: rotate(180deg);
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 8px;
+      min-width: 240px;
+      box-shadow: 0 10px 30px var(--shadow);
+      z-index: 1000;
+      animation: dropdownSlide 0.3s ease;
+    }
+
+    @keyframes dropdownSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dropdown-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+
+    .dropdown-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .dropdown-info {
+      flex: 1;
+    }
+
+    .dropdown-name {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .dropdown-username {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .dropdown-item.logout-item {
+      color: var(--error);
+    }
+
+    .dropdown-item.logout-item:hover {
+      background: var(--error-alpha);
+    }
+
+    /* SETTINGS MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .settings-modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow: hidden;
+      animation: modalSlide 0.3s ease;
+    }
+
+    @keyframes modalSlide {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 25px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .modal-content {
+      padding: 20px 25px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      margin-bottom: 30px;
+    }
+
+    .settings-section h3 {
+      color: var(--text);
+      margin: 0 0 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 15px;
+      background: none;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text);
+      text-align: left;
+      margin-bottom: 8px;
+    }
+
+    .settings-item:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .setting-info {
+      flex: 1;
+    }
+
+    .setting-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .setting-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .theme-switch {
+      display: flex;
+      background: var(--bg-tertiary);
+      border: none;
+      border-radius: 20px;
+      padding: 4px;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .theme-switch span {
+      padding: 6px 12px;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .theme-switch span.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .danger-section h3 {
+      color: var(--error);
+    }
+
+    .danger-item {
+      color: var(--error);
+    }
+
+    .danger-item:hover {
+      background: var(--error-alpha);
+    }
+
+    /* PROFILE FIELDS */
+    .profile-fields {
+      margin-top: 15px;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+    }
+
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    .field-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .profile-input, .profile-textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-primary);
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .profile-input:focus, .profile-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-alpha);
+    }
+
+    .profile-textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+
+    .save-profile-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .save-profile-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* TOGGLE CONTROLS */
+    .privacy-controls, .notification-controls {
+      margin-top: 15px;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+    }
+
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-item:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-info {
+      flex: 1;
+    }
+
+    .toggle-info span {
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .toggle-info small {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* TOGGLE SWITCH */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--text-muted);
+      transition: .4s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* ENHANCED THEME SWITCH */
+    .theme-switch span.active {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
     /* NOTIFICATIONS */
     .notification {
       position: fixed;
@@ -857,6 +1296,35 @@
       const [newComment, setNewComment] = useState({});
       const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
       const [sharedPosts, setSharedPosts] = useState([]);
+      const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+      const [showSettingsModal, setShowSettingsModal] = useState(false);
+      
+      // Settings state
+      const [editingProfile, setEditingProfile] = useState(false);
+      const [profileData, setProfileData] = useState({
+        name: 'John Doe',
+        username: '@john_doe',
+        bio: 'Social media enthusiast and tech lover 🚀',
+        location: 'New York, USA',
+        website: 'https://johndoe.dev'
+      });
+      
+      const [privacySettingsData, setPrivacySettingsData] = useState({
+        profileVisibility: 'public',
+        allowFollowers: true,
+        allowTagging: true,
+        showActivity: true,
+        allowSearch: true
+      });
+      
+      const [notificationPrefs, setNotificationPrefs] = useState({
+        likes: true,
+        comments: true,
+        follows: true,
+        mentions: true,
+        shares: true,
+        newsletter: false
+      });
 
       // Posts State
       const [posts, setPosts] = useState([
@@ -1145,6 +1613,85 @@
         }
       };
 
+      // Profile & Settings Functions
+      const toggleProfileDropdown = () => {
+        setShowProfileDropdown(prev => !prev);
+        setShowSettingsModal(false); // Close settings if open
+      };
+
+      const openSettingsModal = () => {
+        setShowSettingsModal(true);
+        setShowProfileDropdown(false); // Close dropdown if open
+      };
+
+      const closeSettingsModal = () => {
+        setShowSettingsModal(false);
+      };
+
+      const viewProfile = () => {
+        addNotification('👤 Profile page opening...', 'info');
+        setShowProfileDropdown(false);
+        // Add profile page navigation logic here
+      };
+
+      const editProfile = () => {
+        setEditingProfile(true);
+        setShowSettingsModal(false);
+        setShowProfileDropdown(false);
+        addNotification('✏️ Edit Profile mode activated!', 'info');
+      };
+
+      const saveProfile = () => {
+        setEditingProfile(false);
+        addNotification('✅ Profile updated successfully!', 'success');
+      };
+
+      const updateProfileField = (field, value) => {
+        setProfileData(prev => ({
+          ...prev,
+          [field]: value
+        }));
+      };
+
+      const viewBookmarks = () => {
+        const bookmarkedCount = posts.filter(post => post.bookmarked).length;
+        addNotification(`🔖 You have ${bookmarkedCount} bookmarked posts`, 'info');
+        setShowProfileDropdown(false);
+      };
+
+      const accountSettings = () => {
+        openSettingsModal();
+      };
+
+      const updatePrivacySetting = (setting, value) => {
+        setPrivacySettingsData(prev => ({
+          ...prev,
+          [setting]: value
+        }));
+        addNotification(`🔒 ${setting} setting updated!`, 'success');
+      };
+
+      const privacySettings = () => {
+        addNotification('🔒 Privacy settings panel opened!', 'info');
+      };
+
+      const updateNotificationPref = (pref, value) => {
+        setNotificationPrefs(prev => ({
+          ...prev,
+          [pref]: value
+        }));
+        addNotification(`🔔 ${pref} notifications ${value ? 'enabled' : 'disabled'}!`, 'success');
+      };
+
+      const notificationSettings = () => {
+        addNotification('🔔 Notification preferences panel opened!', 'info');
+      };
+
+      const dataExport = () => {
+        addNotification('📊 Data export started! Check your downloads.', 'success');
+        setShowSettingsModal(false);
+      };
+
       // Emoji Functions
       const emojis = ['😀', '😂', '🥺', '😍', '🤔', '👍', '❤️', '🔥', '💯', '🎉', '🚀', '💡', '🌟', '⚡', '🎯', '💪'];
       
@@ -1213,18 +1760,55 @@
                 <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'}`}></i>
                 <span>{isDarkMode ? 'Light' : 'Dark'}</span>
               </button>
-              
-              <div className="profile-btn">
-                <div className="profile-avatar">
-                  {currentUser?.avatar}
-                </div>
-                <span>{currentUser?.name}</span>
-              </div>
-              
-              <button className="nav-btn" onClick={handleLogout}>
-                <i className="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
+
+              <button className="nav-btn" onClick={openSettingsModal}>
+                <i className="fas fa-cog"></i>
+                <span>Settings</span>
               </button>
+              
+              <div className="profile-dropdown-container">
+                <button className="profile-btn" onClick={toggleProfileDropdown}>
+                  <div className="profile-avatar">
+                    {currentUser?.avatar}
+                  </div>
+                  <span>{currentUser?.name}</span>
+                  <i className={`fas fa-chevron-down dropdown-arrow ${showProfileDropdown ? 'rotated' : ''}`}></i>
+                </button>
+
+                {showProfileDropdown && (
+                  <div className="profile-dropdown">
+                    <div className="dropdown-header">
+                      <div className="dropdown-avatar">{currentUser?.avatar}</div>
+                      <div className="dropdown-info">
+                        <div className="dropdown-name">{currentUser?.name}</div>
+                        <div className="dropdown-username">{currentUser?.username}</div>
+                      </div>
+                    </div>
+                    <div className="dropdown-divider"></div>
+                    <button className="dropdown-item" onClick={viewProfile}>
+                      <i className="fas fa-user"></i>
+                      View Profile
+                    </button>
+                    <button className="dropdown-item" onClick={editProfile}>
+                      <i className="fas fa-edit"></i>
+                      Edit Profile
+                    </button>
+                    <button className="dropdown-item" onClick={viewBookmarks}>
+                      <i className="fas fa-bookmark"></i>
+                      Bookmarks
+                    </button>
+                    <button className="dropdown-item" onClick={accountSettings}>
+                      <i className="fas fa-cog"></i>
+                      Settings
+                    </button>
+                    <div className="dropdown-divider"></div>
+                    <button className="dropdown-item logout-item" onClick={handleLogout}>
+                      <i className="fas fa-sign-out-alt"></i>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </nav>
 
@@ -1434,6 +2018,304 @@
               </div>
             ))}
           </div>
+
+          {/* Settings Modal */}
+          {showSettingsModal && (
+            <div className="modal-overlay" onClick={closeSettingsModal}>
+              <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>
+                    <i className="fas fa-cog"></i>
+                    Settings
+                  </h2>
+                  <button className="close-btn" onClick={closeSettingsModal}>
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                
+                <div className="modal-content">
+                  <div className="settings-section">
+                    <h3>
+                      <i className="fas fa-user-cog"></i>
+                      Account Settings
+                    </h3>
+                    
+                    <div className="settings-item">
+                      <div className="setting-info">
+                        <div className="setting-title">Profile Information</div>
+                        <div className="setting-desc">Update your name, bio, and details</div>
+                      </div>
+                    </div>
+                    
+                    <div className="profile-fields">
+                      <div className="field-group">
+                        <label>Display Name</label>
+                        <input
+                          type="text"
+                          value={profileData.name}
+                          onChange={(e) => updateProfileField('name', e.target.value)}
+                          className="profile-input"
+                        />
+                      </div>
+                      
+                      <div className="field-group">
+                        <label>Username</label>
+                        <input
+                          type="text"
+                          value={profileData.username}
+                          onChange={(e) => updateProfileField('username', e.target.value)}
+                          className="profile-input"
+                        />
+                      </div>
+                      
+                      <div className="field-group">
+                        <label>Bio</label>
+                        <textarea
+                          value={profileData.bio}
+                          onChange={(e) => updateProfileField('bio', e.target.value)}
+                          className="profile-textarea"
+                          rows="3"
+                        />
+                      </div>
+                      
+                      <div className="field-group">
+                        <label>Location</label>
+                        <input
+                          type="text"
+                          value={profileData.location}
+                          onChange={(e) => updateProfileField('location', e.target.value)}
+                          className="profile-input"
+                        />
+                      </div>
+                      
+                      <div className="field-group">
+                        <label>Website</label>
+                        <input
+                          type="url"
+                          value={profileData.website}
+                          onChange={(e) => updateProfileField('website', e.target.value)}
+                          className="profile-input"
+                        />
+                      </div>
+                      
+                      <button className="save-profile-btn" onClick={saveProfile}>
+                        <i className="fas fa-save"></i>
+                        Save Changes
+                      </button>
+                    </div>
+
+                    <div className="settings-item privacy-toggle">
+                      <div className="setting-info">
+                        <div className="setting-title">Privacy & Security</div>
+                        <div className="setting-desc">Control your privacy preferences</div>
+                      </div>
+                    </div>
+                    
+                    <div className="privacy-controls">
+                      <div className="toggle-item">
+                        <span>Public Profile</span>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={privacySettingsData.profileVisibility === 'public'}
+                            onChange={(e) => updatePrivacySetting('profileVisibility', e.target.checked ? 'public' : 'private')}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <span>Allow Followers</span>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={privacySettingsData.allowFollowers}
+                            onChange={(e) => updatePrivacySetting('allowFollowers', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <span>Allow Tagging</span>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={privacySettingsData.allowTagging}
+                            onChange={(e) => updatePrivacySetting('allowTagging', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <span>Show Activity Status</span>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={privacySettingsData.showActivity}
+                            onChange={(e) => updatePrivacySetting('showActivity', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="settings-section">
+                    <h3>
+                      <i className="fas fa-bell"></i>
+                      Notifications
+                    </h3>
+                    
+                    <div className="settings-item">
+                      <div className="setting-info">
+                        <div className="setting-title">Notification Preferences</div>
+                        <div className="setting-desc">Choose what notifications you receive</div>
+                      </div>
+                    </div>
+                    
+                    <div className="notification-controls">
+                      <div className="toggle-item">
+                        <div className="toggle-info">
+                          <span>Likes</span>
+                          <small>When someone likes your posts</small>
+                        </div>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={notificationPrefs.likes}
+                            onChange={(e) => updateNotificationPref('likes', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <div className="toggle-info">
+                          <span>Comments</span>
+                          <small>When someone comments on your posts</small>
+                        </div>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={notificationPrefs.comments}
+                            onChange={(e) => updateNotificationPref('comments', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <div className="toggle-info">
+                          <span>Follows</span>
+                          <small>When someone follows you</small>
+                        </div>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={notificationPrefs.follows}
+                            onChange={(e) => updateNotificationPref('follows', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <div className="toggle-info">
+                          <span>Mentions</span>
+                          <small>When someone mentions you</small>
+                        </div>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={notificationPrefs.mentions}
+                            onChange={(e) => updateNotificationPref('mentions', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <div className="toggle-info">
+                          <span>Shares</span>
+                          <small>When someone shares your posts</small>
+                        </div>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={notificationPrefs.shares}
+                            onChange={(e) => updateNotificationPref('shares', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div className="toggle-item">
+                        <div className="toggle-info">
+                          <span>Newsletter</span>
+                          <small>Weekly updates and announcements</small>
+                        </div>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={notificationPrefs.newsletter}
+                            onChange={(e) => updateNotificationPref('newsletter', e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="settings-section">
+                    <h3>
+                      <i className="fas fa-palette"></i>
+                      Appearance
+                    </h3>
+                    <div className="settings-item">
+                      <div className="setting-info">
+                        <div className="setting-title">Theme</div>
+                        <div className="setting-desc">Choose your preferred theme</div>
+                      </div>
+                      <button className="theme-switch" onClick={toggleTheme}>
+                        <span className={isDarkMode ? 'active' : ''}>🌙</span>
+                        <span className={!isDarkMode ? 'active' : ''}>☀️</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="settings-section">
+                    <h3>
+                      <i className="fas fa-download"></i>
+                      Data & Storage
+                    </h3>
+                    <button className="settings-item" onClick={dataExport}>
+                      <div className="setting-info">
+                        <div className="setting-title">Download Your Data</div>
+                        <div className="setting-desc">Export your posts and data</div>
+                      </div>
+                      <i className="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+
+                  <div className="settings-section danger-section">
+                    <h3>
+                      <i className="fas fa-exclamation-triangle"></i>
+                      Account Actions
+                    </h3>
+                    <button className="settings-item danger-item" onClick={handleLogout}>
+                      <div className="setting-info">
+                        <div className="setting-title">Sign Out</div>
+                        <div className="setting-desc">Sign out of your account</div>
+                      </div>
+                      <i className="fas fa-sign-out-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
