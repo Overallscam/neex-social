@@ -399,127 +399,6 @@
       color: var(--error);
     }
 
-    .action-btn.bookmarked {
-      color: var(--warning);
-    }
-
-    /* COMMENTS SECTION */
-    .comments-section {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid var(--border);
-    }
-
-    .add-comment {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .comment-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .comment-input-container {
-      flex: 1;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .comment-input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--bg-primary);
-      color: var(--text);
-      font-size: 14px;
-      resize: none;
-      transition: all 0.3s ease;
-    }
-
-    .comment-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-alpha);
-    }
-
-    .comment-submit {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .comment-submit:hover {
-      background: var(--primary-hover);
-      transform: scale(1.05);
-    }
-
-    .comment-submit:disabled {
-      background: var(--text-muted);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .comments-list {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .comment {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding: 8px 0;
-    }
-
-    .comment-content {
-      flex: 1;
-    }
-
-    .comment-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-
-    .comment-name {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .comment-username {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .comment-time {
-      color: var(--text-muted);
-      font-size: 12px;
-      margin-left: auto;
-    }
-
-    .comment-text {
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.4;
-      margin: 0;
-    }
-
     /* NOTIFICATIONS */
     .notification {
       position: fixed;
@@ -850,13 +729,6 @@
       const [imagePreview, setImagePreview] = useState(null);
       const [showEmojiPicker, setShowEmojiPicker] = useState(false);
       const [isRecording, setIsRecording] = useState(false);
-      const [uploadProgress, setUploadProgress] = useState(0);
-
-      // New interactive features state
-      const [showComments, setShowComments] = useState({});
-      const [newComment, setNewComment] = useState({});
-      const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
-      const [sharedPosts, setSharedPosts] = useState([]);
 
       // Posts State
       const [posts, setPosts] = useState([
@@ -865,59 +737,26 @@
           username: 'john_doe',
           name: 'John Doe',
           avatar: 'JD',
-          verified: true,
           content: '🚀 Welcome to Neex Social! The ultimate social media platform with advanced features like voice messages, stories, real-time messaging, and so much more! #NeexSocial #SocialMedia',
           timestamp: '2h',
           likes: 42,
           comments: 8,
           shares: 12,
           liked: false,
-          bookmarked: false,
-          image: null,
-          trending: true,
-          commentsList: [
-            { id: 1, username: 'tech_enthusiast', name: 'Tech Enthusiast', avatar: 'TE', content: 'This looks amazing! Can\'t wait to try all features! 🚀', timestamp: '1h' },
-            { id: 2, username: 'designer_pro', name: 'Designer Pro', avatar: 'DP', content: 'The UI design is absolutely stunning! 💫✨', timestamp: '45m' }
-          ]
+          image: null
         },
         {
           id: 2,
           username: 'tech_guru',
           name: 'Tech Guru',
           avatar: 'TG',
-          verified: true,
-          content: 'Just experienced the revolutionary UI/UX of Neex Pro! The glassmorphism design, smooth animations, and intuitive navigation are absolutely phenomenal. This is the future! 🌟✨',
+          content: 'Just discovered this amazing new platform! The navigation system is incredible and the user experience is top-notch. Loving the dark mode! 🌙',
           timestamp: '4h',
-          likes: 156,
-          comments: 34,
-          shares: 28,
+          likes: 28,
+          comments: 5,
+          shares: 7,
           liked: true,
-          bookmarked: true,
-          image: null,
-          trending: false,
-          commentsList: [
-            { id: 1, username: 'ui_lover', name: 'UI Lover', avatar: 'UL', content: 'Completely agree! The animations are so smooth 🎨', timestamp: '2h' },
-            { id: 2, username: 'dev_master', name: 'Dev Master', avatar: 'DM', content: 'The technical implementation is impressive!', timestamp: '1h' }
-          ]
-        },
-        {
-          id: 3,
-          username: 'design_wizard',
-          name: 'Design Wizard',
-          avatar: 'DW',
-          verified: false,
-          content: 'The attention to detail in Neex Pro is incredible! From the gradient animations to the micro-interactions, every element feels crafted with care. Truly inspiring work! �💫',
-          timestamp: '6h',
-          likes: 203,
-          comments: 45,
-          shares: 67,
-          liked: false,
-          bookmarked: false,
-          image: null,
-          trending: true,
-          commentsList: [
-            { id: 1, username: 'creative_mind', name: 'Creative Mind', avatar: 'CM', content: 'Such inspiration for my own projects! 🎭', timestamp: '3h' }
-          ]
+          image: null
         }
       ]);
 
@@ -1016,133 +855,6 @@
             ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
             : post
         ));
-        
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          addNotification(
-            post.liked ? '💙 Removed like' : '❤️ Liked post!', 
-            post.liked ? 'info' : 'success'
-          );
-        }
-      };
-
-      // Comment Functions
-      const toggleComments = (postId) => {
-        setShowComments(prev => ({
-          ...prev,
-          [postId]: !prev[postId]
-        }));
-      };
-
-      const addComment = (postId) => {
-        const commentText = newComment[postId];
-        if (commentText && commentText.trim()) {
-          const newCommentObj = {
-            id: Date.now(),
-            username: currentUser.username.substring(1),
-            name: currentUser.name,
-            avatar: currentUser.avatar,
-            content: commentText.trim(),
-            timestamp: 'now'
-          };
-
-          setPosts(prev => prev.map(post => 
-            post.id === postId 
-              ? { 
-                  ...post, 
-                  commentsList: [...post.commentsList, newCommentObj],
-                  comments: post.comments + 1
-                }
-              : post
-          ));
-
-          setNewComment(prev => ({
-            ...prev,
-            [postId]: ''
-          }));
-
-          addNotification('💬 Comment added successfully!', 'success');
-        }
-      };
-
-      // Bookmark Functions
-      const toggleBookmark = (postId) => {
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, bookmarked: !post.bookmarked }
-            : post
-        ));
-
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          if (!post.bookmarked) {
-            setBookmarkedPosts(prev => [...prev, postId]);
-            addNotification('🔖 Post bookmarked!', 'success');
-          } else {
-            setBookmarkedPosts(prev => prev.filter(id => id !== postId));
-            addNotification('📌 Bookmark removed', 'info');
-          }
-        }
-      };
-
-      // Share Functions
-      const sharePost = (postId) => {
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          // Simulate sharing
-          setPosts(prev => prev.map(p => 
-            p.id === postId 
-              ? { ...p, shares: p.shares + 1 }
-              : p
-          ));
-
-          setSharedPosts(prev => [...prev, postId]);
-
-          // Copy to clipboard
-          const shareText = `Check out this post on Neex Pro: "${post.content}" by ${post.name}`;
-          navigator.clipboard.writeText(shareText).then(() => {
-            addNotification('🔗 Post link copied to clipboard!', 'success');
-          }).catch(() => {
-            addNotification('📤 Post shared successfully!', 'success');
-          });
-        }
-      };
-
-      // Repost Function
-      const repost = (postId) => {
-        const originalPost = posts.find(p => p.id === postId);
-        if (originalPost) {
-          const repostObj = {
-            id: Date.now(),
-            username: currentUser.username.substring(1),
-            name: currentUser.name,
-            avatar: currentUser.avatar,
-            verified: currentUser.verified,
-            content: `🔄 Reposted: ${originalPost.content}`,
-            timestamp: 'now',
-            likes: 0,
-            comments: 0,
-            shares: 0,
-            liked: false,
-            bookmarked: false,
-            image: originalPost.image,
-            trending: false,
-            commentsList: [],
-            isRepost: true,
-            originalPost: originalPost
-          };
-
-          setPosts(prev => [repostObj, ...prev]);
-          
-          // Update original post share count
-          setPosts(prev => prev.map(p => 
-            p.id === postId 
-              ? { ...p, shares: p.shares + 1 }
-              : p
-          ));
-
-          addNotification('🔄 Post reposted to your timeline!', 'success');
-        }
       };
 
       // Emoji Functions
@@ -1351,10 +1063,7 @@
                 )}
                 
                 <div className="post-actions">
-                  <button 
-                    className="action-btn"
-                    onClick={() => toggleComments(post.id)}
-                  >
+                  <button className="action-btn">
                     <i className="fas fa-comment"></i>
                     <span>{post.comments}</span>
                   </button>
@@ -1367,70 +1076,15 @@
                     <span>{post.likes}</span>
                   </button>
                   
-                  <button 
-                    className="action-btn"
-                    onClick={() => sharePost(post.id)}
-                  >
+                  <button className="action-btn">
                     <i className="fas fa-share"></i>
                     <span>{post.shares}</span>
                   </button>
                   
-                  <button 
-                    className={`action-btn ${post.bookmarked ? 'bookmarked' : ''}`}
-                    onClick={() => toggleBookmark(post.id)}
-                  >
-                    <i className={`${post.bookmarked ? 'fas' : 'far'} fa-bookmark`}></i>
+                  <button className="action-btn">
+                    <i className="fas fa-bookmark"></i>
                   </button>
                 </div>
-
-                {/* Comments Section */}
-                {showComments[post.id] && (
-                  <div className="comments-section">
-                    <div className="add-comment">
-                      <img src={currentUser.avatar} alt="Your avatar" className="comment-avatar" />
-                      <div className="comment-input-container">
-                        <input
-                          type="text"
-                          placeholder="Add a comment..."
-                          value={newComment[post.id] || ''}
-                          onChange={(e) => setNewComment(prev => ({
-                            ...prev,
-                            [post.id]: e.target.value
-                          }))}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              addComment(post.id);
-                            }
-                          }}
-                          className="comment-input"
-                        />
-                        <button 
-                          onClick={() => addComment(post.id)}
-                          className="comment-submit"
-                          disabled={!newComment[post.id]?.trim()}
-                        >
-                          <i className="fas fa-paper-plane"></i>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="comments-list">
-                      {post.commentsList.map(comment => (
-                        <div key={comment.id} className="comment">
-                          <img src={comment.avatar} alt={comment.username} className="comment-avatar" />
-                          <div className="comment-content">
-                            <div className="comment-header">
-                              <span className="comment-name">{comment.name}</span>
-                              <span className="comment-username">@{comment.username}</span>
-                              <span className="comment-time">{comment.timestamp}</span>
-                            </div>
-                            <p className="comment-text">{comment.content}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>

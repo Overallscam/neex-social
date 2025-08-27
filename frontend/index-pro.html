@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neex Pro - Next-Gen Social Media Platform</title>
+  <meta name="description" content="Revolutionary Social Media Platform with AI-powered features">
+  <meta name="theme-color" content="#1d9bf0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Enhanced Color Palette */
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #141414;
+      --bg-tertiary: #1e1e1e;
+      --bg-quaternary: #2a2a2a;
+      --text: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #707070;
+      --text-accent: #e0e0e0;
+      
+      /* Brand Colors */
+      --primary: #1d9bf0;
+      --primary-hover: #1a8cd8;
+      --primary-light: #4dabf7;
+      --primary-dark: #1971c2;
+      
+      /* Semantic Colors */
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      
+      /* Advanced Gradients */
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-tertiary: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --gradient-quaternary: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --gradient-surface: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+      
+      /* Shadows & Effects */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.6);
+      --glow: 0 0 20px rgba(29, 155, 240, 0.3);
+      --glow-strong: 0 0 40px rgba(29, 155, 240, 0.5);
+      
+      /* Borders */
+      --border: #333333;
+      --border-light: #404040;
+      --border-focus: #1d9bf0;
+      
+      /* Transitions */
+      --transition-fast: 0.15s ease-out;
+      --transition-normal: 0.3s ease-out;
+      --transition-slow: 0.5s ease-out;
+      
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      
+      /* Border Radius */
+      --radius-sm: 0.5rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text);
+      min-height: 100vh;
+      transition: all var(--transition-normal);
+      overflow-x: hidden;
+    }
+
+    body.light {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --bg-quaternary: #e2e8f0;
+      --text: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --text-accent: #334155;
+      --border: #e2e8f0;
+      --border-light: #cbd5e1;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 8px 25px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.2);
+      --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.25);
+      --gradient-surface: linear-gradient(145deg, #f8fafc, #e2e8f0);
+    }
+    
+    .app { 
+      max-width: 680px; 
+      margin: 0 auto; 
+      min-height: 100vh;
+      position: relative;
+      background: var(--gradient-surface);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    /* ENHANCED NAVIGATION */
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-lg) var(--space-xl);
+      background: rgba(20, 20, 20, 0.95);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+
+    .nav-logo {
+      font-size: 2rem;
+      font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+      position: relative;
+      transition: all var(--transition-normal);
+    }
+
+    .nav-logo:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(var(--glow));
+    }
+
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 12px 20px 12px 45px;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 500;
+      width: 320px;
+      transition: all var(--transition-normal);
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: var(--glow);
+      width: 380px;
+      background: var(--bg-secondary);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 16px;
+      transition: all var(--transition-normal);
+    }
+
+    .search-input:focus + .search-icon {
+      color: var(--primary);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .nav-btn, .theme-toggle {
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 10px 18px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-btn::before, .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      transition: all var(--transition-normal);
+      z-index: -1;
+    }
+
+    .nav-btn:hover::before, .theme-toggle:hover::before {
+      left: 0;
+    }
+
+    .nav-btn:hover, .theme-toggle:hover {
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 8px 16px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-secondary);
+      transition: all var(--transition-normal);
+      z-index: -1;
+    }
+
+    .profile-btn:hover::before {
+      left: 0;
+    }
+
+    .profile-btn:hover {
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .profile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--gradient-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ADVANCED COMPOSER */
+    .composer {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      margin: var(--space-xl);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .composer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+    }
+
+    .composer:hover {
+      border-color: var(--border-light);
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-2px);
+    }
+
+    .composer-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: var(--radius-full);
+      background: var(--gradient-quaternary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+      font-size: 18px;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: var(--glow);
+    }
+
+    .user-info h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .user-info p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .composer-main {
+      margin-bottom: var(--space-xl);
+    }
+
+    .composer-main textarea {
+      width: 100%;
+      min-height: 140px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 19px;
+      line-height: 1.6;
+      resize: none;
+      font-family: inherit;
+      outline: none;
+      font-weight: 400;
+    }
+
+    .composer-main textarea::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* ENHANCED MEDIA TOOLS */
+    .media-tools {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin: var(--space-xl) 0;
+      padding: var(--space-lg);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      flex-wrap: wrap;
+      border: 1px solid var(--border);
+    }
+
+    .media-btn {
+      background: none;
+      border: 2px solid var(--border);
+      color: var(--primary);
+      cursor: pointer;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-normal);
+      font-size: 18px;
+      position: relative;
+      overflow: hidden;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .media-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      transition: all var(--transition-normal);
+      z-index: -1;
+    }
+
+    .media-btn:hover::before {
+      left: 0;
+    }
+
+    .media-btn:hover {
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: var(--shadow-md);
+    }
+
+    .media-btn.active {
+      background: var(--gradient-primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    /* COMPOSER FOOTER */
+    .composer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-xl);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--border);
+    }
+
+    .char-counter {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .char-counter.warning { 
+      color: var(--warning); 
+      animation: pulse 1s infinite;
+    }
+
+    .char-counter.error { 
+      color: var(--error);
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .char-progress {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: conic-gradient(var(--primary) 0deg, var(--border) 0deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      position: relative;
+    }
+
+    .post-btn {
+      background: var(--gradient-primary);
+      border: none;
+      color: white;
+      padding: 14px 32px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-md);
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .post-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: all var(--transition-slow);
+    }
+
+    .post-btn:hover::before {
+      left: 100%;
+    }
+
+    .post-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--glow-strong);
+    }
+
+    .post-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ENHANCED FEED */
+    .feed {
+      padding: 0 var(--space-xl) var(--space-xl);
+    }
+
+    .post {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      margin-bottom: var(--space-xl);
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .post::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-secondary);
+      transform: scaleX(0);
+      transition: all var(--transition-normal);
+    }
+
+    .post:hover::before {
+      transform: scaleX(1);
+    }
+
+    .post:hover {
+      border-color: var(--border-light);
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-2px);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    .post-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: var(--radius-full);
+      background: var(--gradient-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-normal);
+    }
+
+    .post-avatar:hover {
+      transform: scale(1.1);
+      box-shadow: var(--glow);
+    }
+
+    .post-info h4 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .post-info span {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .post-content {
+      font-size: 17px;
+      line-height: 1.7;
+      margin-bottom: var(--space-lg);
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .post-image {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-lg);
+      max-height: 450px;
+      object-fit: cover;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+    }
+
+    .post-image:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      background: none;
+      border: 2px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-normal);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      transition: all var(--transition-normal);
+      z-index: -1;
+      opacity: 0.1;
+    }
+
+    .action-btn:hover::before {
+      left: 0;
+    }
+
+    .action-btn:hover {
+      color: var(--text);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .action-btn.liked {
+      color: var(--error);
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--error);
+    }
+
+    .action-btn.liked:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: scale(1.05);
+    }
+
+    /* ENHANCED NOTIFICATIONS */
+    .notification {
+      position: fixed;
+      top: 100px;
+      right: var(--space-xl);
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg) var(--space-xl);
+      color: var(--text);
+      max-width: 400px;
+      box-shadow: var(--shadow-xl);
+      z-index: 2000;
+      animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .notification.success { 
+      border-left: 6px solid var(--success);
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(16, 185, 129, 0.1));
+    }
+    .notification.warning { 
+      border-left: 6px solid var(--warning);
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(245, 158, 11, 0.1));
+    }
+    .notification.error { 
+      border-left: 6px solid var(--error);
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(239, 68, 68, 0.1));
+    }
+    .notification.info { 
+      border-left: 6px solid var(--info);
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(59, 130, 246, 0.1));
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%) scale(0.8); opacity: 0; }
+      to { transform: translateX(0) scale(1); opacity: 1; }
+    }
+
+    /* ENHANCED EMOJI PICKER */
+    .emoji-picker {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-xl);
+      z-index: 1000;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: var(--space-sm);
+      max-width: 350px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .emoji-btn {
+      background: none;
+      border: 2px solid transparent;
+      font-size: 22px;
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .emoji-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--primary);
+      transform: scale(1.3);
+    }
+
+    /* FILE PREVIEW ENHANCEMENT */
+    .file-preview {
+      position: relative;
+      margin: var(--space-lg) 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .file-preview img {
+      width: 100%;
+      max-height: 350px;
+      object-fit: cover;
+      transition: all var(--transition-normal);
+    }
+
+    .file-preview:hover img {
+      transform: scale(1.02);
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-md);
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--border);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-normal);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .remove-preview:hover {
+      background: var(--error);
+      border-color: var(--error);
+      transform: scale(1.1);
+    }
+
+    /* ENHANCED LOGIN FORM */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--space-2xl);
+      background: var(--gradient-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-form::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .login-card {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl) var(--space-2xl);
+      box-shadow: var(--shadow-xl);
+      max-width: 450px;
+      width: 100%;
+      position: relative;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin-bottom: var(--space-md);
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-2xl);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: var(--space-lg);
+      transition: all var(--transition-normal);
+      font-family: inherit;
+      font-weight: 500;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: var(--glow);
+      background: var(--bg-secondary);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--gradient-primary);
+      border: none;
+      color: white;
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: all var(--transition-slow);
+    }
+
+    .login-btn:hover::before {
+      left: 100%;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--glow-strong);
+    }
+
+    /* RESPONSIVE ENHANCEMENTS */
+    @media (max-width: 768px) {
+      .app {
+        max-width: 100%;
+        border: none;
+      }
+
+      .nav-container {
+        padding: var(--space-md) var(--space-lg);
+      }
+
+      .search-input {
+        width: 200px;
+      }
+
+      .search-input:focus {
+        width: 220px;
+      }
+
+      .nav-btn span, .theme-toggle span {
+        display: none;
+      }
+
+      .composer {
+        margin: var(--space-lg);
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+      }
+
+      .media-tools {
+        gap: var(--space-sm);
+        justify-content: center;
+      }
+
+      .feed {
+        padding: 0 var(--space-lg) var(--space-lg);
+      }
+
+      .post {
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+      }
+
+      .notification {
+        right: var(--space-lg);
+        left: var(--space-lg);
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-logo {
+        font-size: 1.5rem;
+      }
+
+      .search-container {
+        display: none;
+      }
+
+      .composer-main textarea {
+        font-size: 17px;
+        min-height: 120px;
+      }
+
+      .post-btn {
+        padding: 12px 28px;
+        font-size: 15px;
+      }
+
+      .login-card {
+        padding: var(--space-xl);
+      }
+
+      .login-card h1 {
+        font-size: 2rem;
+      }
+    }
+
+    /* ACCESSIBILITY ENHANCEMENTS */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* SCROLL ENHANCEMENTS */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .app::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .app::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    .app::-webkit-scrollbar-thumb {
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+    }
+
+    .app::-webkit-scrollbar-thumb:hover {
+      background: var(--gradient-secondary);
+    }
+
+    /* LOADING ANIMATIONS */
+    .fade-in {
+      animation: fadeIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .bounce {
+      animation: bounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bounce {
+      0%, 20%, 60%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-15px); }
+      80% { transform: translateY(-7px); }
+    }
+
+    /* FLOATING ELEMENTS */
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* GLOW EFFECTS */
+    .glow-on-hover {
+      transition: all var(--transition-normal);
+    }
+
+    .glow-on-hover:hover {
+      box-shadow: var(--glow-strong);
+      filter: brightness(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    function App() {
+      // Enhanced Authentication & User State
+      const [loggedIn, setLoggedIn] = useState(true);
+      const [username, setUsername] = useState('johndoe');
+      const [password, setPassword] = useState('');
+      const [currentUser, setCurrentUser] = useState({
+        name: 'John Doe',
+        username: '@johndoe',
+        avatar: 'JD',
+        verified: true,
+        followers: 1234,
+        following: 567
+      });
+
+      // Enhanced Theme & UI State
+      const [isDarkMode, setIsDarkMode] = useState(true);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [notifications, setNotifications] = useState([]);
+      const [isOnline, setIsOnline] = useState(true);
+
+      // Enhanced Post Composer State
+      const [newPost, setNewPost] = useState('');
+      const [postVisibility, setPostVisibility] = useState('public');
+      const [selectedFile, setSelectedFile] = useState(null);
+      const [imagePreview, setImagePreview] = useState(null);
+      const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+      const [isRecording, setIsRecording] = useState(false);
+      const [uploadProgress, setUploadProgress] = useState(0);
+
+      // Enhanced Posts State with more sample data
+      const [posts, setPosts] = useState([
+        {
+          id: 1,
+          username: 'john_doe',
+          name: 'John Doe',
+          avatar: 'JD',
+          verified: true,
+          content: '🚀 Welcome to Neex Pro! The next-generation social media platform with AI-powered features, advanced analytics, real-time collaboration, and immersive experiences! #NeexPro #Innovation #SocialMedia #AI',
+          timestamp: '2h',
+          likes: 89,
+          comments: 23,
+          shares: 17,
+          liked: false,
+          image: null,
+          trending: true
+        },
+        {
+          id: 2,
+          username: 'tech_guru',
+          name: 'Tech Guru',
+          avatar: 'TG',
+          verified: true,
+          content: 'Just experienced the revolutionary UI/UX of Neex Pro! The glassmorphism design, smooth animations, and intuitive navigation are absolutely phenomenal. This is the future of social networking! 🌟✨',
+          timestamp: '4h',
+          likes: 156,
+          comments: 34,
+          shares: 28,
+          liked: true,
+          image: null,
+          trending: false
+        },
+        {
+          id: 3,
+          username: 'design_wizard',
+          name: 'Design Wizard',
+          avatar: 'DW',
+          verified: false,
+          content: 'The attention to detail in Neex Pro is incredible! From the gradient animations to the micro-interactions, every element feels crafted with care. Truly inspiring work! 🎨💫',
+          timestamp: '6h',
+          likes: 203,
+          comments: 45,
+          shares: 67,
+          liked: false,
+          image: null,
+          trending: true
+        }
+      ]);
+
+      // Enhanced Effects
+      useEffect(() => {
+        document.body.className = isDarkMode ? '' : 'light';
+      }, [isDarkMode]);
+
+      useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        return () => {
+          window.removeEventListener('online', handleOnline);
+          window.removeEventListener('offline', handleOffline);
+        };
+      }, []);
+
+      // Enhanced Notification System
+      const addNotification = useCallback((message, type = 'info', duration = 4000) => {
+        const id = Date.now();
+        const notification = { id, message, type };
+        setNotifications(prev => [...prev, notification]);
+        
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== id));
+        }, duration);
+      }, []);
+
+      // Enhanced Authentication Functions
+      const handleLogin = useCallback(() => {
+        if (username && password) {
+          setLoggedIn(true);
+          setCurrentUser({
+            name: username.charAt(0).toUpperCase() + username.slice(1),
+            username: '@' + username,
+            avatar: username.substring(0, 2).toUpperCase(),
+            verified: Math.random() > 0.5,
+            followers: Math.floor(Math.random() * 10000),
+            following: Math.floor(Math.random() * 1000)
+          });
+          addNotification('🎉 Welcome to Neex Pro! Experience the future of social media!', 'success', 5000);
+        } else {
+          addNotification('❌ Please enter valid credentials', 'error');
+        }
+      }, [username, password, addNotification]);
+
+      const handleLogout = useCallback(() => {
+        setLoggedIn(false);
+        setCurrentUser(null);
+        setUsername('');
+        setPassword('');
+        addNotification('👋 Thanks for using Neex Pro! See you soon!', 'info');
+      }, [addNotification]);
+
+      // Enhanced Theme Functions
+      const toggleTheme = useCallback(() => {
+        setIsDarkMode(prev => {
+          const newMode = !prev;
+          addNotification(`🎨 Switched to ${newMode ? 'dark' : 'light'} mode! Looking great!`, 'info');
+          return newMode;
+        });
+      }, [addNotification]);
+
+      // Enhanced Post Functions
+      const handlePost = useCallback(() => {
+        if (newPost.trim() || selectedFile) {
+          const post = {
+            id: Date.now(),
+            username: currentUser.username.substring(1),
+            name: currentUser.name,
+            avatar: currentUser.avatar,
+            verified: currentUser.verified,
+            content: newPost,
+            timestamp: 'now',
+            likes: 0,
+            comments: 0,
+            shares: 0,
+            liked: false,
+            image: imagePreview,
+            trending: Math.random() > 0.7
+          };
+          
+          setPosts(prev => [post, ...prev]);
+          setNewPost('');
+          setSelectedFile(null);
+          setImagePreview(null);
+          addNotification('🎊 Your post was shared successfully! Watch the engagement grow!', 'success');
+        }
+      }, [newPost, selectedFile, imagePreview, currentUser, addNotification]);
+
+      const handleFileUpload = useCallback((event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setSelectedFile(file);
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => setImagePreview(e.target.result);
+            reader.readAsDataURL(file);
+          }
+          addNotification('📎 File uploaded successfully! Looking good!', 'success');
+        }
+      }, [addNotification]);
+
+      const removePreview = useCallback(() => {
+        setSelectedFile(null);
+        setImagePreview(null);
+        addNotification('🗑️ File removed', 'info');
+      }, [addNotification]);
+
+      // Enhanced Social Actions
+      const toggleLike = useCallback((postId) => {
+        setPosts(prev => prev.map(post => 
+          post.id === postId 
+            ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
+            : post
+        ));
+        
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+          addNotification(
+            post.liked ? '💙 Removed like' : '❤️ Liked post!', 
+            post.liked ? 'info' : 'success'
+          );
+        }
+      }, [posts, addNotification]);
+
+      // Enhanced Emoji Functions
+      const emojis = [
+        '😀', '😂', '🥺', '😍', '🤔', '👍', '❤️', '🔥', 
+        '💯', '🎉', '🚀', '💡', '🌟', '⚡', '🎯', '💪',
+        '🎨', '✨', '🌈', '🦄', '🎭', '🎪', '🎸', '🎮'
+      ];
+      
+      const addEmoji = useCallback((emoji) => {
+        setNewPost(prev => prev + emoji);
+        setShowEmojiPicker(false);
+        addNotification(`${emoji} Emoji added!`, 'info', 2000);
+      }, [addNotification]);
+
+      // Enhanced character count and validation
+      const charCount = newPost.length;
+      const maxChars = 280;
+      const isOverLimit = charCount > maxChars;
+      const isNearLimit = charCount > maxChars * 0.8;
+      const charProgress = (charCount / maxChars) * 360;
+
+      // Enhanced Search Function
+      const handleSearch = useCallback((query) => {
+        setSearchQuery(query);
+        if (query.length > 2) {
+          addNotification(`🔍 Searching for "${query}"...`, 'info', 2000);
+        }
+      }, [addNotification]);
+
+      // Login Screen with Enhanced Design
+      if (!loggedIn) {
+        return (
+          <div className="login-form">
+            <div className="login-card fade-in floating">
+              <h1>🚀 Neex Pro</h1>
+              <p>The Next-Generation Social Media Experience</p>
+              <input
+                type="text"
+                placeholder="Username"
+                className="form-input"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="form-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+              />
+              <button className="login-btn glow-on-hover" onClick={handleLogin}>
+                Enter Neex Pro
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Main Enhanced App
+      return (
+        <div className="app">
+          {/* Enhanced Navigation Bar */}
+          <nav className="nav-container">
+            <div className="nav-left">
+              <a href="#" className="nav-logo floating">Neex Pro</a>
+              <div className="search-container">
+                <i className="fas fa-search search-icon"></i>
+                <input 
+                  type="text" 
+                  className="search-input"
+                  placeholder="Search Neex Pro..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="nav-right">
+              {!isOnline && (
+                <div className="nav-btn" style={{color: 'var(--warning)'}}>
+                  <i className="fas fa-wifi-slash"></i>
+                  <span>Offline</span>
+                </div>
+              )}
+              
+              <button className="theme-toggle glow-on-hover" onClick={toggleTheme}>
+                <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'}`}></i>
+                <span>{isDarkMode ? 'Light' : 'Dark'}</span>
+              </button>
+              
+              <div className="profile-btn glow-on-hover">
+                <div className="profile-avatar floating">
+                  {currentUser?.avatar}
+                </div>
+                <div>
+                  <span>{currentUser?.name}</span>
+                  {currentUser?.verified && <i className="fas fa-check-circle" style={{color: 'var(--primary)', marginLeft: '4px'}}></i>}
+                </div>
+              </div>
+              
+              <button className="nav-btn glow-on-hover" onClick={handleLogout}>
+                <i className="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          </nav>
+
+          {/* Enhanced Notifications */}
+          {notifications.map(notification => (
+            <div key={notification.id} className={`notification ${notification.type} fade-in`}>
+              {notification.message}
+            </div>
+          ))}
+
+          {/* Enhanced Post Composer */}
+          <div className="composer fade-in glow-on-hover">
+            <div className="composer-header">
+              <div className="user-avatar floating">{currentUser?.avatar}</div>
+              <div className="user-info">
+                <h3>
+                  {currentUser?.name}
+                  {currentUser?.verified && <i className="fas fa-check-circle" style={{color: 'var(--primary)', marginLeft: '8px'}}></i>}
+                </h3>
+                <p>{currentUser?.username} • {currentUser?.followers?.toLocaleString()} followers</p>
+              </div>
+            </div>
+
+            <div className="composer-main">
+              <textarea
+                placeholder="What's happening in your world today?"
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                maxLength="500"
+              />
+            </div>
+
+            {imagePreview && (
+              <div className="file-preview fade-in">
+                <img src={imagePreview} alt="Preview" />
+                <button className="remove-preview glow-on-hover" onClick={removePreview}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+            )}
+
+            <div className="media-tools">
+              <input
+                type="file"
+                id="file-upload"
+                style={{display: 'none'}}
+                accept="image/*,video/*,audio/*"
+                onChange={handleFileUpload}
+              />
+              <label htmlFor="file-upload" className="media-btn glow-on-hover" title="Upload Photo">
+                <i className="fas fa-image"></i>
+              </label>
+              
+              <button className="media-btn glow-on-hover" title="Upload Video">
+                <i className="fas fa-video"></i>
+              </button>
+              
+              <button className="media-btn glow-on-hover" title="Record Audio">
+                <i className="fas fa-microphone"></i>
+              </button>
+              
+              <div style={{position: 'relative'}}>
+                <button 
+                  className="media-btn glow-on-hover" 
+                  title="Add Emoji"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                  <i className="fas fa-smile"></i>
+                </button>
+                
+                {showEmojiPicker && (
+                  <div className="emoji-picker fade-in">
+                    {emojis.map((emoji, index) => (
+                      <button
+                        key={index}
+                        className="emoji-btn"
+                        onClick={() => addEmoji(emoji)}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <button className="media-btn glow-on-hover" title="Create Poll">
+                <i className="fas fa-poll"></i>
+              </button>
+              
+              <button className="media-btn glow-on-hover" title="Schedule Post">
+                <i className="fas fa-calendar-alt"></i>
+              </button>
+
+              <button className="media-btn glow-on-hover" title="Add Location">
+                <i className="fas fa-map-marker-alt"></i>
+              </button>
+
+              <button className="media-btn glow-on-hover" title="AI Assistant">
+                <i className="fas fa-robot"></i>
+              </button>
+            </div>
+
+            <div className="composer-footer">
+              <div className={`char-counter ${isNearLimit ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
+                <div 
+                  className="char-progress"
+                  style={{
+                    background: `conic-gradient(${isOverLimit ? 'var(--error)' : isNearLimit ? 'var(--warning)' : 'var(--primary)'} ${charProgress}deg, var(--border) ${charProgress}deg)`
+                  }}
+                >
+                  {isOverLimit ? '!' : isNearLimit ? '⚠' : '✓'}
+                </div>
+                <span>{charCount}/{maxChars}</span>
+              </div>
+              <button 
+                className="post-btn bounce glow-on-hover"
+                onClick={handlePost}
+                disabled={isOverLimit || (!newPost.trim() && !selectedFile)}
+              >
+                Share to Neex Pro
+              </button>
+            </div>
+          </div>
+
+          {/* Enhanced Feed */}
+          <div className="feed">
+            {posts.map(post => (
+              <div key={post.id} className="post fade-in glow-on-hover">
+                <div className="post-header">
+                  <div className="post-avatar floating">{post.avatar}</div>
+                  <div className="post-info">
+                    <h4>
+                      {post.name}
+                      {post.verified && <i className="fas fa-check-circle" style={{color: 'var(--primary)', marginLeft: '6px'}}></i>}
+                      {post.trending && <i className="fas fa-fire" style={{color: 'var(--warning)', marginLeft: '6px'}} title="Trending"></i>}
+                    </h4>
+                    <span>@{post.username} • {post.timestamp}</span>
+                  </div>
+                </div>
+                
+                <div className="post-content">{post.content}</div>
+                
+                {post.image && (
+                  <img src={post.image} alt="Post" className="post-image glow-on-hover" />
+                )}
+                
+                <div className="post-actions">
+                  <button className="action-btn glow-on-hover">
+                    <i className="fas fa-comment"></i>
+                    <span>{post.comments.toLocaleString()}</span>
+                  </button>
+                  
+                  <button 
+                    className={`action-btn ${post.liked ? 'liked' : ''} glow-on-hover`}
+                    onClick={() => toggleLike(post.id)}
+                  >
+                    <i className={`${post.liked ? 'fas' : 'far'} fa-heart`}></i>
+                    <span>{post.likes.toLocaleString()}</span>
+                  </button>
+                  
+                  <button className="action-btn glow-on-hover">
+                    <i className="fas fa-retweet"></i>
+                    <span>{post.shares.toLocaleString()}</span>
+                  </button>
+                  
+                  <button className="action-btn glow-on-hover">
+                    <i className="fas fa-share"></i>
+                  </button>
+
+                  <button className="action-btn glow-on-hover">
+                    <i className="fas fa-bookmark"></i>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neex - Advanced Social Media</title>
+  <meta name="description" content="Advanced Social Media Platform with modern features">
+  <meta name="theme-color" content="#1d9bf0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #000;
+      --bg-secondary: #111;
+      --text: #fff;
+      --text-primary: #fff;
+      --text-secondary: #888;
+      --border: #333;
+      --primary: #1da1f2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .composer {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .composer textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 18px;
+      resize: none;
+      outline: none;
+      min-height: 100px;
+      font-family: inherit;
+    }
+
+    .composer textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .composer-tools {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .composer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+    }
+
+    .tool-options {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+    }
+
+    .tool-btn:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: rgba(29, 161, 242, 0.1);
+    }
+
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .privacy-select {
+      padding: 6px 12px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--bg-primary);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .privacy-select:hover {
+      border-color: var(--primary);
+    }
+
+    .privacy-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(29, 155, 240, 0.1);
+    }
+
+    .post-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 80px;
+      height: 40px;
+      box-shadow: 0 2px 8px rgba(29, 155, 240, 0.2);
+    }
+
+    .post-btn:hover {
+      background: #1991db;
+    }
+
+    .post-btn:disabled {
+      background: var(--border);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .post {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: bold;
+    }
+
+    .post-content {
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .app {
+        padding: 10px;
+      }
+      
+      .composer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .post-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .composer-bottom .post-btn {
+        width: 100%;
+      }
+
+      .privacy-select {
+        width: 100%;
+      }
+      
+      .tool-btn {
+        width: 38px;
+        height: 38px;
+        padding: 8px;
+      }
+
+      .tool-options {
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    function App() {
+      const [newPost, setNewPost] = useState('');
+      const [postVisibility, setPostVisibility] = useState('public');
+      const [posts, setPosts] = useState([
+        {
+          id: 1,
+          author: "Anonymous",
+          username: "@anonymous",
+          time: "2h",
+          content: "Welcome to Neex Social! This is a sample post showing the new enhanced composer layout. 🚀",
+          likes: 12,
+          comments: 3,
+          shares: 5
+        }
+      ]);
+      
+      const handlePost = () => {
+        if (newPost.trim()) {
+          const post = {
+            id: posts.length + 1,
+            author: "You",
+            username: "@you",
+            time: "now",
+            content: newPost,
+            likes: 0,
+            comments: 0,
+            shares: 0
+          };
+          setPosts([post, ...posts]);
+          setNewPost('');
+        }
+      };
+
+      const handleLike = (id) => {
+        setPosts(posts.map(post => 
+          post.id === id 
+            ? { ...post, likes: post.likes + 1 }
+            : post
+        ));
+      };
+      
+      return (
+        <div className="app">
+          <div className="header">
+            <div className="logo">Ne</div>
+            <h1>Neex Social</h1>
+          </div>
+          
+          <div className="composer">
+            <textarea
+              placeholder="What's happening?"
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              maxLength="280"
+            />
+            
+            <div className="composer-tools">
+              <div className="composer-bottom">
+                <div className="tool-options">
+                  <label>
+                    <input type="file" accept="image/*" className="file-input" />
+                    <button className="tool-btn" type="button" title="Add Image">
+                      <i className="fas fa-image"></i>
+                    </button>
+                  </label>
+                  
+                  <label>
+                    <input type="file" accept="video/*" className="file-input" />
+                    <button className="tool-btn" type="button" title="Add Video">
+                      <i className="fas fa-video"></i>
+                    </button>
+                  </label>
+                  
+                  <label>
+                    <input type="file" accept="audio/*" className="file-input" />
+                    <button className="tool-btn" type="button" title="Add Audio">
+                      <i className="fas fa-file-audio"></i>
+                    </button>
+                  </label>
+                  
+                  <button className="tool-btn" title="Voice Recording">
+                    <i className="fas fa-microphone"></i>
+                  </button>
+                  
+                  <button className="tool-btn" title="Add Emoji">
+                    <i className="fas fa-smile"></i>
+                  </button>
+                  
+                  <button className="tool-btn" title="Rich Text">
+                    <i className="fas fa-font"></i>
+                  </button>
+                </div>
+
+                <div className="post-actions">
+                  <select 
+                    value={postVisibility}
+                    onChange={(e) => setPostVisibility(e.target.value)}
+                    className="privacy-select"
+                    title="Post visibility"
+                  >
+                    <option value="public">🌍 Everyone</option>
+                    <option value="followers">👥 Followers</option>
+                    <option value="anonymous">🕶️ Anonymous</option>
+                  </select>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <div style={{
+                      width: '30px',
+                      height: '3px',
+                      background: 'var(--border)',
+                      borderRadius: '2px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: (newPost.length / 280) * 100 + '%',
+                        height: '100%',
+                        background: newPost.length > 250 ? '#ff4444' : 
+                                  newPost.length > 200 ? '#ffa500' : 
+                                  'var(--primary)',
+                        transition: 'all 0.3s ease'
+                      }}></div>
+                    </div>
+                    <span style={{
+                      color: newPost.length > 250 ? '#ff4444' : 'var(--text-secondary)',
+                      fontSize: '12px',
+                      minWidth: '25px',
+                      textAlign: 'right'
+                    }}>
+                      {280 - newPost.length}
+                    </span>
+                  </div>
+
+                  <button 
+                    className="post-btn" 
+                    onClick={handlePost}
+                    disabled={!newPost.trim()}
+                  >
+                    <i className="fas fa-paper-plane" style={{fontSize: '14px'}}></i>
+                    Post
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="posts">
+            {posts.map(post => (
+              <div key={post.id} className="post">
+                <div className="post-header">
+                  <div className="avatar">
+                    {post.author.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4>{post.author}</h4>
+                    <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                      {post.username} · {post.time}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="post-content">
+                  {post.content}
+                </div>
+                
+                <div className="post-actions">
+                  <button 
+                    className="action-btn"
+                    onClick={() => handleLike(post.id)}
+                  >
+                    <i className="fas fa-heart"></i> {post.likes}
+                  </button>
+                  <button className="action-btn">
+                    <i className="fas fa-comment"></i> {post.comments}
+                  </button>
+                  <button className="action-btn">
+                    <i className="fas fa-share"></i> {post.shares}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{textAlign: 'center', padding: '20px', color: 'var(--text-secondary)', fontSize: '12px'}}>
+            <p>© 2025 Neex Social. Enhanced composer layout working perfectly! ✨</p>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
