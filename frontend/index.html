@@ -65,7 +65,7 @@
     /* NAVIGATION STYLES */
     .nav-container {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       padding: 15px 20px;
       background: var(--bg-secondary);
@@ -77,10 +77,23 @@
       -webkit-backdrop-filter: blur(20px);
     }
 
-    .nav-left {
+    .nav-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-container {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
     }
 
     .nav-logo {
@@ -92,6 +105,86 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    /* BOTTOM NAVIGATION */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 600px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: var(--text-secondary);
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.1);
+    }
+
+    .nav-item:hover {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.05);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item.active i {
+      transform: scale(1.1);
+    }
+
+    .nav-item span {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 4px;
+      right: 12px;
+      background: var(--error);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    /* Add bottom padding to main content to account for bottom nav */
+    .app {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: 80px;
     }
 
     .search-container {
@@ -399,566 +492,6 @@
       color: var(--error);
     }
 
-    .action-btn.bookmarked {
-      color: var(--warning);
-    }
-
-    /* COMMENTS SECTION */
-    .comments-section {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid var(--border);
-    }
-
-    .add-comment {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .comment-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .comment-input-container {
-      flex: 1;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .comment-input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--bg-primary);
-      color: var(--text);
-      font-size: 14px;
-      resize: none;
-      transition: all 0.3s ease;
-    }
-
-    .comment-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-alpha);
-    }
-
-    .comment-submit {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .comment-submit:hover {
-      background: var(--primary-hover);
-      transform: scale(1.05);
-    }
-
-    .comment-submit:disabled {
-      background: var(--text-muted);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .comments-list {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .comment {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding: 8px 0;
-    }
-
-    .comment-content {
-      flex: 1;
-    }
-
-    .comment-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-
-    .comment-name {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .comment-username {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .comment-time {
-      color: var(--text-muted);
-      font-size: 12px;
-      margin-left: auto;
-    }
-
-    .comment-text {
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.4;
-      margin: 0;
-    }
-
-    /* PROFILE DROPDOWN */
-    .profile-dropdown-container {
-      position: relative;
-    }
-
-    .profile-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: var(--text);
-    }
-
-    .profile-btn:hover {
-      background: var(--bg-tertiary);
-      border-color: var(--primary);
-    }
-
-    .dropdown-arrow {
-      transition: transform 0.3s ease;
-      font-size: 12px;
-      margin-left: 4px;
-    }
-
-    .dropdown-arrow.rotated {
-      transform: rotate(180deg);
-    }
-
-    .profile-dropdown {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 8px;
-      min-width: 240px;
-      box-shadow: 0 10px 30px var(--shadow);
-      z-index: 1000;
-      animation: dropdownSlide 0.3s ease;
-    }
-
-    @keyframes dropdownSlide {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .dropdown-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-
-    .dropdown-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .dropdown-info {
-      flex: 1;
-    }
-
-    .dropdown-name {
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-
-    .dropdown-username {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .dropdown-divider {
-      height: 1px;
-      background: var(--border);
-      margin: 8px 0;
-    }
-
-    .dropdown-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      padding: 12px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: var(--text);
-      text-align: left;
-    }
-
-    .dropdown-item:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .dropdown-item.logout-item {
-      color: var(--error);
-    }
-
-    .dropdown-item.logout-item:hover {
-      background: var(--error-alpha);
-    }
-
-    /* SETTINGS MODAL */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .settings-modal {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow: hidden;
-      animation: modalSlide 0.3s ease;
-    }
-
-    @keyframes modalSlide {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 25px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-header h2 {
-      margin: 0;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .close-btn:hover {
-      background: var(--bg-tertiary);
-      color: var(--text);
-    }
-
-    .modal-content {
-      padding: 20px 25px;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-
-    .settings-section {
-      margin-bottom: 30px;
-    }
-
-    .settings-section h3 {
-      color: var(--text);
-      margin: 0 0 15px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 16px;
-    }
-
-    .settings-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 15px;
-      background: none;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: var(--text);
-      text-align: left;
-      margin-bottom: 8px;
-    }
-
-    .settings-item:hover {
-      background: var(--bg-tertiary);
-    }
-
-    .setting-info {
-      flex: 1;
-    }
-
-    .setting-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .setting-desc {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .theme-switch {
-      display: flex;
-      background: var(--bg-tertiary);
-      border: none;
-      border-radius: 20px;
-      padding: 4px;
-      gap: 4px;
-      cursor: pointer;
-    }
-
-    .theme-switch span {
-      padding: 6px 12px;
-      border-radius: 16px;
-      transition: all 0.3s ease;
-    }
-
-    .theme-switch span.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .danger-section h3 {
-      color: var(--error);
-    }
-
-    .danger-item {
-      color: var(--error);
-    }
-
-    .danger-item:hover {
-      background: var(--error-alpha);
-    }
-
-    /* PROFILE FIELDS */
-    .profile-fields {
-      margin-top: 15px;
-      padding: 15px;
-      background: var(--bg-tertiary);
-      border-radius: 12px;
-    }
-
-    .field-group {
-      margin-bottom: 20px;
-    }
-
-    .field-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .profile-input, .profile-textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--bg-primary);
-      color: var(--text);
-      font-size: 14px;
-      font-family: 'Inter', sans-serif;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
-    }
-
-    .profile-input:focus, .profile-textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-alpha);
-    }
-
-    .profile-textarea {
-      resize: vertical;
-      min-height: 80px;
-      line-height: 1.5;
-    }
-
-    .save-profile-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .save-profile-btn:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-    }
-
-    /* TOGGLE CONTROLS */
-    .privacy-controls, .notification-controls {
-      margin-top: 15px;
-      padding: 15px;
-      background: var(--bg-tertiary);
-      border-radius: 12px;
-    }
-
-    .toggle-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .toggle-item:last-child {
-      border-bottom: none;
-    }
-
-    .toggle-info {
-      flex: 1;
-    }
-
-    .toggle-info span {
-      display: block;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .toggle-info small {
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    /* TOGGLE SWITCH */
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 26px;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--text-muted);
-      transition: .4s;
-      border-radius: 26px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: var(--primary);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(24px);
-    }
-
-    /* ENHANCED THEME SWITCH */
-    .theme-switch span.active {
-      background: var(--primary);
-      color: white;
-      transform: scale(1.1);
-    }
-
     /* NOTIFICATIONS */
     .notification {
       position: fixed;
@@ -1237,6 +770,106 @@
       border: 0;
     }
 
+    /* ANONYMOUS POST STYLES */
+    .post-mode-dropdown {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      min-width: 120px;
+      transition: all 0.3s ease;
+    }
+
+    .post-mode-dropdown.anonymous {
+      background: linear-gradient(135deg, #6b46c1, #9333ea);
+      border-color: #9333ea;
+      color: white;
+    }
+
+    .post-mode-dropdown:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+    }
+
+    .post-mode-dropdown option {
+      background: var(--bg-secondary);
+      color: var(--text);
+      padding: 8px;
+    }
+
+    .anonymous-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .anonymous-toggle.active {
+      background: linear-gradient(135deg, #6b46c1, #9333ea);
+      color: white;
+    }
+
+    .anonymous-toggle input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      background: var(--bg-primary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .anonymous-toggle input[type="checkbox"]:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .anonymous-toggle input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .anonymous-post {
+      border-left: 3px solid #9333ea;
+      position: relative;
+    }
+
+    .anonymous-post::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 8px;
+      height: 8px;
+      background: #9333ea;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
     /* SCROLL BEHAVIOR */
     html {
       scroll-behavior: smooth;
@@ -1281,50 +914,18 @@
       const [isDarkMode, setIsDarkMode] = useState(true);
       const [searchQuery, setSearchQuery] = useState('');
       const [notifications, setNotifications] = useState([]);
+      
+      // Navigation State
+      const [activeTab, setActiveTab] = useState('home');
 
       // Post Composer State
       const [newPost, setNewPost] = useState('');
       const [postVisibility, setPostVisibility] = useState('public');
+      const [postMode, setPostMode] = useState('regular'); // 'regular' or 'anonymous'
       const [selectedFile, setSelectedFile] = useState(null);
       const [imagePreview, setImagePreview] = useState(null);
       const [showEmojiPicker, setShowEmojiPicker] = useState(false);
       const [isRecording, setIsRecording] = useState(false);
-      const [uploadProgress, setUploadProgress] = useState(0);
-
-      // New interactive features state
-      const [showComments, setShowComments] = useState({});
-      const [newComment, setNewComment] = useState({});
-      const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
-      const [sharedPosts, setSharedPosts] = useState([]);
-      const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-      const [showSettingsModal, setShowSettingsModal] = useState(false);
-      
-      // Settings state
-      const [editingProfile, setEditingProfile] = useState(false);
-      const [profileData, setProfileData] = useState({
-        name: 'John Doe',
-        username: '@john_doe',
-        bio: 'Social media enthusiast and tech lover 🚀',
-        location: 'New York, USA',
-        website: 'https://johndoe.dev'
-      });
-      
-      const [privacySettingsData, setPrivacySettingsData] = useState({
-        profileVisibility: 'public',
-        allowFollowers: true,
-        allowTagging: true,
-        showActivity: true,
-        allowSearch: true
-      });
-      
-      const [notificationPrefs, setNotificationPrefs] = useState({
-        likes: true,
-        comments: true,
-        follows: true,
-        mentions: true,
-        shares: true,
-        newsletter: false
-      });
 
       // Posts State
       const [posts, setPosts] = useState([
@@ -1333,59 +934,42 @@
           username: 'john_doe',
           name: 'John Doe',
           avatar: 'JD',
-          verified: true,
-          content: '🚀 Welcome to Neex Social! The ultimate social media platform with advanced features like voice messages, stories, real-time messaging, and so much more! #NeexSocial #SocialMedia',
+          content: '🚀 Welcome to Neex Social! The ultimate social media platform with advanced features like voice messages, stories, real-time messaging, and now anonymous posting! #NeexSocial #SocialMedia',
           timestamp: '2h',
           likes: 42,
           comments: 8,
           shares: 12,
           liked: false,
-          bookmarked: false,
           image: null,
-          trending: true,
-          commentsList: [
-            { id: 1, username: 'tech_enthusiast', name: 'Tech Enthusiast', avatar: 'TE', content: 'This looks amazing! Can\'t wait to try all features! 🚀', timestamp: '1h' },
-            { id: 2, username: 'designer_pro', name: 'Designer Pro', avatar: 'DP', content: 'The UI design is absolutely stunning! 💫✨', timestamp: '45m' }
-          ]
+          isAnonymous: false
         },
         {
           id: 2,
-          username: 'tech_guru',
-          name: 'Tech Guru',
-          avatar: 'TG',
-          verified: true,
-          content: 'Just experienced the revolutionary UI/UX of Neex Pro! The glassmorphism design, smooth animations, and intuitive navigation are absolutely phenomenal. This is the future! 🌟✨',
-          timestamp: '4h',
-          likes: 156,
-          comments: 34,
-          shares: 28,
+          username: 'anonymous',
+          name: 'Anonymous',
+          avatar: '👤',
+          content: 'Finally! A place where I can share my thoughts without worrying about judgment. The anonymous feature on Neex is exactly what social media needed. 🔒✨',
+          timestamp: '3h',
+          likes: 28,
+          comments: 15,
+          shares: 7,
           liked: true,
-          bookmarked: true,
           image: null,
-          trending: false,
-          commentsList: [
-            { id: 1, username: 'ui_lover', name: 'UI Lover', avatar: 'UL', content: 'Completely agree! The animations are so smooth 🎨', timestamp: '2h' },
-            { id: 2, username: 'dev_master', name: 'Dev Master', avatar: 'DM', content: 'The technical implementation is impressive!', timestamp: '1h' }
-          ]
+          isAnonymous: true
         },
         {
           id: 3,
-          username: 'design_wizard',
-          name: 'Design Wizard',
-          avatar: 'DW',
-          verified: false,
-          content: 'The attention to detail in Neex Pro is incredible! From the gradient animations to the micro-interactions, every element feels crafted with care. Truly inspiring work! �💫',
-          timestamp: '6h',
-          likes: 203,
-          comments: 45,
-          shares: 67,
+          username: 'tech_guru',
+          name: 'Tech Guru',
+          avatar: 'TG',
+          content: 'Just discovered this amazing new platform! The navigation system is incredible and the user experience is top-notch. Loving the dark mode! 🌙',
+          timestamp: '4h',
+          likes: 35,
+          comments: 5,
+          shares: 9,
           liked: false,
-          bookmarked: false,
           image: null,
-          trending: true,
-          commentsList: [
-            { id: 1, username: 'creative_mind', name: 'Creative Mind', avatar: 'CM', content: 'Such inspiration for my own projects! 🎭', timestamp: '3h' }
-          ]
+          isAnonymous: false
         }
       ]);
 
@@ -1437,25 +1021,28 @@
       // Post Functions
       const handlePost = () => {
         if (newPost.trim() || selectedFile) {
+          const isAnonymous = postMode === 'anonymous';
           const post = {
             id: Date.now(),
-            username: currentUser.username.substring(1),
-            name: currentUser.name,
-            avatar: currentUser.avatar,
+            username: isAnonymous ? 'anonymous' : currentUser.username.substring(1),
+            name: isAnonymous ? 'Anonymous' : currentUser.name,
+            avatar: isAnonymous ? '👤' : currentUser.avatar,
             content: newPost,
             timestamp: 'now',
             likes: 0,
             comments: 0,
             shares: 0,
             liked: false,
-            image: imagePreview
+            image: imagePreview,
+            isAnonymous: isAnonymous
           };
           
           setPosts(prev => [post, ...prev]);
           setNewPost('');
           setSelectedFile(null);
           setImagePreview(null);
-          addNotification('Post shared successfully! 🎊', 'success');
+          setPostMode('regular');
+          addNotification(isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊', 'success');
         }
       };
 
@@ -1484,212 +1071,6 @@
             ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
             : post
         ));
-        
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          addNotification(
-            post.liked ? '💙 Removed like' : '❤️ Liked post!', 
-            post.liked ? 'info' : 'success'
-          );
-        }
-      };
-
-      // Comment Functions
-      const toggleComments = (postId) => {
-        setShowComments(prev => ({
-          ...prev,
-          [postId]: !prev[postId]
-        }));
-      };
-
-      const addComment = (postId) => {
-        const commentText = newComment[postId];
-        if (commentText && commentText.trim()) {
-          const newCommentObj = {
-            id: Date.now(),
-            username: currentUser.username.substring(1),
-            name: currentUser.name,
-            avatar: currentUser.avatar,
-            content: commentText.trim(),
-            timestamp: 'now'
-          };
-
-          setPosts(prev => prev.map(post => 
-            post.id === postId 
-              ? { 
-                  ...post, 
-                  commentsList: [...post.commentsList, newCommentObj],
-                  comments: post.comments + 1
-                }
-              : post
-          ));
-
-          setNewComment(prev => ({
-            ...prev,
-            [postId]: ''
-          }));
-
-          addNotification('💬 Comment added successfully!', 'success');
-        }
-      };
-
-      // Bookmark Functions
-      const toggleBookmark = (postId) => {
-        setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, bookmarked: !post.bookmarked }
-            : post
-        ));
-
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          if (!post.bookmarked) {
-            setBookmarkedPosts(prev => [...prev, postId]);
-            addNotification('🔖 Post bookmarked!', 'success');
-          } else {
-            setBookmarkedPosts(prev => prev.filter(id => id !== postId));
-            addNotification('📌 Bookmark removed', 'info');
-          }
-        }
-      };
-
-      // Share Functions
-      const sharePost = (postId) => {
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          // Simulate sharing
-          setPosts(prev => prev.map(p => 
-            p.id === postId 
-              ? { ...p, shares: p.shares + 1 }
-              : p
-          ));
-
-          setSharedPosts(prev => [...prev, postId]);
-
-          // Copy to clipboard
-          const shareText = `Check out this post on Neex Pro: "${post.content}" by ${post.name}`;
-          navigator.clipboard.writeText(shareText).then(() => {
-            addNotification('🔗 Post link copied to clipboard!', 'success');
-          }).catch(() => {
-            addNotification('📤 Post shared successfully!', 'success');
-          });
-        }
-      };
-
-      // Repost Function
-      const repost = (postId) => {
-        const originalPost = posts.find(p => p.id === postId);
-        if (originalPost) {
-          const repostObj = {
-            id: Date.now(),
-            username: currentUser.username.substring(1),
-            name: currentUser.name,
-            avatar: currentUser.avatar,
-            verified: currentUser.verified,
-            content: `🔄 Reposted: ${originalPost.content}`,
-            timestamp: 'now',
-            likes: 0,
-            comments: 0,
-            shares: 0,
-            liked: false,
-            bookmarked: false,
-            image: originalPost.image,
-            trending: false,
-            commentsList: [],
-            isRepost: true,
-            originalPost: originalPost
-          };
-
-          setPosts(prev => [repostObj, ...prev]);
-          
-          // Update original post share count
-          setPosts(prev => prev.map(p => 
-            p.id === postId 
-              ? { ...p, shares: p.shares + 1 }
-              : p
-          ));
-
-          addNotification('🔄 Post reposted to your timeline!', 'success');
-        }
-      };
-
-      // Profile & Settings Functions
-      const toggleProfileDropdown = () => {
-        setShowProfileDropdown(prev => !prev);
-        setShowSettingsModal(false); // Close settings if open
-      };
-
-      const openSettingsModal = () => {
-        setShowSettingsModal(true);
-        setShowProfileDropdown(false); // Close dropdown if open
-      };
-
-      const closeSettingsModal = () => {
-        setShowSettingsModal(false);
-      };
-
-      const viewProfile = () => {
-        addNotification('👤 Profile page opening...', 'info');
-        setShowProfileDropdown(false);
-        // Add profile page navigation logic here
-      };
-
-      const editProfile = () => {
-        setEditingProfile(true);
-        setShowSettingsModal(false);
-        setShowProfileDropdown(false);
-        addNotification('✏️ Edit Profile mode activated!', 'info');
-      };
-
-      const saveProfile = () => {
-        setEditingProfile(false);
-        addNotification('✅ Profile updated successfully!', 'success');
-      };
-
-      const updateProfileField = (field, value) => {
-        setProfileData(prev => ({
-          ...prev,
-          [field]: value
-        }));
-      };
-
-      const viewBookmarks = () => {
-        const bookmarkedCount = posts.filter(post => post.bookmarked).length;
-        addNotification(`🔖 You have ${bookmarkedCount} bookmarked posts`, 'info');
-        setShowProfileDropdown(false);
-      };
-
-      const accountSettings = () => {
-        openSettingsModal();
-      };
-
-      const updatePrivacySetting = (setting, value) => {
-        setPrivacySettingsData(prev => ({
-          ...prev,
-          [setting]: value
-        }));
-        addNotification(`🔒 ${setting} setting updated!`, 'success');
-      };
-
-      const privacySettings = () => {
-        addNotification('🔒 Privacy settings panel opened!', 'info');
-      };
-
-      const updateNotificationPref = (pref, value) => {
-        setNotificationPrefs(prev => ({
-          ...prev,
-          [pref]: value
-        }));
-        addNotification(`🔔 ${pref} notifications ${value ? 'enabled' : 'disabled'}!`, 'success');
-      };
-
-      const notificationSettings = () => {
-        addNotification('🔔 Notification preferences panel opened!', 'info');
-      };
-
-      const dataExport = () => {
-        addNotification('📊 Data export started! Check your downloads.', 'success');
-        setShowSettingsModal(false);
       };
 
       // Emoji Functions
@@ -1739,101 +1120,65 @@
       // Main App
       return (
         <div className="app">
-          {/* Navigation Bar */}
+          {/* Simple Navigation Bar */}
           <nav className="nav-container">
-            <div className="nav-left">
-              <a href="#" className="nav-logo">Neex</a>
-              <div className="search-container">
-                <i className="fas fa-search search-icon"></i>
-                <input 
-                  type="text" 
-                  className="search-input"
-                  placeholder="Search Neex..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div className="nav-right">
-              <button className="theme-toggle" onClick={toggleTheme}>
-                <i className={`fas ${isDarkMode ? 'fa-sun' : 'fa-moon'}`}></i>
-                <span>{isDarkMode ? 'Light' : 'Dark'}</span>
-              </button>
-
-              <button className="nav-btn" onClick={openSettingsModal}>
-                <i className="fas fa-cog"></i>
-                <span>Settings</span>
-              </button>
-              
-              <div className="profile-dropdown-container">
-                <button className="profile-btn" onClick={toggleProfileDropdown}>
-                  <div className="profile-avatar">
-                    {currentUser?.avatar}
-                  </div>
-                  <span>{currentUser?.name}</span>
-                  <i className={`fas fa-chevron-down dropdown-arrow ${showProfileDropdown ? 'rotated' : ''}`}></i>
-                </button>
-
-                {showProfileDropdown && (
-                  <div className="profile-dropdown">
-                    <div className="dropdown-header">
-                      <div className="dropdown-avatar">{currentUser?.avatar}</div>
-                      <div className="dropdown-info">
-                        <div className="dropdown-name">{currentUser?.name}</div>
-                        <div className="dropdown-username">{currentUser?.username}</div>
-                      </div>
-                    </div>
-                    <div className="dropdown-divider"></div>
-                    <button className="dropdown-item" onClick={viewProfile}>
-                      <i className="fas fa-user"></i>
-                      View Profile
-                    </button>
-                    <button className="dropdown-item" onClick={editProfile}>
-                      <i className="fas fa-edit"></i>
-                      Edit Profile
-                    </button>
-                    <button className="dropdown-item" onClick={viewBookmarks}>
-                      <i className="fas fa-bookmark"></i>
-                      Bookmarks
-                    </button>
-                    <button className="dropdown-item" onClick={accountSettings}>
-                      <i className="fas fa-cog"></i>
-                      Settings
-                    </button>
-                    <div className="dropdown-divider"></div>
-                    <button className="dropdown-item logout-item" onClick={handleLogout}>
-                      <i className="fas fa-sign-out-alt"></i>
-                      Logout
-                    </button>
-                  </div>
-                )}
+            <div className="nav-center">
+              <div className="logo-container">
+                <img src="logo.png" alt="NEEX Logo" className="logo-img" />
+                <span className="nav-logo">NEEX</span>
               </div>
             </div>
           </nav>
 
-          {/* Notifications */}
-          {notifications.map(notification => (
-            <div key={notification.id} className={`notification ${notification.type} fade-in`}>
-              {notification.message}
-            </div>
-          ))}
+          {/* Main Content based on active tab */}
+          {activeTab === 'home' && (
+            <>
+              {/* Notifications */}
+              {notifications.map(notification => (
+                <div key={notification.id} className={`notification ${notification.type} fade-in`}>
+                  {notification.message}
+                </div>
+              ))}
 
           {/* Post Composer */}
           <div className="composer fade-in">
             <div className="composer-header">
-              <div className="user-avatar">{currentUser?.avatar}</div>
+              <div className="user-avatar">{postMode === 'anonymous' ? '👤' : currentUser?.avatar}</div>
               <div>
-                <h3>{currentUser?.name}</h3>
+                <h3>{postMode === 'anonymous' ? 'Anonymous' : currentUser?.name}</h3>
                 <p style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
-                  {currentUser?.username}
+                  {postMode === 'anonymous' ? '@anonymous' : currentUser?.username}
                 </p>
               </div>
-            </div>
-
-            <div className="composer-main">
+              <div style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <select
+                  value={postMode}
+                  onChange={(e) => setPostMode(e.target.value)}
+                  className={`post-mode-dropdown ${postMode === 'anonymous' ? 'anonymous' : ''}`}
+                  style={{
+                    background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--bg-primary)',
+                    border: `1px solid ${postMode === 'anonymous' ? '#9333ea' : 'var(--border)'}`,
+                    borderRadius: '20px',
+                    padding: '8px 12px',
+                    color: postMode === 'anonymous' ? 'white' : 'var(--text)',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    minWidth: '120px'
+                  }}
+                >
+                  <option value="regular" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                    👤 Regular
+                  </option>
+                  <option value="anonymous" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                    🔒 Anonymous
+                  </option>
+                </select>
+              </div>
+            </div>            <div className="composer-main">
               <textarea
-                placeholder="What's happening on Neex?"
+                placeholder={postMode === 'anonymous' ? "Share something anonymously..." : "What's happening on Neex?"}
                 value={newPost}
                 onChange={(e) => setNewPost(e.target.value)}
                 maxLength="500"
@@ -1910,8 +1255,12 @@
                 className="post-btn bounce"
                 onClick={handlePost}
                 disabled={isOverLimit || (!newPost.trim() && !selectedFile)}
+                style={{
+                  background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)'
+                }}
               >
-                Post to Neex
+                <i className={`fas ${postMode === 'anonymous' ? 'fa-mask' : 'fa-paper-plane'}`} style={{marginRight: '8px'}}></i>
+                {postMode === 'anonymous' ? 'Post Anonymously' : 'Post to Neex'}
               </button>
             </div>
           </div>
@@ -1919,11 +1268,21 @@
           {/* Feed */}
           <div className="feed">
             {posts.map(post => (
-              <div key={post.id} className="post fade-in">
+              <div key={post.id} className={`post fade-in ${post.isAnonymous ? 'anonymous-post' : ''}`}>
                 <div className="post-header">
-                  <div className="post-avatar">{post.avatar}</div>
+                  <div className="post-avatar" style={{
+                    background: post.isAnonymous ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)',
+                    fontSize: post.isAnonymous ? '20px' : 'inherit'
+                  }}>
+                    {post.avatar}
+                  </div>
                   <div className="post-info">
-                    <h4>{post.name}</h4>
+                    <h4 style={{
+                      color: post.isAnonymous ? '#9333ea' : 'var(--text)'
+                    }}>
+                      {post.name}
+                      {post.isAnonymous && <i className="fas fa-mask" style={{marginLeft: '8px', fontSize: '12px'}}></i>}
+                    </h4>
                     <span>@{post.username} • {post.timestamp}</span>
                   </div>
                 </div>
@@ -1935,10 +1294,7 @@
                 )}
                 
                 <div className="post-actions">
-                  <button 
-                    className="action-btn"
-                    onClick={() => toggleComments(post.id)}
-                  >
+                  <button className="action-btn">
                     <i className="fas fa-comment"></i>
                     <span>{post.comments}</span>
                   </button>
@@ -1951,64 +1307,104 @@
                     <span>{post.likes}</span>
                   </button>
                   
-                  <button 
-                    className="action-btn"
-                    onClick={() => sharePost(post.id)}
-                  >
+                  <button className="action-btn">
                     <i className="fas fa-share"></i>
                     <span>{post.shares}</span>
                   </button>
                   
-                  <button 
-                    className={`action-btn ${post.bookmarked ? 'bookmarked' : ''}`}
-                    onClick={() => toggleBookmark(post.id)}
-                  >
-                    <i className={`${post.bookmarked ? 'fas' : 'far'} fa-bookmark`}></i>
+                  <button className="action-btn">
+                    <i className="fas fa-bookmark"></i>
                   </button>
                 </div>
+              </div>
+            ))}
+          </div>
+            </>
+          )}
 
-                {/* Comments Section */}
-                {showComments[post.id] && (
-                  <div className="comments-section">
-                    <div className="add-comment">
-                      <img src={currentUser.avatar} alt="Your avatar" className="comment-avatar" />
-                      <div className="comment-input-container">
-                        <input
-                          type="text"
-                          placeholder="Add a comment..."
-                          value={newComment[post.id] || ''}
-                          onChange={(e) => setNewComment(prev => ({
-                            ...prev,
-                            [post.id]: e.target.value
-                          }))}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              addComment(post.id);
-                            }
-                          }}
-                          className="comment-input"
-                        />
-                        <button 
-                          onClick={() => addComment(post.id)}
-                          className="comment-submit"
-                          disabled={!newComment[post.id]?.trim()}
-                        >
-                          <i className="fas fa-paper-plane"></i>
-                        </button>
+          {activeTab === 'search' && (
+            <div className="search-page">
+              <div style={{padding: '20px'}}>
+                <div style={{background: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px', marginBottom: '20px', textAlign: 'center'}}>
+                  <i className="fas fa-search" style={{fontSize: '48px', color: 'var(--primary)', marginBottom: '16px'}}></i>
+                  <h3>Search NEEX</h3>
+                  <p style={{color: 'var(--text-secondary)', marginBottom: '20px'}}>Discover posts, people, and trending topics</p>
+                  <input 
+                    type="text" 
+                    placeholder="Search for posts, users, hashtags..." 
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text)',
+                      fontSize: '16px'
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                {searchQuery && (
+                  <div>
+                    <h4 style={{marginBottom: '16px'}}>Search Results for "{searchQuery}"</h4>
+                    {posts.filter(post => 
+                      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      post.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (!post.isAnonymous && post.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ).map(post => (
+                      <div key={post.id} className={`post fade-in ${post.isAnonymous ? 'anonymous-post' : ''}`} style={{marginBottom: '16px'}}>
+                        <div className="post-header">
+                          <div className="post-avatar" style={{
+                            background: post.isAnonymous ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)',
+                            fontSize: post.isAnonymous ? '20px' : 'inherit'
+                          }}>
+                            {post.avatar}
+                          </div>
+                          <div className="post-info">
+                            <h4 style={{
+                              color: post.isAnonymous ? '#9333ea' : 'var(--text)'
+                            }}>
+                              {post.name}
+                              {post.isAnonymous && <i className="fas fa-mask" style={{marginLeft: '8px', fontSize: '12px'}}></i>}
+                            </h4>
+                            <span>@{post.username} • {post.timestamp}</span>
+                          </div>
+                        </div>
+                        <div className="post-content">{post.content}</div>
                       </div>
-                    </div>
-
-                    <div className="comments-list">
-                      {post.commentsList.map(comment => (
-                        <div key={comment.id} className="comment">
-                          <img src={comment.avatar} alt={comment.username} className="comment-avatar" />
-                          <div className="comment-content">
-                            <div className="comment-header">
-                              <span className="comment-name">{comment.name}</span>
-                              <span className="comment-username">@{comment.username}</span>
-                              <span className="comment-time">{comment.timestamp}</span>
-                            </div>
-                            <p className="comment-text">{comment.content}</p>
+                    ))}
+                    {posts.filter(post => 
+                      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      post.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (!post.isAnonymous && post.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ).length === 0 && (
+                      <p style={{color: 'var(--text-secondary)', textAlign: 'center', padding: '20px'}}>
+                        No results found for "{searchQuery}"
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {!searchQuery && (
+                  <div>
+                    <h4 style={{marginBottom: '16px'}}>Trending Topics</h4>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                      {['#NeexSocial', '#Anonymous', '#SocialMedia', '#TechNews', '#Trending', '#ReactJS'].map(tag => (
+                        <div key={tag} style={{
+                          background: 'var(--bg-secondary)',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          border: tag === '#Anonymous' ? '1px solid #9333ea' : '1px solid var(--border)'
+                        }} onClick={() => setSearchQuery(tag)}>
+                          <strong style={{color: tag === '#Anonymous' ? '#9333ea' : 'var(--text)'}}>
+                            {tag === '#Anonymous' && <i className="fas fa-mask" style={{marginRight: '8px'}}></i>}
+                            {tag}
+                          </strong>
+                          <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                            {Math.floor(Math.random() * 1000) + 100} posts
                           </div>
                         </div>
                       ))}
@@ -2016,306 +1412,162 @@
                   </div>
                 )}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
-          {/* Settings Modal */}
-          {showSettingsModal && (
-            <div className="modal-overlay" onClick={closeSettingsModal}>
-              <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                  <h2>
-                    <i className="fas fa-cog"></i>
-                    Settings
-                  </h2>
-                  <button className="close-btn" onClick={closeSettingsModal}>
-                    <i className="fas fa-times"></i>
+          {activeTab === 'notifications' && (
+            <div className="notifications-page">
+              <div style={{padding: '20px'}}>
+                <h3 style={{marginBottom: '20px'}}>Notifications</h3>
+                {notifications.length > 0 ? (
+                  notifications.map(notification => (
+                    <div key={notification.id} style={{
+                      background: 'var(--bg-secondary)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      marginBottom: '12px',
+                      border: '1px solid var(--border)'
+                    }}>
+                      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                        <i className="fas fa-bell" style={{color: 'var(--primary)'}}></i>
+                        <div>
+                          {notification.message}
+                          <div style={{fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px'}}>
+                            Just now
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{textAlign: 'center', padding: '40px 20px'}}>
+                    <i className="fas fa-bell" style={{fontSize: '48px', color: 'var(--primary)', marginBottom: '16px'}}></i>
+                    <h4>No notifications yet</h4>
+                    <p style={{color: 'var(--text-secondary)'}}>When you get notifications, they'll show up here</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="profile-page">
+              <div style={{padding: '20px'}}>
+                <div style={{
+                  background: 'var(--bg-secondary)',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{
+                    fontSize: '64px',
+                    marginBottom: '16px'
+                  }}>
+                    {currentUser?.avatar}
+                  </div>
+                  <h2>{currentUser?.name}</h2>
+                  <p style={{color: 'var(--text-secondary)', marginBottom: '16px'}}>@{currentUser?.username}</p>
+                  <p style={{marginBottom: '20px'}}>{currentUser?.bio}</p>
+                  <div style={{display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '20px'}}>
+                    <div>
+                      <strong>{posts.filter(p => p.username === currentUser?.username.substring(1) && !p.isAnonymous).length}</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Posts</div>
+                    </div>
+                    <div>
+                      <strong>156</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Following</div>
+                    </div>
+                    <div>
+                      <strong>1.2K</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Followers</div>
+                    </div>
+                  </div>
+                  <button style={{
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginRight: '12px'
+                  }}>
+                    Edit Profile
                   </button>
                 </div>
-                
-                <div className="modal-content">
-                  <div className="settings-section">
-                    <h3>
-                      <i className="fas fa-user-cog"></i>
-                      Account Settings
-                    </h3>
-                    
-                    <div className="settings-item">
-                      <div className="setting-info">
-                        <div className="setting-title">Profile Information</div>
-                        <div className="setting-desc">Update your name, bio, and details</div>
+
+                <div>
+                  <h4 style={{marginBottom: '16px'}}>My Posts</h4>
+                  {posts.filter(post => post.username === currentUser?.username.substring(1) && !post.isAnonymous).length > 0 ? (
+                    posts.filter(post => post.username === currentUser?.username.substring(1) && !post.isAnonymous).map(post => (
+                      <div key={post.id} className="post fade-in" style={{marginBottom: '16px'}}>
+                        <div className="post-content" style={{marginBottom: '12px'}}>{post.content}</div>
+                        <div style={{fontSize: '14px', color: 'var(--text-secondary)'}}>
+                          {post.likes} likes • {post.comments} comments • {post.timestamp}
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="profile-fields">
-                      <div className="field-group">
-                        <label>Display Name</label>
-                        <input
-                          type="text"
-                          value={profileData.name}
-                          onChange={(e) => updateProfileField('name', e.target.value)}
-                          className="profile-input"
-                        />
-                      </div>
-                      
-                      <div className="field-group">
-                        <label>Username</label>
-                        <input
-                          type="text"
-                          value={profileData.username}
-                          onChange={(e) => updateProfileField('username', e.target.value)}
-                          className="profile-input"
-                        />
-                      </div>
-                      
-                      <div className="field-group">
-                        <label>Bio</label>
-                        <textarea
-                          value={profileData.bio}
-                          onChange={(e) => updateProfileField('bio', e.target.value)}
-                          className="profile-textarea"
-                          rows="3"
-                        />
-                      </div>
-                      
-                      <div className="field-group">
-                        <label>Location</label>
-                        <input
-                          type="text"
-                          value={profileData.location}
-                          onChange={(e) => updateProfileField('location', e.target.value)}
-                          className="profile-input"
-                        />
-                      </div>
-                      
-                      <div className="field-group">
-                        <label>Website</label>
-                        <input
-                          type="url"
-                          value={profileData.website}
-                          onChange={(e) => updateProfileField('website', e.target.value)}
-                          className="profile-input"
-                        />
-                      </div>
-                      
-                      <button className="save-profile-btn" onClick={saveProfile}>
-                        <i className="fas fa-save"></i>
-                        Save Changes
+                    ))
+                  ) : (
+                    <div style={{textAlign: 'center', padding: '20px', color: 'var(--text-secondary)'}}>
+                      <p>You haven't posted anything yet!</p>
+                      <button 
+                        style={{
+                          background: 'var(--primary)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '8px 16px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          marginTop: '10px'
+                        }}
+                        onClick={() => setActiveTab('home')}
+                      >
+                        Create Your First Post
                       </button>
                     </div>
-
-                    <div className="settings-item privacy-toggle">
-                      <div className="setting-info">
-                        <div className="setting-title">Privacy & Security</div>
-                        <div className="setting-desc">Control your privacy preferences</div>
-                      </div>
-                    </div>
-                    
-                    <div className="privacy-controls">
-                      <div className="toggle-item">
-                        <span>Public Profile</span>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={privacySettingsData.profileVisibility === 'public'}
-                            onChange={(e) => updatePrivacySetting('profileVisibility', e.target.checked ? 'public' : 'private')}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <span>Allow Followers</span>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={privacySettingsData.allowFollowers}
-                            onChange={(e) => updatePrivacySetting('allowFollowers', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <span>Allow Tagging</span>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={privacySettingsData.allowTagging}
-                            onChange={(e) => updatePrivacySetting('allowTagging', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <span>Show Activity Status</span>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={privacySettingsData.showActivity}
-                            onChange={(e) => updatePrivacySetting('showActivity', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="settings-section">
-                    <h3>
-                      <i className="fas fa-bell"></i>
-                      Notifications
-                    </h3>
-                    
-                    <div className="settings-item">
-                      <div className="setting-info">
-                        <div className="setting-title">Notification Preferences</div>
-                        <div className="setting-desc">Choose what notifications you receive</div>
-                      </div>
-                    </div>
-                    
-                    <div className="notification-controls">
-                      <div className="toggle-item">
-                        <div className="toggle-info">
-                          <span>Likes</span>
-                          <small>When someone likes your posts</small>
-                        </div>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={notificationPrefs.likes}
-                            onChange={(e) => updateNotificationPref('likes', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <div className="toggle-info">
-                          <span>Comments</span>
-                          <small>When someone comments on your posts</small>
-                        </div>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={notificationPrefs.comments}
-                            onChange={(e) => updateNotificationPref('comments', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <div className="toggle-info">
-                          <span>Follows</span>
-                          <small>When someone follows you</small>
-                        </div>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={notificationPrefs.follows}
-                            onChange={(e) => updateNotificationPref('follows', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <div className="toggle-info">
-                          <span>Mentions</span>
-                          <small>When someone mentions you</small>
-                        </div>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={notificationPrefs.mentions}
-                            onChange={(e) => updateNotificationPref('mentions', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <div className="toggle-info">
-                          <span>Shares</span>
-                          <small>When someone shares your posts</small>
-                        </div>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={notificationPrefs.shares}
-                            onChange={(e) => updateNotificationPref('shares', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                      
-                      <div className="toggle-item">
-                        <div className="toggle-info">
-                          <span>Newsletter</span>
-                          <small>Weekly updates and announcements</small>
-                        </div>
-                        <label className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={notificationPrefs.newsletter}
-                            onChange={(e) => updateNotificationPref('newsletter', e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="settings-section">
-                    <h3>
-                      <i className="fas fa-palette"></i>
-                      Appearance
-                    </h3>
-                    <div className="settings-item">
-                      <div className="setting-info">
-                        <div className="setting-title">Theme</div>
-                        <div className="setting-desc">Choose your preferred theme</div>
-                      </div>
-                      <button className="theme-switch" onClick={toggleTheme}>
-                        <span className={isDarkMode ? 'active' : ''}>🌙</span>
-                        <span className={!isDarkMode ? 'active' : ''}>☀️</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="settings-section">
-                    <h3>
-                      <i className="fas fa-download"></i>
-                      Data & Storage
-                    </h3>
-                    <button className="settings-item" onClick={dataExport}>
-                      <div className="setting-info">
-                        <div className="setting-title">Download Your Data</div>
-                        <div className="setting-desc">Export your posts and data</div>
-                      </div>
-                      <i className="fas fa-chevron-right"></i>
-                    </button>
-                  </div>
-
-                  <div className="settings-section danger-section">
-                    <h3>
-                      <i className="fas fa-exclamation-triangle"></i>
-                      Account Actions
-                    </h3>
-                    <button className="settings-item danger-item" onClick={handleLogout}>
-                      <div className="setting-info">
-                        <div className="setting-title">Sign Out</div>
-                        <div className="setting-desc">Sign out of your account</div>
-                      </div>
-                      <i className="fas fa-sign-out-alt"></i>
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
+
+          {/* Bottom Navigation */}
+          <div className="bottom-nav">
+            <div 
+              className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
+              onClick={() => setActiveTab('home')}
+            >
+              <i className={activeTab === 'home' ? 'fas fa-home' : 'far fa-home'}></i>
+              <span>Home</span>
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
+              onClick={() => setActiveTab('search')}
+            >
+              <i className="fas fa-search"></i>
+              <span>Search</span>
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'notifications' ? 'active' : ''}`}
+              onClick={() => setActiveTab('notifications')}
+            >
+              <i className={activeTab === 'notifications' ? 'fas fa-bell' : 'far fa-bell'}></i>
+              <span>Notifications</span>
+              {notifications.length > 0 && (
+                <div className="notification-badge">{notifications.length}</div>
+              )}
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <i className={activeTab === 'profile' ? 'fas fa-user' : 'far fa-user'}></i>
+              <span>Profile</span>
+            </div>
+          </div>
         </div>
       );
     }

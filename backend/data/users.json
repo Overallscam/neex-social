@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "username": "john",
+    "password": "123",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "avatar": "JD",
+    "bio": "Hello! I'm John 👋",
+    "verified": true,
+    "followers": 1234,
+    "following": 567,
+    "joinDate": "2025-08-20T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "username": "alice",
+    "password": "123",
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "avatar": "AJ",
+    "bio": "Love coffee and books ☕📚",
+    "verified": true,
+    "followers": 987,
+    "following": 432,
+    "joinDate": "2025-08-21T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "username": "bob",
+    "password": "123",
+    "name": "Bob Chen",
+    "email": "bob@example.com",
+    "avatar": "BC",
+    "bio": "Tech enthusiist 💻",
+    "verified": false,
+    "followers": 543,
+    "following": 789,
+    "joinDate": "2025-08-22T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "username": "sarah",
+    "password": "123",
+    "name": "Sarah Garcia",
+    "email": "sarah@example.com",
+    "avatar": "SG",
+    "bio": "Designer & creator 🎨",
+    "verified": true,
+    "followers": 2156,
+    "following": 234,
+    "joinDate": "2025-08-23T00:00:00.000Z"
+  }
+]

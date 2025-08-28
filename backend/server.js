@@ -4,8 +4,13 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config(); // Load environment variables
+const { EnhancedDatabase } = require('./database-enhanced'); // Enhanced database with Firebase support
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Initialize enhanced database
+const database = new EnhancedDatabase();
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -46,97 +51,135 @@ const upload = multer({
     }
 });
 
-let users = [
-    { username: 'john', password: '123', avatar: null, bio: 'Hello! I\'m John 👋' },
-    { username: 'alice', password: '123', avatar: null, bio: 'Love coffee and books ☕📚' },
-    { username: 'bob', password: '123', avatar: null, bio: 'Tech enthusiast 💻' },
-    { username: 'sarah', password: '123', avatar: null, bio: 'Designer & creator 🎨' }
-];
-let posts = [
-    { 
-        id: 1, username: 'john', content: 'Hello everyone! This is my first post 👋', 
-        date: new Date('2025-08-25T10:00:00'), image: null, likes: ['alice'], reactions: { like: 1, heart: 0, laugh: 0 }
-    },
-    { 
-        id: 2, username: 'alice', content: 'Beautiful day today! ☀️', 
-        date: new Date('2025-08-25T11:30:00'), image: null, likes: ['john', 'bob'], reactions: { like: 2, heart: 0, laugh: 0 }
-    },
-    { 
-        id: 3, username: 'bob', content: 'Just finished reading a great book 📚', 
-        date: new Date('2025-08-25T12:15:00'), image: null, likes: ['sarah'], reactions: { like: 1, heart: 0, laugh: 0 }
-    },
-    { 
-        id: 4, username: 'sarah', content: 'Working on an exciting new project! 💻', 
-        date: new Date('2025-08-25T13:45:00'), image: null, likes: [], reactions: { like: 0, heart: 0, laugh: 0 }
-    },
-    { 
-        id: 5, username: 'john', content: 'Anyone want to grab coffee later? ☕', 
-        date: new Date('2025-08-25T14:20:00'), image: null, likes: ['alice'], reactions: { like: 1, heart: 0, laugh: 0 }
-    }
-];
-let messages = [
-    { from: 'john', to: 'alice', content: 'Hey Alice, how are you?', date: new Date('2025-08-25T09:00:00') },
-    { from: 'alice', to: 'john', content: 'Hi John! I\'m doing great, thanks for asking!', date: new Date('2025-08-25T09:05:00') },
-    { from: 'bob', to: 'sarah', content: 'Did you see the latest project updates?', date: new Date('2025-08-25T10:30:00') },
-    { from: 'sarah', to: 'bob', content: 'Yes! They look amazing. Great work!', date: new Date('2025-08-25T10:35:00') }
-];
-let friendRequests = [
-    { from: 'bob', to: 'john', status: 'pending', date: new Date('2025-08-25T08:00:00') }
-];
-let friendships = [
-    { user1: 'john', user2: 'alice', date: new Date('2025-08-24T12:00:00') },
-    { user1: 'bob', user2: 'sarah', date: new Date('2025-08-24T15:30:00') }
-];
+// Remove in-memory arrays - now using persistent database
+// let users = [...] - REMOVED
+// let posts = [...] - REMOVED  
+// let messages = [...] - REMOVED
 
-let postIdCounter = 6;
+let userIdCounter = 5;
 let commentIdCounter = 1;
 let comments = [];
 
 // Root route
 app.get('/', (req, res) => {
+    const status = database.getStatus();
     res.json({ 
-        message: 'Neex Social Backend API is running!', 
-        version: '1.0.0',
-        endpoints: ['/posts', '/users', '/register', '/login', '/messages']
+        message: 'NEEX Social Media API Server 🔥', 
+        version: '2.0.0',
+        database: status,
+        endpoints: ['/posts', '/users', '/register', '/login', '/messages'],
+        timestamp: new Date().toISOString()
     });
 });
 
-app.post('/register', (req, res) => {
-    const { username, password } = req.body;
-    if (users.find(u => u.username === username)) {
-        return res.status(400).json({ message: 'User already exists' });
+app.post('/register', async (req, res) => {
+    const { username, password, name, email, bio } = req.body;
+    
+    // Validation
+    if (!username || !password || !name || !email) {
+        return res.status(400).json({ message: 'Username, password, name, and email are required' });
     }
-    users.push({ username, password });
-    res.json({ message: 'Registered successfully' });
+    
+    // Check if user already exists
+    const existingUser = await database.getUserByUsername(username);
+    if (existingUser) {
+        return res.status(400).json({ message: 'Username already exists' });
+    }
+    
+    // Create avatar from name initials
+    const avatar = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    
+    // Create new user
+    const newUser = {
+        username,
+        password, // In production, this should be hashed
+        name,
+        email,
+        avatar,
+        bio: bio || 'Hello, I\'m new to NEEX! 👋',
+        verified: false,
+        followers: 0,
+        following: 0,
+        joinDate: new Date().toISOString()
+    };
+    
+    const savedUser = await database.addUser(newUser);
+    
+    if (savedUser) {
+        // Return user data without password
+        const { password: _, ...userResponse } = savedUser;
+        res.json({ 
+            message: 'Registration successful', 
+            user: userResponse 
+        });
+    } else {
+        res.status(500).json({ message: 'Failed to create user' });
+    }
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+    
+    const user = await database.getUserByUsername(username);
+    if (!user || user.password !== password) {
+        return res.status(401).json({ message: 'Invalid username or password' });
+    }
+    
+    // Return user data without password
+    const { password: _, ...userResponse } = user;
+    res.json({ 
+        message: 'Login successful', 
+        user: userResponse 
+    });
+});
+
+// Get user profile
+app.get('/users/:username', async (req, res) => {
+    const { username } = req.params;
+    const user = await database.getUserByUsername(username);
+    
     if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(404).json({ message: 'User not found' });
     }
-    res.json({ message: 'Login successful' });
+    
+    // Return user data without password
+    const { password: _, ...userResponse } = user;
+    res.json(userResponse);
 });
 
-app.post('/posts', upload.single('image'), (req, res) => {
+// Get all users (for user search/discovery)
+app.get('/users', async (req, res) => {
+    const users = await database.getUsers();
+    const userList = users.map(({ password, ...user }) => user);
+    res.json(userList);
+});
+
+app.post('/posts', upload.single('image'), async (req, res) => {
     const { username, content, isAnonymous } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
     
     const newPost = {
-        id: postIdCounter++,
-        username: isAnonymous ? 'Anonymous' : username,
+        username: isAnonymous === 'true' ? 'Anonymous' : username,
         content,
         image,
-        date: new Date(),
+        date: new Date().toISOString(),
         likes: [],
         reactions: { like: 0, heart: 0, laugh: 0 },
-        isAnonymous: isAnonymous || false,
-        originalUser: isAnonymous ? username : null // Keep track of original user for moderation
+        isAnonymous: isAnonymous === 'true' || false,
+        originalUser: isAnonymous === 'true' ? username : null // Keep track of original user for moderation
     };
     
-    posts.push(newPost);
-    res.json({ message: 'Post created', post: newPost });
+    const savedPost = await database.addPost(newPost);
+    
+    if (savedPost) {
+        res.json({ message: 'Post created', post: savedPost });
+    } else {
+        res.status(500).json({ message: 'Failed to create post' });
+    }
 });
 
 // Like/unlike post
@@ -197,14 +240,27 @@ app.post('/posts/:postId/react', (req, res) => {
     });
 });
 
-app.get('/posts', (req, res) => {
+app.get('/posts', async (req, res) => {
+    const posts = await database.getPosts();
     res.json(posts.slice(-20).reverse());
 });
 
-app.post('/messages', (req, res) => {
+app.post('/messages', async (req, res) => {
     const { from, to, content } = req.body;
-    messages.push({ from, to, content, date: new Date() });
-    res.json({ message: 'Message sent' });
+    const newMessage = { 
+        from, 
+        to, 
+        content, 
+        date: new Date().toISOString() 
+    };
+    
+    const savedMessage = await database.addMessage(newMessage);
+    
+    if (savedMessage) {
+        res.json({ message: 'Message sent', data: savedMessage });
+    } else {
+        res.status(500).json({ message: 'Failed to send message' });
+    }
 });
 
 app.get('/messages/:user1/:user2', (req, res) => {
@@ -354,8 +410,22 @@ app.get('/posts/:postId/comments', (req, res) => {
     res.json(postComments);
 });
 
+// Initialize database and start server
+const startServer = async () => {
+    try {
+        // Enhanced database is initialized automatically in constructor
+        
+        app.listen(PORT, () => {
+            const status = database.getStatus();
+            console.log(`🚀 NEEX Backend running on port ${PORT}`);
+            console.log(`� Database: ${status.current.toUpperCase()}`);
+            console.log(`📊 Status: ${status.status[status.current]}`);
+            console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+        });
+    } catch (error) {
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
+    }
+};
 
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+startServer();
