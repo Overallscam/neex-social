@@ -1083,15 +1083,22 @@
         // Check if user is logged in
         if (!requireLogin('post')) return;
         
+        if (!newPost.trim() && !selectedFile) {
+          addNotification('Please write something to post', 'warning');
+          return;
+        }
+        
         if (newPost.trim() || selectedFile) {
           const isAnonymous = postMode === 'anonymous';
+          const username = currentUser?.username ? currentUser.username.substring(1) : 'Guest';
+          
           const post = {
-            username: isAnonymous ? 'anonymous' : currentUser.username.substring(1),
-            name: isAnonymous ? 'Anonymous' : currentUser.name,
-            avatar: isAnonymous ? '👤' : currentUser.avatar,
-            content: newPost,
+            username: username,
+            content: newPost.trim(),
             isAnonymous: isAnonymous
           };
+          
+          console.log('Posting:', post); // Debug log
           
           try {
             // Send to backend
@@ -1104,39 +1111,24 @@
             });
             
             if (response.ok) {
-              const newPostData = await response.json();
-              // Add to local state immediately for instant feedback
-              setPosts(prev => [newPostData, ...prev]);
+              const result = await response.json();
+              console.log('Post response:', result); // Debug log
               setNewPost('');
               setSelectedFile(null);
               setImagePreview(null);
               setPostMode('regular');
               addNotification(isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊', 'success');
               
-              // Note: No need to fetchPosts() here since we already added the new post locally
-              // fetchPosts() will run automatically every 3 seconds to sync with other users
+              // Refresh posts to show the new one
+              fetchPosts();
             } else {
-              addNotification('Failed to post. Please try again.', 'error');
+              const errorData = await response.json();
+              console.error('Post failed:', errorData);
+              addNotification(errorData.message || 'Failed to post. Please try again.', 'error');
             }
           } catch (error) {
             console.error('Error posting:', error);
-            // Fallback to local posting if backend is down
-            const fallbackPost = {
-              id: Date.now(),
-              ...post,
-              timestamp: 'now',
-              likes: 0,
-              comments: 0,
-              shares: 0,
-              liked: false,
-              image: imagePreview
-            };
-            setPosts(prev => [fallbackPost, ...prev]);
-            setNewPost('');
-            setSelectedFile(null);
-            setImagePreview(null);
-            setPostMode('regular');
-            addNotification('Posted locally (backend offline)', 'warning');
+            addNotification('Network error. Please check your connection.', 'error');
           }
         }
       };
