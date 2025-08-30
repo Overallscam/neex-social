@@ -1021,10 +1021,22 @@
       // Initialize posts from backend and setup real-time updates
       const fetchPosts = async () => {
         try {
-          const response = await fetch('http://localhost:5001/api/posts');
+          const response = await fetch('http://localhost:5001/posts');
           if (response.ok) {
             const backendPosts = await response.json();
-            setPosts(backendPosts);
+            // Sort posts by creation date (newest first)
+            const sortedPosts = backendPosts.sort((a, b) => {
+              const dateA = new Date(a.createdAt || a.date || a.timestamp);
+              const dateB = new Date(b.createdAt || b.date || b.timestamp);
+              return dateB - dateA; // Newest first
+            });
+            
+            // Remove duplicates based on post ID
+            const uniquePosts = sortedPosts.filter((post, index, self) => 
+              index === self.findIndex(p => p.id === post.id)
+            );
+            
+            setPosts(uniquePosts);
           }
         } catch (error) {
           console.log('Backend offline, using sample data');
@@ -1055,7 +1067,7 @@
           
           try {
             // Send to backend
-            const response = await fetch('http://localhost:5001/api/posts', {
+            const response = await fetch('http://localhost:5001/posts', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1073,8 +1085,8 @@
               setPostMode('regular');
               addNotification(isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊', 'success');
               
-              // Fetch latest posts to get real-time updates
-              fetchPosts();
+              // Note: No need to fetchPosts() here since we already added the new post locally
+              // fetchPosts() will run automatically every 3 seconds to sync with other users
             } else {
               addNotification('Failed to post. Please try again.', 'error');
             }
