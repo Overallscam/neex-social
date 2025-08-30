@@ -901,14 +901,11 @@
 
     function App() {
       // Authentication & User State
-      const [loggedIn, setLoggedIn] = useState(true);
-      const [username, setUsername] = useState('johndoe');
+      const [loggedIn, setLoggedIn] = useState(false);
+      const [username, setUsername] = useState('');
       const [password, setPassword] = useState('');
-      const [currentUser, setCurrentUser] = useState({
-        name: 'John Doe',
-        username: '@johndoe',
-        avatar: 'JD'
-      });
+      const [currentUser, setCurrentUser] = useState(null);
+      const [showLoginModal, setShowLoginModal] = useState(false);
 
       // Theme & UI State
       const [isDarkMode, setIsDarkMode] = useState(true);
@@ -978,6 +975,16 @@
         document.body.className = isDarkMode ? '' : 'light';
       }, [isDarkMode]);
 
+      // Check localStorage for saved user
+      useEffect(() => {
+        const savedUser = localStorage.getItem('neexUser');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          setCurrentUser(user);
+          setLoggedIn(true);
+        }
+      }, []);
+
       // Notification System
       const addNotification = (message, type = 'info') => {
         const id = Date.now();
@@ -992,12 +999,15 @@
       // Authentication Functions
       const handleLogin = () => {
         if (username && password) {
-          setLoggedIn(true);
-          setCurrentUser({
+          const user = {
             name: username.charAt(0).toUpperCase() + username.slice(1),
             username: '@' + username,
             avatar: username.substring(0, 2).toUpperCase()
-          });
+          };
+          setLoggedIn(true);
+          setCurrentUser(user);
+          localStorage.setItem('neexUser', JSON.stringify(user));
+          setShowLoginModal(false);
           addNotification('Welcome to Neex Social! 🎉', 'success');
         } else {
           addNotification('Please enter valid credentials', 'error');
@@ -1009,7 +1019,18 @@
         setCurrentUser(null);
         setUsername('');
         setPassword('');
+        localStorage.removeItem('neexUser');
         addNotification('See you later! 👋', 'info');
+      };
+
+      // Show login modal when user tries to interact
+      const requireLogin = (action) => {
+        if (!loggedIn) {
+          setShowLoginModal(true);
+          addNotification('Please login to ' + action, 'info');
+          return false;
+        }
+        return true;
       };
 
       // Theme Functions
@@ -1018,10 +1039,14 @@
         addNotification(`Switched to ${isDarkMode ? 'light' : 'dark'} mode! 🎨`, 'info');
       };
 
+      // API Configuration - Simple fallback
+      const API_BASE_URL = 'http://localhost:5001';
+      console.log('🌍 NEEX Global Network - API:', API_BASE_URL);
+
       // Initialize posts from backend and setup real-time updates
       const fetchPosts = async () => {
         try {
-          const response = await fetch('http://localhost:5001/posts');
+          const response = await fetch(`${API_BASE_URL}/posts`);
           if (response.ok) {
             const backendPosts = await response.json();
             // Sort posts by creation date (newest first)
@@ -1055,6 +1080,9 @@
 
       // Post Functions
       const handlePost = async () => {
+        // Check if user is logged in
+        if (!requireLogin('post')) return;
+        
         if (newPost.trim() || selectedFile) {
           const isAnonymous = postMode === 'anonymous';
           const post = {
@@ -1067,7 +1095,7 @@
           
           try {
             // Send to backend
-            const response = await fetch('http://localhost:5001/posts', {
+            const response = await fetch(`${API_BASE_URL}/posts`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1133,6 +1161,8 @@
 
       // Social Actions
       const toggleLike = (postId) => {
+        if (!requireLogin('like posts')) return;
+        
         setPosts(prev => prev.map(post => 
           post.id === postId 
             ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
@@ -1153,40 +1183,92 @@
       const isOverLimit = charCount > 280;
       const isNearLimit = charCount > 250;
 
-      // Login Screen
-      if (!loggedIn) {
-        return (
-          <div className="login-form">
-            <div className="login-card fade-in">
-              <h1>🚀 Neex Social</h1>
-              <p>The Ultimate Social Media Experience</p>
-              <input
-                type="text"
-                placeholder="Username"
-                className="form-input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="form-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-              />
-              <button className="login-btn" onClick={handleLogin}>
-                Login to Neex
-              </button>
-            </div>
-          </div>
-        );
-      }
-
-      // Main App
+      // Main App - Always show the feed
       return (
         <div className="app">
+          {/* Login Modal */}
+          {showLoginModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000
+            }}>
+              <div style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: '20px',
+                padding: '30px',
+                maxWidth: '400px',
+                width: '90%',
+                position: 'relative'
+              }}>
+                <button 
+                  style={{
+                    position: 'absolute',
+                    top: '15px',
+                    right: '15px',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text)',
+                    fontSize: '20px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setShowLoginModal(false)}
+                >
+                  ✕
+                </button>
+                <h2 style={{textAlign: 'center', marginBottom: '10px', color: 'var(--primary)'}}>
+                  🚀 Login to Neex
+                </h2>
+                <p style={{textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '20px'}}>
+                  Join the conversation!
+                </p>
+                <input
+                  type="text"
+                  placeholder="Username"
+                  className="form-input"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  style={{marginBottom: '15px'}}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="form-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  style={{marginBottom: '20px'}}
+                />
+                <button 
+                  style={{
+                    width: '100%',
+                    background: 'var(--gradient)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                  onClick={handleLogin}
+                >
+                  Login
+                </button>
+                <p style={{textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)', marginTop: '15px'}}>
+                  Enter any username and password to continue
+                </p>
+              </div>
+            </div>
+          )}
           {/* Simple Navigation Bar */}
           <nav className="nav-container">
             <div className="nav-center">
@@ -1194,6 +1276,48 @@
                 <img src="logo.png" alt="NEEX Logo" className="logo-img" />
                 <span className="nav-logo">NEEX</span>
               </div>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              {loggedIn ? (
+                <>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '14px'}}>
+                    <div className="user-avatar" style={{width: '24px', height: '24px', fontSize: '10px'}}>
+                      {currentUser?.avatar}
+                    </div>
+                    <span>{currentUser?.name}</span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    style={{
+                      background: 'none',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      padding: '6px 12px',
+                      borderRadius: '15px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  style={{
+                    background: 'var(--primary)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '15px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Login
+                </button>
+              )}
             </div>
           </nav>
 
@@ -1209,127 +1333,159 @@
 
           {/* Post Composer */}
           <div className="composer fade-in">
-            <div className="composer-header">
-              <div className="user-avatar">{postMode === 'anonymous' ? '👤' : currentUser?.avatar}</div>
-              <div>
-                <h3>{postMode === 'anonymous' ? 'Anonymous' : currentUser?.name}</h3>
-                <p style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
-                  {postMode === 'anonymous' ? '@anonymous' : currentUser?.username}
+            {loggedIn ? (
+              <>
+                <div className="composer-header">
+                  <div className="user-avatar">{postMode === 'anonymous' ? '👤' : currentUser?.avatar}</div>
+                  <div>
+                    <h3>{postMode === 'anonymous' ? 'Anonymous' : currentUser?.name}</h3>
+                    <p style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                      {postMode === 'anonymous' ? '@anonymous' : currentUser?.username}
+                    </p>
+                  </div>
+                  <div style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                    <select
+                      value={postMode}
+                      onChange={(e) => setPostMode(e.target.value)}
+                      className={`post-mode-dropdown ${postMode === 'anonymous' ? 'anonymous' : ''}`}
+                      style={{
+                        background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--bg-primary)',
+                        border: `1px solid ${postMode === 'anonymous' ? '#9333ea' : 'var(--border)'}`,
+                        borderRadius: '20px',
+                        padding: '8px 12px',
+                        color: postMode === 'anonymous' ? 'white' : 'var(--text)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        minWidth: '120px'
+                      }}
+                    >
+                      <option value="regular" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                        👤 Regular
+                      </option>
+                      <option value="anonymous" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                        🔒 Anonymous
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div className="composer-main">
+                  <textarea
+                    placeholder={postMode === 'anonymous' ? "Share something anonymously..." : "What's happening on Neex?"}
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    maxLength="500"
+                  />
+                </div>
+              </>
+            ) : (
+              <div style={{textAlign: 'center', padding: '30px'}}>
+                <div style={{fontSize: '48px', marginBottom: '15px'}}>👋</div>
+                <h3 style={{marginBottom: '10px'}}>Welcome to NEEX!</h3>
+                <p style={{color: 'var(--text-secondary)', marginBottom: '20px'}}>
+                  Browse posts from the community or login to share your thoughts
                 </p>
-              </div>
-              <div style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                <select
-                  value={postMode}
-                  onChange={(e) => setPostMode(e.target.value)}
-                  className={`post-mode-dropdown ${postMode === 'anonymous' ? 'anonymous' : ''}`}
+                <button 
+                  onClick={() => setShowLoginModal(true)}
                   style={{
-                    background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--bg-primary)',
-                    border: `1px solid ${postMode === 'anonymous' ? '#9333ea' : 'var(--border)'}`,
+                    background: 'var(--gradient)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px 24px',
                     borderRadius: '20px',
-                    padding: '8px 12px',
-                    color: postMode === 'anonymous' ? 'white' : 'var(--text)',
-                    fontSize: '14px',
-                    fontWeight: '500',
                     cursor: 'pointer',
-                    outline: 'none',
-                    minWidth: '120px'
+                    fontSize: '16px',
+                    fontWeight: 'bold'
                   }}
                 >
-                  <option value="regular" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
-                    👤 Regular
-                  </option>
-                  <option value="anonymous" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
-                    🔒 Anonymous
-                  </option>
-                </select>
-              </div>
-            </div>            <div className="composer-main">
-              <textarea
-                placeholder={postMode === 'anonymous' ? "Share something anonymously..." : "What's happening on Neex?"}
-                value={newPost}
-                onChange={(e) => setNewPost(e.target.value)}
-                maxLength="500"
-              />
-            </div>
-
-            {imagePreview && (
-              <div className="file-preview">
-                <img src={imagePreview} alt="Preview" />
-                <button className="remove-preview" onClick={removePreview}>
-                  <i className="fas fa-times"></i>
+                  Login to Post
                 </button>
               </div>
             )}
 
-            <div className="media-tools">
-              <input
-                type="file"
-                id="file-upload"
-                style={{display: 'none'}}
-                accept="image/*,video/*,audio/*"
-                onChange={handleFileUpload}
-              />
-              <label htmlFor="file-upload" className="media-btn" title="Upload Photo">
-                <i className="fas fa-image"></i>
-              </label>
-              
-              <button className="media-btn" title="Upload Video">
-                <i className="fas fa-video"></i>
-              </button>
-              
-              <button className="media-btn" title="Upload Audio">
-                <i className="fas fa-microphone"></i>
-              </button>
-              
-              <div style={{position: 'relative'}}>
-                <button 
-                  className="media-btn" 
-                  title="Add Emoji"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                  <i className="fas fa-smile"></i>
-                </button>
-                
-                {showEmojiPicker && (
-                  <div className="emoji-picker">
-                    {emojis.map((emoji, index) => (
-                      <button
-                        key={index}
-                        className="emoji-btn"
-                        onClick={() => addEmoji(emoji)}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
+            {loggedIn && (
+              <>
+                {imagePreview && (
+                  <div className="file-preview">
+                    <img src={imagePreview} alt="Preview" />
+                    <button className="remove-preview" onClick={removePreview}>
+                      <i className="fas fa-times"></i>
+                    </button>
                   </div>
                 )}
-              </div>
-              
-              <button className="media-btn" title="Add Poll">
-                <i className="fas fa-poll"></i>
-              </button>
-              
-              <button className="media-btn" title="Schedule Post">
-                <i className="fas fa-calendar"></i>
-              </button>
-            </div>
 
-            <div className="composer-footer">
-              <div className={`char-counter ${isNearLimit ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
-                {charCount}/280
-              </div>
-              <button 
-                className="post-btn bounce"
-                onClick={handlePost}
-                disabled={isOverLimit || (!newPost.trim() && !selectedFile)}
-                style={{
-                  background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)'
-                }}
-              >
-                <i className={`fas ${postMode === 'anonymous' ? 'fa-mask' : 'fa-paper-plane'}`} style={{marginRight: '8px'}}></i>
-                {postMode === 'anonymous' ? 'Post Anonymously' : 'Post to Neex'}
-              </button>
-            </div>
+                <div className="media-tools">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    style={{display: 'none'}}
+                    accept="image/*,video/*,audio/*"
+                    onChange={handleFileUpload}
+                  />
+                  <label htmlFor="file-upload" className="media-btn" title="Upload Photo">
+                    <i className="fas fa-image"></i>
+                  </label>
+                  
+                  <button className="media-btn" title="Upload Video">
+                    <i className="fas fa-video"></i>
+                  </button>
+                  
+                  <button className="media-btn" title="Upload Audio">
+                    <i className="fas fa-microphone"></i>
+                  </button>
+                  
+                  <div style={{position: 'relative'}}>
+                    <button 
+                      className="media-btn" 
+                      title="Add Emoji"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <i className="fas fa-smile"></i>
+                    </button>
+                    
+                    {showEmojiPicker && (
+                      <div className="emoji-picker">
+                        {emojis.map((emoji, index) => (
+                          <button
+                            key={index}
+                            className="emoji-btn"
+                            onClick={() => addEmoji(emoji)}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button className="media-btn" title="Add Poll">
+                    <i className="fas fa-poll"></i>
+                  </button>
+                  
+                  <button className="media-btn" title="Schedule Post">
+                    <i className="fas fa-calendar"></i>
+                  </button>
+                </div>
+
+                <div className="composer-footer">
+                  <div className={`char-counter ${isNearLimit ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
+                    {charCount}/280
+                  </div>
+                  <button 
+                    className="post-btn bounce"
+                    onClick={handlePost}
+                    disabled={isOverLimit || (!newPost.trim() && !selectedFile)}
+                    style={{
+                      background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)'
+                    }}
+                  >
+                    <i className={`fas ${postMode === 'anonymous' ? 'fa-mask' : 'fa-paper-plane'}`} style={{marginRight: '8px'}}></i>
+                    {postMode === 'anonymous' ? 'Post Anonymously' : 'Post to Neex'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Feed */}

@@ -5,18 +5,18 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config(); // Load environment variables
-const { EnhancedDatabase } = require('./database-enhanced'); // Enhanced database with Firebase support
+const { RealtimeDatabase } = require('./firebase-realtime-config'); // Firebase Realtime Database only
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Initialize enhanced database
-const database = new EnhancedDatabase();
+// Initialize Firebase Realtime Database (online only)
+const database = new RealtimeDatabase();
 
 // Enhanced CORS for global deployment
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://your-app.netlify.app', 'https://neex-social.netlify.app'] // Add your Netlify URL
-    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5000'],
+    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5000', 'http://localhost:8080', 'http://127.0.0.1:8080'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -168,13 +168,54 @@ app.get('/users', async (req, res) => {
     res.json(userList);
 });
 
+// Authentication middleware
+const requireAuth = async (req, res, next) => {
+    const { username } = req.body;
+    
+    if (!username) {
+        return res.status(401).json({ 
+            message: 'Authentication required. Please login to post.', 
+            requireLogin: true 
+        });
+    }
+    
+    // Verify user exists
+    const user = await database.getUserByUsername(username);
+    if (!user) {
+        return res.status(401).json({ 
+            message: 'Invalid user. Please login again.', 
+            requireLogin: true 
+        });
+    }
+    
+    req.user = user;
+    next();
+};
+
 app.post('/posts', upload.single('image'), async (req, res) => {
     const { username, content, isAnonymous } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
     
+    // Basic authentication check
+    if (!username || username.trim() === '') {
+        return res.status(401).json({ 
+            message: '🔐 Authentication required. Please login to post.', 
+            requireLogin: true 
+        });
+    }
+    
+    // Content validation
+    if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: 'Post content cannot be empty' });
+    }
+    
+    if (content.length > 500) {
+        return res.status(400).json({ message: 'Post content cannot exceed 500 characters' });
+    }
+    
     const newPost = {
-        username: isAnonymous === 'true' ? 'Anonymous' : username,
-        content,
+        username: isAnonymous === 'true' ? 'Anonymous' : (username || 'Guest'),
+        content: content.trim(),
         image,
         date: new Date().toISOString(),
         likes: [],
@@ -186,7 +227,8 @@ app.post('/posts', upload.single('image'), async (req, res) => {
     const savedPost = await database.addPost(newPost);
     
     if (savedPost) {
-        res.json({ message: 'Post created', post: savedPost });
+        console.log(`📝 New post created by ${isAnonymous === 'true' ? 'Anonymous' : (username || 'Guest')}: "${content.substring(0, 50)}..."`);
+        res.json({ message: 'Post created successfully', post: savedPost });
     } else {
         res.status(500).json({ message: 'Failed to create post' });
     }
@@ -423,14 +465,15 @@ app.get('/posts/:postId/comments', (req, res) => {
 // Initialize database and start server
 const startServer = async () => {
     try {
-        // Enhanced database is initialized automatically in constructor
+        // Initialize Firebase Realtime Database with sample data
+        await database.initializeSampleData();
         
         app.listen(PORT, () => {
-            const status = database.getStatus();
             console.log(`🚀 NEEX Backend running on port ${PORT}`);
-            console.log(`� Database: ${status.current.toUpperCase()}`);
-            console.log(`📊 Status: ${status.status[status.current]}`);
+            console.log(`🔥 Database: FIREBASE-REALTIME (Global Cloud)`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`� UI: Previous Interface Restored`);
+            console.log(`📡 Real-time sync: ENABLED`);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);
