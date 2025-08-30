@@ -65,7 +65,7 @@
     /* NAVIGATION STYLES */
     .nav-container {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       padding: 15px 20px;
       background: var(--bg-secondary);
@@ -79,7 +79,7 @@
 
     .nav-center {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
     }
 
@@ -1018,31 +1018,86 @@
         addNotification(`Switched to ${isDarkMode ? 'light' : 'dark'} mode! 🎨`, 'info');
       };
 
+      // Initialize posts from backend and setup real-time updates
+      const fetchPosts = async () => {
+        try {
+          const response = await fetch('http://localhost:5001/api/posts');
+          if (response.ok) {
+            const backendPosts = await response.json();
+            setPosts(backendPosts);
+          }
+        } catch (error) {
+          console.log('Backend offline, using sample data');
+        }
+      };
+
+      // Fetch posts on component mount and setup polling for real-time updates
+      useEffect(() => {
+        fetchPosts();
+        
+        // Poll for new posts every 3 seconds for real-time updates
+        const interval = setInterval(fetchPosts, 3000);
+        
+        return () => clearInterval(interval);
+      }, []);
+
       // Post Functions
-      const handlePost = () => {
+      const handlePost = async () => {
         if (newPost.trim() || selectedFile) {
           const isAnonymous = postMode === 'anonymous';
           const post = {
-            id: Date.now(),
             username: isAnonymous ? 'anonymous' : currentUser.username.substring(1),
             name: isAnonymous ? 'Anonymous' : currentUser.name,
             avatar: isAnonymous ? '👤' : currentUser.avatar,
             content: newPost,
-            timestamp: 'now',
-            likes: 0,
-            comments: 0,
-            shares: 0,
-            liked: false,
-            image: imagePreview,
             isAnonymous: isAnonymous
           };
           
-          setPosts(prev => [post, ...prev]);
-          setNewPost('');
-          setSelectedFile(null);
-          setImagePreview(null);
-          setPostMode('regular');
-          addNotification(isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊', 'success');
+          try {
+            // Send to backend
+            const response = await fetch('http://localhost:5001/api/posts', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(post)
+            });
+            
+            if (response.ok) {
+              const newPostData = await response.json();
+              // Add to local state immediately for instant feedback
+              setPosts(prev => [newPostData, ...prev]);
+              setNewPost('');
+              setSelectedFile(null);
+              setImagePreview(null);
+              setPostMode('regular');
+              addNotification(isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊', 'success');
+              
+              // Fetch latest posts to get real-time updates
+              fetchPosts();
+            } else {
+              addNotification('Failed to post. Please try again.', 'error');
+            }
+          } catch (error) {
+            console.error('Error posting:', error);
+            // Fallback to local posting if backend is down
+            const fallbackPost = {
+              id: Date.now(),
+              ...post,
+              timestamp: 'now',
+              likes: 0,
+              comments: 0,
+              shares: 0,
+              liked: false,
+              image: imagePreview
+            };
+            setPosts(prev => [fallbackPost, ...prev]);
+            setNewPost('');
+            setSelectedFile(null);
+            setImagePreview(null);
+            setPostMode('regular');
+            addNotification('Posted locally (backend offline)', 'warning');
+          }
         }
       };
 
