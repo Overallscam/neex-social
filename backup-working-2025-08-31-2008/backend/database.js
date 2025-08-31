@@ -154,27 +154,6 @@ const db = {
             return users.find(user => user.email === email);
         },
         
-        findByUsername: (username) => {
-            const users = db.users.getAll();
-            return users.find(user => user.username === username);
-        },
-        
-        update: (username, updatedUser) => {
-            const users = db.users.getAll();
-            const index = users.findIndex(user => user.username === username);
-            if (index !== -1) {
-                users[index] = { ...users[index], ...updatedUser };
-                return db.users.save(users) ? users[index] : null;
-            }
-            return null;
-        },
-        
-        delete: (username) => {
-            const users = db.users.getAll();
-            const filteredUsers = users.filter(user => user.username !== username);
-            return db.users.save(filteredUsers);
-        },
-        
         add: (user) => {
             const users = db.users.getAll();
             const maxId = users.length > 0 ? Math.max(...users.map(u => u.id)) : 0;
@@ -248,37 +227,4 @@ const db = {
 // Initialize database on startup
 initializeDatabase();
 
-// Enhanced async wrapper functions for user management
-const getUserByUsername = async (username) => {
-    return db.users.findByUsername(username);
-};
-
-const updateUser = async (username, updatedUser) => {
-    return db.users.update(username, updatedUser);
-};
-
-const deleteUser = async (username) => {
-    return db.users.delete(username);
-};
-
-const getUsers = async () => {
-    return db.users.getAll();
-};
-
-const getUserByEmail = async (email) => {
-    return db.users.findByEmail(email);
-};
-
-const addUser = async (user) => {
-    return db.users.add(user);
-};
-
-module.exports = {
-    ...db,
-    getUserByUsername,
-    updateUser,
-    deleteUser,
-    getUsers,
-    getUserByEmail,
-    addUser
-};
+module.exports = db;

@@ -3,32 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Page</title>
+  <title>NEEX Test</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #1d9bf0, #8b5cf6);
+      border-radius: 12px;
+    }
+  </style>
 </head>
 <body>
-  <div id="root">
-    <h1>Test - App Loading...</h1>
-    <p>If you see this, the server is working!</p>
+  <div class="container">
+    <h1>🚀 NEEX Social Media</h1>
+    <p>Frontend Test Page</p>
+    <p>If you see this, the frontend server is working!</p>
+    <button onclick="testReact()">Test React Loading</button>
+    <div id="react-test"></div>
   </div>
-  
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
+
   <script type="text/babel">
-    function App() {
-      return (
-        <div style={{padding: '20px', fontFamily: 'Arial'}}>
-          <h1>🎉 Social Media App Test</h1>
-          <p>React is working correctly!</p>
-          <button onClick={() => alert('Button works!')}>
-            Test Button
-          </button>
-        </div>
-      );
+    function TestComponent() {
+      return React.createElement('div', {style: {color: 'lime', marginTop: '20px'}}, 'React is working! ✅');
     }
-    
-    ReactDOM.render(<App />, document.getElementById('root'));
+
+    function testReact() {
+      ReactDOM.render(React.createElement(TestComponent), document.getElementById('react-test'));
+    }
   </script>
 </body>
 </html>

@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "username": "john",
+    "content": "Hello everyone! This is my first post 👋",
+    "date": "2025-08-25T04:30:00.000Z",
+    "image": null,
+    "likes": [
+      "alice"
+    ],
+    "reactions": {
+      "like": 1,
+      "heart": 0,
+      "laugh": 0
+    },
+    "isAnonymous": false
+  },
+  {
+    "id": 2,
+    "username": "alice",
+    "content": "Beautiful day today! ☀️",
+    "date": "2025-08-25T06:00:00.000Z",
+    "image": null,
+    "likes": [
+      "john",
+      "bob"
+    ],
+    "reactions": {
+      "like": 2,
+      "heart": 0,
+      "laugh": 0
+    },
+    "isAnonymous": false
+  },
+  {
+    "id": 3,
+    "username": "bob",
+    "content": "Just finished reading a great book 📚",
+    "date": "2025-08-25T06:45:00.000Z",
+    "image": null,
+    "likes": [
+      "sarah"
+    ],
+    "reactions": {
+      "like": 1,
+      "heart": 0,
+      "laugh": 0
+    },
+    "isAnonymous": false
+  }
+]
