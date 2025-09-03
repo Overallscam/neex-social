@@ -1009,7 +1009,7 @@
         }
 
         try {
-          const response = await fetch('http://localhost:5001/login', {
+          const response = await fetch('`${API_BASE_URL}/login`', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1078,7 +1078,7 @@
           };
 
           // Save user to backend
-          const response = await fetch('http://localhost:5001/users', {
+          const response = await fetch('`${API_BASE_URL}/users`', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1137,7 +1137,7 @@
       };
 
       // API Configuration - Simple fallback
-      const API_BASE_URL = 'http://localhost:5001';
+      const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:5001';
       console.log('🌍 NEEX Global Network - API:', API_BASE_URL);
 
       // Initialize posts from backend and setup real-time updates
