@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>API Test</title>
@@ -11,7 +11,7 @@
     <script>
         async function testAPI() {
             const resultDiv = document.getElementById('result');
-            const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:5001';
+            const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'https://neex-social-production.up.railway.app';
             resultDiv.innerHTML += '<p>Using API URL: ' + API_BASE_URL + '</p>';
             
             try {
