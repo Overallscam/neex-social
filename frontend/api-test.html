@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <div id="result"></div>
+    
+    <script src="config.js"></script>
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:5001';
+            resultDiv.innerHTML += '<p>Using API URL: ' + API_BASE_URL + '</p>';
+            
+            try {
+                const response = await fetch(API_BASE_URL + '/posts');
+                resultDiv.innerHTML += '<p>Status: ' + response.status + '</p>';
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML += '<p>SUCCESS! Got ' + data.length + ' posts</p>';
+                } else {
+                    resultDiv.innerHTML += '<p>ERROR: ' + response.statusText + '</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML += '<p>NETWORK ERROR: ' + error.message + '</p>';
+            }
+        }
+        window.onload = testAPI;
+    </script>
+</body>
+</html>
