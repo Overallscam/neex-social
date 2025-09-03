@@ -1,4 +1,17 @@
 {
+  "name": "neex-social",
+  "version": "1.0.0",
+  "description": "Advanced Social Media Platform with React and Express.js",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && nodemon server.js",
+    "frontend": "cd frontend && python -m http.server 8080",
+    "install-all": "cd backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": ["social-media", "react", "express", "nodejs"],
+  "author": "Neex Social Team",
+  "license": "MIT",
   "devDependencies": {
     "nodemon": "^3.1.10"
   }

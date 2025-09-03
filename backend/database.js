@@ -273,6 +273,24 @@ const addUser = async (user) => {
     return db.users.add(user);
 };
 
+// Enhanced async wrapper functions for posts management
+const getPosts = async () => {
+    return db.posts.getAll();
+};
+
+const addPost = async (post) => {
+    return db.posts.add(post);
+};
+
+// Enhanced async wrapper functions for messages management
+const getMessages = async () => {
+    return db.messages.getAll();
+};
+
+const addMessage = async (message) => {
+    return db.messages.add(message);
+};
+
 module.exports = {
     ...db,
     getUserByUsername,
@@ -280,5 +298,9 @@ module.exports = {
     deleteUser,
     getUsers,
     getUserByEmail,
-    addUser
+    addUser,
+    getPosts,
+    addPost,
+    getMessages,
+    addMessage
 };

@@ -1,0 +1,26 @@
+{
+  "name": "Neex Social",
+  "short_name": "Neex",
+  "description": "Advanced Social Media Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1d9bf0",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["social", "entertainment", "communication"],
+  "lang": "en",
+  "scope": "/",
+  "prefer_related_applications": false
+}

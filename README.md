@@ -135,19 +135,24 @@ NODE_ENV=production
 neex-social/
 ├── 📱 frontend/              # React web application
 │   ├── index.html           # Main application file
+│   ├── App.js              # React components
+│   ├── config.js           # Configuration file
 │   ├── manifest.json        # PWA manifest
 │   ├── sw.js               # Service worker
-│   └── ICONS-NEEDED.md     # Icon setup guide
+│   ├── logo.png            # App logo
+│   └── package.json        # Frontend dependencies
 ├── 🔧 backend/              # Express.js API server
 │   ├── server.js           # Main server file
+│   ├── database.js         # Database operations
 │   ├── package.json        # Node.js dependencies
+│   ├── data/               # JSON data files
 │   └── uploads/            # File upload directory
-├── 📱 mobile-app/           # Cordova mobile setup
-│   ├── config.xml          # Mobile app configuration
-│   ├── package.json        # Build dependencies
-│   └── www/                # Mobile app files
+├── � frontend-backup/      # Clean frontend backup
+│   ├── index.html          # Backup main file
+│   ├── manifest.json       # Backup PWA manifest
+│   ├── sw.js              # Backup service worker
+│   └── logo.png           # Backup logo
 ├── 📋 DEPLOYMENT.md         # Detailed deployment guide
-├── 🚀 deploy.bat           # Quick deployment script
 ├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
