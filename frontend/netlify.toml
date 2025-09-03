@@ -11,6 +11,18 @@
   force = true
 
 [[redirects]]
+  from = "/posts"
+  to = "https://neex-social-production.up.railway.app/posts"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/users"
+  to = "https://neex-social-production.up.railway.app/users"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
