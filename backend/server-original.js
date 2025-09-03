@@ -17,11 +17,11 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ['http://localhost:3000', 'http://localhost:5001', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com', 'https://neex.netlify.app'],
+        origin: ['http://localhost:3000', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com'],
         methods: ['GET', 'POST']
     }
 });
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3000;
 
 // Rate limiting
 const limiter = rateLimit({
@@ -34,7 +34,7 @@ app.use(limiter);
 
 // CORS Configuration
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5001', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com', 'https://neex.netlify.app'],
+    origin: ['http://localhost:3000', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com'],
     credentials: true
 }));
 

@@ -17,7 +17,7 @@ const config = {
   
   // Production (Railway + Netlify)
   production: {
-    API_BASE_URL: 'https://neex-backend.up.railway.app', // Replace with your Railway URL
+    API_BASE_URL: 'https://neex-social-production.up.railway.app', // Replace with your Railway URL
     FIREBASE_CONFIG: {
       apiKey: "AIzaSyCEUX19EIV2tKsqRZiYPiQ64Wfgb6QLvwo",
       authDomain: "neex-57c2e.firebaseapp.com",
