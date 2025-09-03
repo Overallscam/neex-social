@@ -1198,7 +1198,7 @@
               formData.append('username', username);
               formData.append('content', newPost.trim());
               formData.append('isAnonymous', isAnonymous);
-              formData.append('image', selectedFile);
+              formData.append('media', selectedFile); // Changed from 'image' to 'media'
               
               console.log('Posting with image:', { username, content: newPost.trim(), isAnonymous, hasImage: true });
               
@@ -1770,8 +1770,8 @@
                 
                 <div className="post-content">{post.content}</div>
                 
-                {post.image && (
-                  <img src={post.image} alt="Post" className="post-image" />
+                {post.media && (
+                  <img src={post.media} alt="Post" className="post-image" />
                 )}
                 
                 <div className="post-actions">
