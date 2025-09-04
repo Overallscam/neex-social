@@ -891,6 +891,44 @@
     .app::-webkit-scrollbar-thumb:hover {
       background: var(--text-secondary);
     }
+
+    /* Comments Styles */
+    .comments-section {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .comments-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .comment-item {
+      transition: background 0.2s ease;
+    }
+
+    .comment-item:hover {
+      background: var(--bg-primary);
+    }
+
+    .comment-input {
+      transition: border-color 0.2s ease;
+    }
+
+    .comment-input:focus {
+      border-color: var(--primary) !important;
+    }
+
+    .comment-send-btn {
+      transition: all 0.2s ease;
+    }
+
+    .comment-send-btn:hover {
+      background: var(--primary-dark) !important;
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -928,6 +966,11 @@
       const [imagePreview, setImagePreview] = useState(null);
       const [showEmojiPicker, setShowEmojiPicker] = useState(false);
       const [isRecording, setIsRecording] = useState(false);
+
+      // Comments State
+      const [comments, setComments] = useState({});
+      const [showComments, setShowComments] = useState({});
+      const [newComment, setNewComment] = useState({});
 
       // Posts State
       const [posts, setPosts] = useState([
@@ -1299,6 +1342,67 @@
       const charCount = newPost.length;
       const isOverLimit = charCount > 280;
       const isNearLimit = charCount > 250;
+
+      // Comments Functions
+      const fetchComments = async (postId) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`);
+          if (response.ok) {
+            const postComments = await response.json();
+            setComments(prev => ({ ...prev, [postId]: postComments }));
+          }
+        } catch (error) {
+          console.error('Failed to fetch comments:', error);
+        }
+      };
+
+      const toggleComments = (postId) => {
+        const isCurrentlyShown = showComments[postId];
+        setShowComments(prev => ({ ...prev, [postId]: !isCurrentlyShown }));
+        
+        if (!isCurrentlyShown && !comments[postId]) {
+          fetchComments(postId);
+        }
+      };
+
+      const addComment = async (postId) => {
+        if (!requireLogin('comment')) return;
+        
+        const commentText = newComment[postId];
+        if (!commentText || !commentText.trim()) return;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: currentUser?.username?.substring(1) || 'Guest',
+              content: commentText.trim()
+            })
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            setComments(prev => ({
+              ...prev,
+              [postId]: [...(prev[postId] || []), result.comment]
+            }));
+            setNewComment(prev => ({ ...prev, [postId]: '' }));
+            
+            // Update post comment count
+            setPosts(prev => prev.map(post => 
+              post.id === postId 
+                ? { ...post, comments: post.comments + 1 }
+                : post
+            ));
+            
+            addNotification('💬 Comment added!', 'success');
+          }
+        } catch (error) {
+          console.error('Failed to add comment:', error);
+          addNotification('Failed to add comment', 'error');
+        }
+      };
 
       // Main App - Always show the feed
       return (
@@ -1775,7 +1879,10 @@
                 )}
                 
                 <div className="post-actions">
-                  <button className="action-btn">
+                  <button 
+                    className="action-btn"
+                    onClick={() => toggleComments(post.id)}
+                  >
                     <i className="fas fa-comment"></i>
                     <span>{post.comments}</span>
                   </button>
@@ -1797,6 +1904,114 @@
                     <i className="fas fa-bookmark"></i>
                   </button>
                 </div>
+
+                {/* Comments Section */}
+                {showComments[post.id] && (
+                  <div className="comments-section" style={{
+                    marginTop: '16px',
+                    borderTop: '1px solid var(--border)',
+                    paddingTop: '16px'
+                  }}>
+                    {/* Comment Input */}
+                    {loggedIn && (
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginBottom: '16px',
+                        alignItems: 'center'
+                      }}>
+                        <div className="user-avatar" style={{fontSize: '12px'}}>
+                          {currentUser?.avatar}
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={newComment[post.id] || ''}
+                          onChange={(e) => setNewComment(prev => ({
+                            ...prev,
+                            [post.id]: e.target.value
+                          }))}
+                          onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                          className="comment-input"
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            border: '1px solid var(--border)',
+                            borderRadius: '20px',
+                            background: 'var(--bg-secondary)',
+                            color: 'var(--text)',
+                            outline: 'none'
+                          }}
+                        />
+                        <button
+                          onClick={() => addComment(post.id)}
+                          className="comment-send-btn"
+                          style={{
+                            background: 'var(--primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <i className="fas fa-paper-plane" style={{fontSize: '12px'}}></i>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Comments List */}
+                    <div className="comments-list">
+                      {comments[post.id]?.map(comment => (
+                        <div key={comment.id} className="comment-item" style={{
+                          display: 'flex',
+                          gap: '12px',
+                          marginBottom: '12px',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          background: 'var(--bg-tertiary)'
+                        }}>
+                          <div className="user-avatar" style={{fontSize: '10px'}}>
+                            {comment.username.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div style={{flex: 1}}>
+                            <div style={{
+                              fontWeight: 'bold',
+                              fontSize: '14px',
+                              marginBottom: '4px'
+                            }}>
+                              {comment.username}
+                            </div>
+                            <div style={{fontSize: '14px'}}>
+                              {comment.content}
+                            </div>
+                            <div style={{
+                              fontSize: '12px',
+                              color: 'var(--text-secondary)',
+                              marginTop: '4px'
+                            }}>
+                              {new Date(comment.date).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {comments[post.id]?.length === 0 && (
+                        <div style={{
+                          textAlign: 'center',
+                          color: 'var(--text-secondary)',
+                          padding: '20px'
+                        }}>
+                          No comments yet. Be the first to comment!
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
