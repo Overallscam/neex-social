@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<backup-rules xmlns:android="http://schemas.android.com/apk/res/android">
+    <include domain="sharedpref" path="."/>
+    <include domain="database" path="."/>
+    <include domain="file" path="."/>
+</backup-rules>

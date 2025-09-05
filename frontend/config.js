@@ -17,7 +17,7 @@ const config = {
   
   // Production (Railway + Netlify)
   production: {
-    API_BASE_URL: 'https://neex-social-production.up.railway.app', // Replace with your Railway URL
+    API_BASE_URL: 'https://neex-social-production.up.railway.app', // Working Railway URL
     FIREBASE_CONFIG: {
       apiKey: "AIzaSyCEUX19EIV2tKsqRZiYPiQ64Wfgb6QLvwo",
       authDomain: "neex-57c2e.firebaseapp.com",
@@ -31,10 +31,8 @@ const config = {
   }
 };
 
-// Auto-detect environment
-const isProduction = window.location.hostname !== 'localhost' && 
-                     window.location.hostname !== '127.0.0.1' &&
-                     !window.location.hostname.includes('192.168');
+// Auto-detect environment - Use Railway backend (working)
+const isProduction = true; // Use Railway backend
 
 const currentConfig = isProduction ? config.production : config.development;
 
