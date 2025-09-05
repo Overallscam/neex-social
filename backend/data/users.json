@@ -32,6 +32,17 @@
     "avatar": "JD",
     "bio": "Hello! I'm John 👋",
     "verified": true,
+    "isAdmin": true,
+    "role": "admin",
+    "permissions": {
+      "deleteAnyPost": true,
+      "editAnyPost": true,
+      "makePostAnonymous": true,
+      "togglePostVisibility": true,
+      "manageUsers": true,
+      "viewAllData": true,
+      "moderateContent": true
+    },
     "followers": 1234,
     "following": 567,
     "joinDate": "2025-08-20T00:00:00.000Z"
