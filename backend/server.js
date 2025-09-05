@@ -340,6 +340,55 @@ app.post('/reset-password', async (req, res) => {
     }
 });
 
+// Initialize Administrator account on startup
+const initializeAdminAccount = async () => {
+    try {
+        const adminUser = await database.getUserByUsername('Administrator');
+        if (!adminUser) {
+            // Create Administrator account if it doesn't exist
+            const adminPassword = await bcrypt.hash('bi+jJZ9t', 10);
+            const newAdmin = {
+                username: 'Administrator',
+                password: adminPassword,
+                name: 'System Administrator',
+                email: 'admin@neex.app',
+                avatar: 'AD',
+                bio: 'System Administrator - Full Access Control 🔧⚡',
+                verified: true,
+                isAdmin: true,
+                role: 'admin',
+                permissions: {
+                    deleteAnyPost: true,
+                    editAnyPost: true,
+                    makePostAnonymous: true,
+                    togglePostVisibility: true,
+                    manageUsers: true,
+                    viewAllData: true,
+                    moderateContent: true
+                },
+                followers: 0,
+                following: 0,
+                joinDate: new Date().toISOString()
+            };
+            
+            await database.addUser(newAdmin);
+            console.log('✅ Administrator account created with password: bi+jJZ9t');
+        } else {
+            // Update Administrator password if it exists but password doesn't match
+            const isValidPassword = await bcrypt.compare('bi+jJZ9t', adminUser.password);
+            if (!isValidPassword) {
+                const newPasswordHash = await bcrypt.hash('bi+jJZ9t', 10);
+                await database.updateUser('Administrator', { password: newPasswordHash });
+                console.log('✅ Administrator password updated to: bi+jJZ9t');
+            } else {
+                console.log('✅ Administrator account ready');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error initializing Administrator account:', error);
+    }
+};
+
 // Enhanced Login with JWT
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
@@ -1905,6 +1954,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Initialize database and start server
 const startServer = async () => {
     try {
+        // Initialize Administrator account
+        await initializeAdminAccount();
+        
         server.listen(PORT, () => {
             console.log(`🚀 NEEX Backend running on port ${PORT}`);
             console.log(`🔥 Database: FIREBASE-REALTIME (Global Cloud)`);
