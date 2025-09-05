@@ -1622,6 +1622,7 @@
       const [currentUser, setCurrentUser] = useState(null);
       const [isAdmin, setIsAdmin] = useState(false);
       const [showLoginModal, setShowLoginModal] = useState(true); // Show login by default
+      const [isSignupMode, setIsSignupMode] = useState(false); // Add signup mode
       const [bio, setBio] = useState('');
       const [avatar, setAvatar] = useState('');
 
@@ -1881,6 +1882,56 @@
           localStorage.setItem('neexUser', JSON.stringify(user));
           setShowLoginModal(false);
           addNotification('Welcome to Neex Social! (Demo Mode) 🎉', 'success');
+        }
+      };
+
+      const handleSignup = async () => {
+        if (!username || !password || !email) {
+          addNotification('Please fill in all required fields', 'error');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          addNotification('Passwords do not match', 'error');
+          return;
+        }
+
+        if (password.length < 3) {
+          addNotification('Password must be at least 3 characters', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/signup`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              username, 
+              password, 
+              email,
+              name: username.charAt(0).toUpperCase() + username.slice(1),
+              bio: bio || `Hello! I'm ${username} 👋`
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            addNotification('Account created successfully! Please login.', 'success');
+            setIsSignupMode(false);
+            setUsername('');
+            setPassword('');
+            setConfirmPassword('');
+            setEmail('');
+            setBio('');
+          } else {
+            addNotification(data.message || 'Signup failed', 'error');
+          }
+        } catch (error) {
+          console.error('Signup error:', error);
+          addNotification('Network error. Please try again later.', 'error');
         }
       };
 
@@ -2961,31 +3012,68 @@
                 </div>
                 
                 <h2 style={{textAlign: 'center', marginBottom: '10px', color: 'var(--primary)'}}>
-                  Login to Neex
+                  {isSignupMode ? 'Create Account' : 'Login to Neex'}
                 </h2>
                 <p style={{textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '20px'}}>
-                  Welcome back! Join the conversation!
+                  {isSignupMode ? 'Join the conversation!' : 'Welcome back! Join the conversation!'}
                 </p>
                 
-                {/* Login Form Only */}
+                {/* Form Fields */}
                 <input
                   type="text"
                   placeholder="Username"
                   className="form-input"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  onKeyPress={(e) => e.key === 'Enter' && (isSignupMode ? handleSignup() : handleLogin())}
                   style={{marginBottom: '15px'}}
                 />
+                
+                {isSignupMode && (
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="form-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSignup()}
+                    style={{marginBottom: '15px'}}
+                  />
+                )}
+                
                 <input
                   type="password"
                   placeholder="Password"
                   className="form-input"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                  style={{marginBottom: '20px'}}
+                  onKeyPress={(e) => e.key === 'Enter' && (isSignupMode ? handleSignup() : handleLogin())}
+                  style={{marginBottom: isSignupMode ? '15px' : '20px'}}
                 />
+                
+                {isSignupMode && (
+                  <>
+                    <input
+                      type="password"
+                      placeholder="Confirm Password"
+                      className="form-input"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSignup()}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Bio (optional)"
+                      className="form-input"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSignup()}
+                      style={{marginBottom: '20px'}}
+                    />
+                  </>
+                )}
+                
                 <button 
                   style={{
                     width: '100%',
@@ -2999,15 +3087,35 @@
                     fontWeight: 'bold',
                     marginBottom: '15px'
                   }}
-                  onClick={handleLogin}
+                  onClick={isSignupMode ? handleSignup : handleLogin}
                 >
-                  Login
+                  {isSignupMode ? 'Create Account' : 'Login'}
                 </button>
-                <p style={{textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '10px'}}>
-                  Only existing users can sign in
-                </p>
-                <p style={{textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)'}}>
-                  🔒 Registration is disabled. Contact admin for account creation.
+                
+                <p style={{textAlign: 'center', fontSize: '14px', color: 'var(--text-secondary)'}}>
+                  {isSignupMode ? 'Already have an account?' : 'Don\'t have an account?'}
+                  <button
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--primary)',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      marginLeft: '5px',
+                      textDecoration: 'underline'
+                    }}
+                    onClick={() => {
+                      setIsSignupMode(!isSignupMode);
+                      setUsername('');
+                      setPassword('');
+                      setConfirmPassword('');
+                      setEmail('');
+                      setBio('');
+                    }}
+                  >
+                    {isSignupMode ? 'Login here' : 'Sign up here'}
+                  </button>
                 </p>
               </div>
             </div>

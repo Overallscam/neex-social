@@ -378,6 +378,73 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Enhanced Signup with JWT
+app.post('/signup', async (req, res) => {
+    const { username, password, email, name, bio } = req.body;
+    
+    if (!username || !password || !email) {
+        return res.status(400).json({ message: 'Username, password, and email are required' });
+    }
+    
+    if (password.length < 3) {
+        return res.status(400).json({ message: 'Password must be at least 3 characters' });
+    }
+    
+    try {
+        // Check if username already exists
+        const existingUser = await database.getUserByUsername(username);
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+        
+        // Check if email already exists
+        const emailUser = await database.getUserByEmail(email);
+        if (emailUser) {
+            return res.status(400).json({ message: 'Email already registered' });
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Create new user
+        const newUser = {
+            username,
+            password: hashedPassword,
+            name: name || username.charAt(0).toUpperCase() + username.slice(1),
+            email,
+            avatar: username.substring(0, 2).toUpperCase(),
+            bio: bio || `Hello! I'm ${username} 👋`,
+            verified: false,
+            isAdmin: false,
+            role: "user",
+            followers: 0,
+            following: 0,
+            joinDate: new Date().toISOString()
+        };
+        
+        // Add user to database
+        const savedUser = await database.addUser(newUser);
+        
+        console.log(`✅ New user registered: ${username}`);
+        
+        res.status(201).json({ 
+            message: 'Account created successfully',
+            user: { 
+                id: savedUser.id, 
+                username: savedUser.username, 
+                name: savedUser.name, 
+                email: savedUser.email,
+                avatar: savedUser.avatar,
+                bio: savedUser.bio,
+                verified: savedUser.verified
+            }
+        });
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ message: 'Account creation failed' });
+    }
+});
+
 // Get user profile
 app.get('/users/:username', async (req, res) => {
     const { username } = req.params;
