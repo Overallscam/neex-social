@@ -69,6 +69,31 @@ const sendEmail = async (to, subject, html) => {
     }
 };
 
+// Admin Middleware - Strict Administrator-only access
+const isAdmin = async (req, res, next) => {
+    try {
+        const { username } = req.body;
+        if (!username) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+        
+        // Only allow exact "Administrator" username
+        if (username !== 'Administrator') {
+            return res.status(403).json({ message: 'Administrator access required - Invalid user' });
+        }
+        
+        const user = await database.getUserByUsername(username);
+        if (!user || !user.isAdmin || user.username !== 'Administrator') {
+            return res.status(403).json({ message: 'Administrator access denied - Invalid credentials' });
+        }
+        
+        req.adminUser = user;
+        next();
+    } catch (error) {
+        res.status(500).json({ message: 'Administrator verification failed' });
+    }
+};
+
 const generateEmailTemplate = (title, message, actionUrl, actionText) => {
     return `
     <!DOCTYPE html>
@@ -187,96 +212,13 @@ let liveStreams = [];
 let hashtags = new Map();
 let mentions = new Map();
 
-// Enhanced User Registration with Email Verification
+// Registration Disabled - Accounts are pre-created only
 app.post('/register', async (req, res) => {
-    const { username, password, email, name } = req.body;
-    
-    // Validation
-    if (!username || !password || !email) {
-        return res.status(400).json({ message: 'Username, password, and email are required' });
-    }
-    
-    if (password.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
-    }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: 'Please enter a valid email address' });
-    }
-    
-    try {
-        // Check if user already exists
-        const existingUser = await database.getUserByUsername(username);
-        if (existingUser) {
-            return res.status(400).json({ message: 'Username already exists' });
-        }
-        
-        const existingEmail = await database.getUserByEmail(email);
-        if (existingEmail) {
-            return res.status(400).json({ message: 'Email already registered' });
-        }
-        
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // Generate verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        
-        // Create user
-        const newUser = {
-            username,
-            password: hashedPassword,
-            name: name || username.charAt(0).toUpperCase() + username.slice(1),
-            email,
-            avatar: username.substring(0, 2).toUpperCase(),
-            bio: 'New to Neex Social! 🌟',
-            verified: false,
-            emailVerified: false,
-            verificationToken,
-            followers: [],
-            following: [],
-            followerCount: 0,
-            followingCount: 0,
-            posts: 0,
-            privacySettings: {
-                profileVisibility: 'public',
-                followersVisible: true,
-                emailVisible: false
-            },
-            joinDate: new Date().toISOString()
-        };
-        
-        const savedUser = await database.addUser(newUser);
-        
-        if (savedUser) {
-            // Send verification email
-            const verificationUrl = `http://localhost:3000/verify-email?token=${verificationToken}`;
-            const emailSent = await sendEmail(
-                email,
-                'Verify Your NEEX Account',
-                generateEmailTemplate(
-                    'Email Verification',
-                    `Welcome to NEEX Social, ${name || username}! Please verify your email address to complete your registration.`,
-                    verificationUrl,
-                    'Verify Email'
-                )
-            );
-            
-            const { password: _, verificationToken: __, ...userResponse } = savedUser;
-            res.json({ 
-                message: 'Registration successful! Please check your email to verify your account.',
-                user: userResponse,
-                emailSent
-            });
-        } else {
-            res.status(500).json({ message: 'Failed to create user' });
-        }
-    } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({ message: 'Registration failed' });
-    }
+    // Registration is disabled - users can only sign in with existing accounts
+    return res.status(403).json({ 
+        message: 'Registration is disabled. Only existing users can sign in.',
+        registrationDisabled: true 
+    });
 });
 
 // Email Verification
@@ -416,14 +358,7 @@ app.post('/login', async (req, res) => {
         if (!isValidPassword) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
-        
-        if (!user.emailVerified) {
-            return res.status(401).json({ 
-                message: 'Please verify your email address before logging in',
-                requireEmailVerification: true
-            });
-        }
-        
+
         // Generate JWT token
         const token = jwt.sign(
             { username: user.username, email: user.email },
@@ -1066,6 +1001,220 @@ app.post('/posts/:postId/share', async (req, res) => {
     } catch (error) {
         console.error('Share post error:', error);
         res.status(500).json({ message: 'Failed to share post' });
+    }
+});
+
+// =============================================================================
+// ADMIN ENDPOINTS - Full Control for Administrator
+// =============================================================================
+
+// Admin: Delete any post
+app.delete('/admin/posts/:postId', isAdmin, async (req, res) => {
+    const { postId } = req.params;
+    
+    try {
+        const posts = await database.getPosts();
+        const postIndex = posts.findIndex(p => p.id === parseInt(postId));
+        
+        if (postIndex === -1) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        // Remove post (in a real app, you'd call database.deletePost)
+        const deletedPost = posts.splice(postIndex, 1)[0];
+        
+        // Emit real-time update
+        io.emit('post-deleted', { postId: parseInt(postId), adminUser: req.adminUser.username });
+        
+        res.json({ 
+            message: 'Post deleted successfully',
+            deletedPost,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin delete post error:', error);
+        res.status(500).json({ message: 'Failed to delete post' });
+    }
+});
+
+// Admin: Edit any post
+app.put('/admin/posts/:postId', isAdmin, async (req, res) => {
+    const { postId } = req.params;
+    const { content, isAnonymous, visible } = req.body;
+    
+    try {
+        const posts = await database.getPosts();
+        const postIndex = posts.findIndex(p => p.id === parseInt(postId));
+        
+        if (postIndex === -1) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        const post = posts[postIndex];
+        
+        // Update post properties
+        if (content !== undefined) post.content = content;
+        if (isAnonymous !== undefined) {
+            post.isAnonymous = isAnonymous;
+            if (isAnonymous) {
+                post.originalUser = post.username;
+                post.username = 'Anonymous';
+            } else if (post.originalUser) {
+                post.username = post.originalUser;
+                delete post.originalUser;
+            }
+        }
+        if (visible !== undefined) post.visible = visible;
+        
+        // Add admin edit marker
+        post.editedByAdmin = {
+            adminUser: req.adminUser.username,
+            editDate: new Date().toISOString()
+        };
+        
+        // Emit real-time update
+        io.emit('post-updated', { 
+            postId: parseInt(postId), 
+            post, 
+            adminUser: req.adminUser.username 
+        });
+        
+        res.json({ 
+            message: 'Post updated successfully',
+            post,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin edit post error:', error);
+        res.status(500).json({ message: 'Failed to edit post' });
+    }
+});
+
+// Admin: Toggle post anonymity
+app.patch('/admin/posts/:postId/anonymity', isAdmin, async (req, res) => {
+    const { postId } = req.params;
+    const { makeAnonymous } = req.body;
+    
+    try {
+        const posts = await database.getPosts();
+        const postIndex = posts.findIndex(p => p.id === parseInt(postId));
+        
+        if (postIndex === -1) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        const post = posts[postIndex];
+        
+        if (makeAnonymous) {
+            post.originalUser = post.username;
+            post.username = 'Anonymous';
+            post.isAnonymous = true;
+        } else {
+            if (post.originalUser) {
+                post.username = post.originalUser;
+                delete post.originalUser;
+            }
+            post.isAnonymous = false;
+        }
+        
+        // Add admin action marker
+        post.adminActions = post.adminActions || [];
+        post.adminActions.push({
+            action: makeAnonymous ? 'made_anonymous' : 'revealed_identity',
+            adminUser: req.adminUser.username,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Emit real-time update
+        io.emit('post-anonymity-changed', { 
+            postId: parseInt(postId), 
+            post,
+            adminUser: req.adminUser.username 
+        });
+        
+        res.json({ 
+            message: `Post ${makeAnonymous ? 'made anonymous' : 'identity revealed'}`,
+            post,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin anonymity toggle error:', error);
+        res.status(500).json({ message: 'Failed to toggle anonymity' });
+    }
+});
+
+// Admin: Toggle post visibility
+app.patch('/admin/posts/:postId/visibility', isAdmin, async (req, res) => {
+    const { postId } = req.params;
+    const { visible } = req.body;
+    
+    try {
+        const posts = await database.getPosts();
+        const postIndex = posts.findIndex(p => p.id === parseInt(postId));
+        
+        if (postIndex === -1) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        const post = posts[postIndex];
+        post.visible = visible;
+        post.hiddenByAdmin = !visible ? {
+            adminUser: req.adminUser.username,
+            hiddenDate: new Date().toISOString()
+        } : null;
+        
+        // Emit real-time update
+        io.emit('post-visibility-changed', { 
+            postId: parseInt(postId), 
+            visible,
+            adminUser: req.adminUser.username 
+        });
+        
+        res.json({ 
+            message: `Post ${visible ? 'made visible' : 'hidden'}`,
+            post,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin visibility toggle error:', error);
+        res.status(500).json({ message: 'Failed to toggle visibility' });
+    }
+});
+
+// Admin: Get all posts (including hidden ones)
+app.get('/admin/posts', isAdmin, async (req, res) => {
+    try {
+        const posts = await database.getPosts();
+        res.json({ 
+            posts,
+            totalPosts: posts.length,
+            adminUser: req.adminUser.username,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin get posts error:', error);
+        res.status(500).json({ message: 'Failed to get posts' });
+    }
+});
+
+// Admin: Get user management data
+app.get('/admin/users', isAdmin, async (req, res) => {
+    try {
+        const users = await database.getUsers();
+        const sanitizedUsers = users.map(user => {
+            const { password, ...safeUser } = user;
+            return safeUser;
+        });
+        
+        res.json({ 
+            users: sanitizedUsers,
+            totalUsers: sanitizedUsers.length,
+            adminUser: req.adminUser.username,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin get users error:', error);
+        res.status(500).json({ message: 'Failed to get users' });
     }
 });
 
