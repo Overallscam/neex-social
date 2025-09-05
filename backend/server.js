@@ -17,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ['http://localhost:3000', 'http://localhost:5001', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com', 'https://neex.netlify.app'],
+        origin: ['http://localhost:3000', 'http://localhost:5001', 'http://localhost:8080', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com', 'https://neex.netlify.app'],
         methods: ['GET', 'POST']
     }
 });
@@ -34,7 +34,7 @@ app.use(limiter);
 
 // CORS Configuration
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5001', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com', 'https://neex.netlify.app'],
+    origin: ['http://localhost:3000', 'http://localhost:5001', 'http://localhost:8080', 'https://neex-57c2e.web.app', 'https://neex-57c2e.firebaseapp.com', 'https://neex.netlify.app'],
     credentials: true
 }));
 
