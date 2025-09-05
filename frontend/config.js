@@ -31,8 +31,8 @@ const config = {
   }
 };
 
-// Auto-detect environment - Use Railway backend (working)
-const isProduction = true; // Use Railway backend
+// Auto-detect environment - Use Local backend (with working Administrator password)
+const isProduction = false; // Use Local backend temporarily until Railway updates
 
 const currentConfig = isProduction ? config.production : config.development;
 

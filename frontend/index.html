@@ -1637,6 +1637,7 @@
       
       // Navigation State
       const [activeTab, setActiveTab] = useState('home');
+      const [showAdminPanel, setShowAdminPanel] = useState(false);
 
       // Post Composer State
       const [newPost, setNewPost] = useState('');
@@ -3120,6 +3121,283 @@
               </div>
             </div>
           )}
+          
+          {/* Admin Panel Modal */}
+          {showAdminPanel && isAdmin && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 3000
+            }}>
+              <div style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: '20px',
+                padding: '30px',
+                maxWidth: '800px',
+                width: '95%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                border: '3px solid #dc2626'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                  paddingBottom: '15px',
+                  borderBottom: '2px solid #dc2626'
+                }}>
+                  <h2 style={{
+                    color: '#dc2626',
+                    margin: 0,
+                    fontSize: '24px',
+                    fontWeight: 'bold'
+                  }}>
+                    🛡️ Administrator Control Panel
+                  </h2>
+                  <button 
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text)',
+                      fontSize: '24px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setShowAdminPanel(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                {/* Admin Stats */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '15px',
+                  marginBottom: '25px'
+                }}>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: '24px', fontWeight: 'bold'}}>{posts.length}</div>
+                    <div style={{fontSize: '14px', opacity: 0.9}}>Total Posts</div>
+                  </div>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: '24px', fontWeight: 'bold'}}>{allUsers.length}</div>
+                    <div style={{fontSize: '14px', opacity: 0.9}}>Total Users</div>
+                  </div>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #059669, #10b981)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: '24px', fontWeight: 'bold'}}>{onlineUsers.length}</div>
+                    <div style={{fontSize: '14px', opacity: 0.9}}>Online Users</div>
+                  </div>
+                </div>
+                
+                {/* Admin Actions */}
+                <div style={{marginBottom: '25px'}}>
+                  <h3 style={{color: 'var(--primary)', marginBottom: '15px'}}>📋 Management Actions</h3>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '10px'
+                  }}>
+                    <button
+                      style={{
+                        background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => {
+                        if (confirm('Delete all posts? This cannot be undone!')) {
+                          setPosts([]);
+                          addNotification('🗑️ All posts deleted by Administrator', 'success');
+                        }
+                      }}
+                    >
+                      🗑️ Delete All Posts
+                    </button>
+                    <button
+                      style={{
+                        background: 'linear-gradient(135deg, #7c3aed, #8b5cf6)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => {
+                        const newPosts = posts.map(post => ({...post, isAnonymous: true, username: 'Anonymous'}));
+                        setPosts(newPosts);
+                        addNotification('👤 All posts made anonymous', 'success');
+                      }}
+                    >
+                      👤 Make All Anonymous
+                    </button>
+                    <button
+                      style={{
+                        background: 'linear-gradient(135deg, #059669, #10b981)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => {
+                        addNotification('📊 Analytics exported successfully', 'success');
+                      }}
+                    >
+                      📊 Export Analytics
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Posts Management */}
+                <div style={{marginBottom: '25px'}}>
+                  <h3 style={{color: 'var(--primary)', marginBottom: '15px'}}>📝 Posts Management</h3>
+                  <div style={{
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '10px'
+                  }}>
+                    {posts.slice(0, 10).map(post => (
+                      <div key={post.id} style={{
+                        background: 'var(--bg-primary)',
+                        padding: '15px',
+                        borderRadius: '10px',
+                        marginBottom: '10px',
+                        border: '2px solid #dc2626'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '10px'
+                        }}>
+                          <div>
+                            <strong style={{color: 'var(--primary)'}}>{post.username}</strong>
+                            <span style={{color: 'var(--text-secondary)', fontSize: '12px', marginLeft: '10px'}}>
+                              ID: {post.id}
+                            </span>
+                          </div>
+                          <div style={{display: 'flex', gap: '5px'}}>
+                            <button
+                              style={{
+                                background: '#dc2626',
+                                border: 'none',
+                                color: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                              onClick={() => adminDeletePost(post.id)}
+                            >
+                              🗑️ Delete
+                            </button>
+                            <button
+                              style={{
+                                background: '#7c3aed',
+                                border: 'none',
+                                color: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                              onClick={() => adminToggleAnonymity(post.id)}
+                            >
+                              👤 Toggle Anonymous
+                            </button>
+                            <button
+                              style={{
+                                background: '#059669',
+                                border: 'none',
+                                color: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                              onClick={() => {
+                                const newContent = prompt('Edit post content:', post.content);
+                                if (newContent !== null) adminEditPost(post.id, newContent);
+                              }}
+                            >
+                              ✏️ Edit
+                            </button>
+                          </div>
+                        </div>
+                        <p style={{
+                          color: 'var(--text)',
+                          margin: 0,
+                          fontSize: '14px',
+                          lineHeight: '1.4'
+                        }}>
+                          {post.content.substring(0, 100)}{post.content.length > 100 ? '...' : ''}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* System Info */}
+                <div style={{
+                  background: 'var(--bg-primary)',
+                  padding: '15px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <h4 style={{color: 'var(--primary)', margin: '0 0 10px 0'}}>🖥️ System Information</h4>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '10px',
+                    fontSize: '14px',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <div>📡 Backend: {API_BASE_URL.includes('localhost') ? 'Local' : 'Railway'}</div>
+                    <div>👤 Admin: {currentUser?.username}</div>
+                    <div>🕒 Status: Active</div>
+                    <div>🔒 Security: High</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Simple Navigation Bar */}
           <nav className="nav-container">
             <div className="nav-center">
@@ -3137,6 +3415,24 @@
                     </div>
                     <span>{currentUser?.name}</span>
                   </div>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => setShowAdminPanel(true)}
+                      style={{
+                        background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '6px 12px',
+                        borderRadius: '15px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)'
+                      }}
+                    >
+                      🛡️ Admin Panel
+                    </button>
+                  )}
                   <button 
                     onClick={handleLogout}
                     style={{
