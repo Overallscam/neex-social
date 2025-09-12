@@ -246,6 +246,7 @@
         .alert-success { background: #10b981; color: white; }
         .alert-error { background: #dc2626; color: white; }
         .alert-warning { background: #f59e0b; color: white; }
+        .alert-info { background: #0ea5e9; color: white; }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -271,19 +272,35 @@
             <div class="login-form">
                 <div id="loginAlert"></div>
                 
+                <div style="background: #0ea5e9; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;">
+                    <h4 style="margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Login Credentials</h4>
+                    <div><strong>Option 1:</strong> john / john123</div>
+                    <div><strong>Option 2:</strong> Administrator / bi+jJZ9t</div>
+                    <div><strong>Option 3:</strong> bob / 123 (if available)</div>
+                    <small style="opacity: 0.8; display: block; margin-top: 8px;">
+                        If admin credentials don't work, the Railway deployment may need admin account setup.
+                    </small>
+                </div>
+                
                 <div class="form-group">
                     <label for="adminUsername">Username</label>
-                    <input type="text" id="adminUsername" placeholder="Enter admin username">
+                    <input type="text" id="adminUsername" placeholder="Enter admin username" value="john">
                 </div>
                 
                 <div class="form-group">
                     <label for="adminPassword">Password</label>
-                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                    <input type="password" id="adminPassword" placeholder="Enter admin password" value="john123">
                 </div>
                 
                 <button class="login-btn" onclick="adminLogin()">
                     <i class="fas fa-sign-in-alt"></i> Login to Admin Panel
                 </button>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <button style="background: #10b981; border: none; padding: 8px 16px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px;" onclick="testConnection()">
+                        <i class="fas fa-wifi"></i> Test Connection
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -410,6 +427,8 @@
             }
 
             try {
+                showAlert(alertDiv, `🔄 Attempting login to ${API_BASE_URL} with user: ${username}...`, 'info');
+                
                 console.log('Attempting login to:', `${API_BASE_URL}/login`);
                 console.log('Credentials:', { username, password: password ? '***' : 'empty' });
                 
@@ -427,19 +446,24 @@
                 const data = await response.json();
                 console.log('Response data:', data);
 
-                if (response.ok && (data.user.username === 'john' || data.user.username === 'Administrator')) {
-                    currentAdmin = {
-                        token: data.token,
-                        user: data.user
-                    };
-                    
-                    showAlert(alertDiv, 'Login successful! Welcome, ' + data.user.username, 'success');
-                    
-                    setTimeout(() => {
-                        document.getElementById('loginSection').style.display = 'none';
-                        document.getElementById('adminDashboard').style.display = 'block';
-                        loadDashboardData();
-                    }, 1000);
+                if (response.ok) {
+                    // Check if user has admin privileges
+                    if (data.user.isAdmin || data.user.username === 'john' || data.user.username === 'Administrator') {
+                        currentAdmin = {
+                            token: data.token,
+                            user: data.user
+                        };
+                        
+                        showAlert(alertDiv, `✅ Login successful! Welcome, ${data.user.name || data.user.username}`, 'success');
+                        
+                        setTimeout(() => {
+                            document.getElementById('loginSection').style.display = 'none';
+                            document.getElementById('adminDashboard').style.display = 'block';
+                            loadDashboardData();
+                        }, 1000);
+                    } else {
+                        showAlert(alertDiv, `❌ Access denied: ${data.user.username} does not have admin privileges`, 'error');
+                    }
                 } else {
                     showAlert(alertDiv, data.message || 'Login failed', 'error');
                 }
@@ -454,11 +478,11 @@
                 let errorMessage = 'Connection error.';
                 
                 if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    errorMessage = 'Cannot connect to backend server. Make sure the server is running on port 5001.';
+                    errorMessage = '🔌 Cannot connect to backend server. Make sure the Railway deployment is active.';
                 } else if (error.message.includes('CORS')) {
-                    errorMessage = 'CORS error. Check server configuration.';
+                    errorMessage = '⚠️ CORS error. Check server configuration.';
                 } else {
-                    errorMessage = `Network error: ${error.message}`;
+                    errorMessage = `🚫 Network error: ${error.message}`;
                 }
                 
                 showAlert(alertDiv, errorMessage, 'error');
@@ -761,6 +785,29 @@
 
         function exportSingleChat(chatId) {
             alert(`Export chat ${chatId}\n\nThis would export the chat messages to a downloadable file.`);
+        }
+
+        function exportChats() {
+            alert(`Export chat ${chatId}\n\nThis would export the chat messages to a downloadable file.`);
+        }
+
+        async function testConnection() {
+            const alertDiv = document.getElementById('loginAlert');
+            
+            try {
+                showAlert(alertDiv, 'Testing connection to backend...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/posts`);
+                if (response.ok) {
+                    const posts = await response.json();
+                    showAlert(alertDiv, `✅ Connection successful! Found ${posts.length} posts. Backend is working.`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Connection test error:', error);
+                showAlert(alertDiv, `❌ Connection failed: ${error.message}. Check if backend is running.`, 'error');
+            }
         }
 
         async function exportChats() {
