@@ -274,12 +274,12 @@
                 
                 <div style="background: #0ea5e9; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;">
                     <h4 style="margin-bottom: 10px;"><i class="fas fa-info-circle"></i> Login Credentials</h4>
-                    <div><strong>Working:</strong> bob / 123</div>
+                    <div><strong>✅ Working:</strong> bob / 123</div>
                     <div><strong>Try:</strong> john / 123</div>
                     <div><strong>Try:</strong> alice / 123</div>
                     <div><strong>Try:</strong> sarah / 123</div>
                     <small style="opacity: 0.8; display: block; margin-top: 8px;">
-                        Railway backend uses simplified authentication. Try "bob/123" first.
+                        Railway backend uses simplified authentication. Click "Test Connection" first to verify backend is working.
                     </small>
                 </div>
                 
@@ -465,24 +465,23 @@
                         document.getElementById('adminDashboard').style.display = 'block';
                         loadDashboardData();
                     }, 1500);
-                } else if (response.ok && data.user) {
-                    // New backend response with full user data
-                    if (data.user.isAdmin || data.user.username === 'john' || data.user.username === 'Administrator') {
-                        currentAdmin = {
-                            token: data.token,
-                            user: data.user
-                        };
-                        
-                        showAlert(alertDiv, `✅ Login successful! Welcome, ${data.user.name || data.user.username}`, 'success');
-                        
-                        setTimeout(() => {
-                            document.getElementById('loginSection').style.display = 'none';
-                            document.getElementById('adminDashboard').style.display = 'block';
-                            loadDashboardData();
-                        }, 1000);
-                    } else {
-                        showAlert(alertDiv, `❌ Access denied: ${data.user.username} does not have admin privileges`, 'error');
-                    }
+                } else if (response.ok && data.user && data.user.isAdmin) {
+                    // New backend response with full user data and admin check
+                    currentAdmin = {
+                        token: data.token,
+                        user: data.user
+                    };
+                    
+                    showAlert(alertDiv, `✅ Login successful! Welcome, ${data.user.name || data.user.username}`, 'success');
+                    
+                    setTimeout(() => {
+                        document.getElementById('loginSection').style.display = 'none';
+                        document.getElementById('adminDashboard').style.display = 'block';
+                        loadDashboardData();
+                    }, 1000);
+                } else if (response.ok && data.user && !data.user.isAdmin) {
+                    // User exists but doesn't have admin privileges
+                    showAlert(alertDiv, `❌ Access denied: ${data.user.username} does not have admin privileges`, 'error');
                 } else {
                     showAlert(alertDiv, data.message || 'Login failed - Invalid credentials', 'error');
                 }
