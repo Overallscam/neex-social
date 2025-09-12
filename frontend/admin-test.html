@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #fff; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #10b981; }
+        .error { background: #dc2626; }
+        .info { background: #0ea5e9; }
+        button { background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testUsers()">Test Get Users</button>
+    <button onclick="clearResults()">Clear</button>
+    
+    <div id="results"></div>
+
+    <script>
+        let adminToken = null;
+        const API_BASE_URL = 'https://neex-social-production.up.railway.app';
+
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testLogin() {
+            try {
+                addResult('Testing login...', 'info');
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'john',
+                        password: 'john123'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    adminToken = data.token;
+                    addResult(`✅ Login successful! Token: ${adminToken.substring(0, 20)}...`, 'success');
+                } else {
+                    const error = await response.json();
+                    addResult(`❌ Login failed: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUsers() {
+            if (!adminToken) {
+                addResult('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                addResult('Testing get users...', 'info');
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    addResult(`✅ Users loaded: ${users.length} users found`, 'success');
+                    users.forEach((user, index) => {
+                        addResult(`User ${index + 1}: ${user.username} (${user.name}) - Admin: ${user.isAdmin}`, 'info');
+                    });
+                } else {
+                    const error = await response.json();
+                    addResult(`❌ Users failed: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Users error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

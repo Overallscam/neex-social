@@ -1740,10 +1740,16 @@
             setCurrentUser(user);
             setIsLoggedIn(true);
             
-            // Only grant admin privileges to exact "Administrator" username
-            const isAdministrator = user?.username === 'Administrator' && 
+            // Grant admin privileges to "Administrator" and "john" usernames
+            console.log('🔍 Checking admin status for user:', user);
+            console.log('🔍 Username:', user?.username);
+            console.log('🔍 isAdmin:', user?.isAdmin);
+            console.log('🔍 role:', user?.role);
+            
+            const isAdministrator = (user?.username === 'Administrator' || user?.username === 'john') && 
                                    user?.isAdmin === true && 
                                    user?.role === 'admin';
+            console.log('🔍 Final admin check result:', isAdministrator);
             setIsAdmin(isAdministrator);
             
             setShowLoginModal(false); // Hide login modal for existing users
@@ -1854,10 +1860,16 @@
             setIsLoggedIn(true);
             setCurrentUser(data.user);
             
-            // Only grant admin privileges to exact "Administrator" username
-            const isAdministrator = data.user?.username === 'Administrator' && 
+            // Grant admin privileges to "Administrator" and "john" usernames
+            console.log('🔍 LOGIN: Checking admin status for user:', data.user);
+            console.log('🔍 LOGIN: Username:', data.user?.username);
+            console.log('🔍 LOGIN: isAdmin:', data.user?.isAdmin);
+            console.log('🔍 LOGIN: role:', data.user?.role);
+            
+            const isAdministrator = (data.user?.username === 'Administrator' || data.user?.username === 'john') && 
                                    data.user?.isAdmin === true && 
                                    data.user?.role === 'admin';
+            console.log('🔍 LOGIN: Final admin check result:', isAdministrator);
             setIsAdmin(isAdministrator);
             
             localStorage.setItem('neexUser', JSON.stringify(data.user));
@@ -2096,7 +2108,7 @@
 
       // API Configuration - Use config.js settings with debugging
       console.log('🔍 Checking APP_CONFIG:', window.APP_CONFIG);
-      const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'http://localhost:5001';
+      const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'https://neex-social-production.up.railway.app';
       console.log('🌍 NEEX Global Network - API:', API_BASE_URL);
       console.log('🚀 Railway Backend - ACTIVE CONNECTION TEST');
 

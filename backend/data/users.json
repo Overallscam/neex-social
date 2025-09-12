@@ -26,7 +26,7 @@
   {
     "id": 1,
     "username": "john",
-    "password": "123",
+    "password": "$2b$10$N9F6oTWqu3NKRuZZZk4A6uCJsmuNyjzXk.x7dc.8x/ig.mXiiKsMq",
     "name": "John Doe",
     "email": "john@example.com",
     "avatar": "JD",

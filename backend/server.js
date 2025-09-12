@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 5001;
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: 1000, // limit each IP to 1000 requests per windowMs (increased for development)
     message: 'Too many requests from this IP, please try again later.'
 });
 
@@ -69,27 +69,41 @@ const sendEmail = async (to, subject, html) => {
     }
 };
 
-// Admin Middleware - Strict Administrator-only access
+// Admin Middleware - Support for Administrator and john admin access
 const isAdmin = async (req, res, next) => {
     try {
-        const { username } = req.body;
-        if (!username) {
-            return res.status(401).json({ message: 'Authentication required' });
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Authorization token required' });
         }
         
-        // Only allow exact "Administrator" username
-        if (username !== 'Administrator') {
-            return res.status(403).json({ message: 'Administrator access required - Invalid user' });
-        }
+        const token = authHeader.split(' ')[1];
         
-        const user = await database.getUserByUsername(username);
-        if (!user || !user.isAdmin || user.username !== 'Administrator') {
-            return res.status(403).json({ message: 'Administrator access denied - Invalid credentials' });
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            const user = await database.getUserByUsername(decoded.username);
+            
+            if (!user) {
+                return res.status(401).json({ message: 'User not found' });
+            }
+            
+            // Allow both "Administrator" and "john" usernames
+            if (user.username !== 'Administrator' && user.username !== 'john') {
+                return res.status(403).json({ message: 'Administrator access required - Invalid user' });
+            }
+            
+            if (!user.isAdmin) {
+                return res.status(403).json({ message: 'Administrator access denied - Not an admin' });
+            }
+            
+            req.adminUser = user;
+            next();
+        } catch (jwtError) {
+            return res.status(401).json({ message: 'Invalid or expired token' });
         }
-        
-        req.adminUser = user;
-        next();
     } catch (error) {
+        console.error('Admin middleware error:', error);
         res.status(500).json({ message: 'Administrator verification failed' });
     }
 };
@@ -343,6 +357,7 @@ app.post('/reset-password', async (req, res) => {
 // Initialize Administrator account on startup
 const initializeAdminAccount = async () => {
     try {
+        // Initialize Administrator account
         const adminUser = await database.getUserByUsername('Administrator');
         if (!adminUser) {
             // Create Administrator account if it doesn't exist
@@ -384,8 +399,51 @@ const initializeAdminAccount = async () => {
                 console.log('✅ Administrator account ready');
             }
         }
+
+        // Initialize john admin account
+        const johnUser = await database.getUserByUsername('john');
+        if (!johnUser) {
+            // Create john admin account if it doesn't exist
+            const johnPassword = await bcrypt.hash('john123', 10);
+            const newJohnAdmin = {
+                username: 'john',
+                password: johnPassword,
+                name: 'John Admin',
+                email: 'john@neex.app',
+                avatar: 'JA',
+                bio: 'John Administrator - Full Access Control 🔧⚡',
+                verified: true,
+                isAdmin: true,
+                role: 'admin',
+                permissions: {
+                    deleteAnyPost: true,
+                    editAnyPost: true,
+                    makePostAnonymous: true,
+                    togglePostVisibility: true,
+                    manageUsers: true,
+                    viewAllData: true,
+                    moderateContent: true
+                },
+                followers: 0,
+                following: 0,
+                joinDate: new Date().toISOString()
+            };
+            
+            await database.addUser(newJohnAdmin);
+            console.log('✅ John admin account created with password: john123');
+        } else {
+            // Update john password if it exists but password doesn't match
+            const isValidPassword = await bcrypt.compare('john123', johnUser.password);
+            if (!isValidPassword) {
+                const newPasswordHash = await bcrypt.hash('john123', 10);
+                await database.updateUser('john', { password: newPasswordHash });
+                console.log('✅ John admin password updated to: john123');
+            } else {
+                console.log('✅ John admin account ready');
+            }
+        }
     } catch (error) {
-        console.error('❌ Error initializing Administrator account:', error);
+        console.error('❌ Error initializing admin accounts:', error);
     }
 };
 
@@ -1322,15 +1380,67 @@ app.get('/admin/users', isAdmin, async (req, res) => {
             return safeUser;
         });
         
-        res.json({ 
-            users: sanitizedUsers,
-            totalUsers: sanitizedUsers.length,
-            adminUser: req.adminUser.username,
-            adminAction: true
-        });
+        // Return just the users array for frontend compatibility
+        res.json(sanitizedUsers);
     } catch (error) {
         console.error('Admin get users error:', error);
         res.status(500).json({ message: 'Failed to get users' });
+    }
+});
+
+// Admin: Delete all posts
+app.delete('/admin/posts', isAdmin, async (req, res) => {
+    try {
+        await database.deleteAllPosts();
+        res.json({ 
+            message: 'All posts deleted successfully',
+            adminUser: req.adminUser.username,
+            action: 'delete_all_posts'
+        });
+    } catch (error) {
+        console.error('Admin delete all posts error:', error);
+        res.status(500).json({ message: 'Failed to delete posts' });
+    }
+});
+
+// Admin: Make all posts anonymous
+app.post('/admin/posts/make-anonymous', isAdmin, async (req, res) => {
+    try {
+        await database.makeAllPostsAnonymous();
+        res.json({ 
+            message: 'All posts made anonymous successfully',
+            adminUser: req.adminUser.username,
+            action: 'make_anonymous'
+        });
+    } catch (error) {
+        console.error('Admin make anonymous error:', error);
+        res.status(500).json({ message: 'Failed to make posts anonymous' });
+    }
+});
+
+// Admin: Delete specific user
+app.delete('/admin/users/:username', isAdmin, async (req, res) => {
+    try {
+        const { username } = req.params;
+        
+        // Prevent deleting admin users
+        if (username === 'Administrator' || username === 'john') {
+            return res.status(403).json({ message: 'Cannot delete admin users' });
+        }
+        
+        const result = await database.deleteUser(username);
+        if (result.success) {
+            res.json({ 
+                message: `User ${username} deleted successfully`,
+                adminUser: req.adminUser.username,
+                action: 'delete_user'
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Admin delete user error:', error);
+        res.status(500).json({ message: 'Failed to delete user' });
     }
 });
 
@@ -1946,6 +2056,58 @@ io.on('connection', (socket) => {
             console.log(`👋 User disconnected: ${socket.id}`);
         }
     });
+});
+
+// =============================================================================
+// CHAT ENDPOINTS
+// =============================================================================
+
+// Get all chats
+app.get('/chats', (req, res) => {
+    try {
+        const fs = require('fs');
+        const chatsPath = path.join(__dirname, 'data', 'chats.json');
+        
+        if (fs.existsSync(chatsPath)) {
+            const chatsData = fs.readFileSync(chatsPath, 'utf8');
+            const chats = JSON.parse(chatsData);
+            res.json(chats);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error('Get chats error:', error);
+        res.status(500).json({ message: 'Failed to get chats' });
+    }
+});
+
+// Admin: Get all chats
+app.get('/admin/chats', isAdmin, (req, res) => {
+    try {
+        const fs = require('fs');
+        const chatsPath = path.join(__dirname, 'data', 'chats.json');
+        
+        if (fs.existsSync(chatsPath)) {
+            const chatsData = fs.readFileSync(chatsPath, 'utf8');
+            const chats = JSON.parse(chatsData);
+            res.json({
+                chats,
+                totalChats: chats.length,
+                adminUser: req.adminUser.username,
+                adminAction: true
+            });
+        } else {
+            res.json({
+                chats: [],
+                totalChats: 0,
+                adminUser: req.adminUser.username,
+                adminAction: true
+            });
+        }
+    } catch (error) {
+        console.error('Admin get chats error:', error);
+        res.status(500).json({ message: 'Failed to get chats' });
+    }
 });
 
 // Serve static files

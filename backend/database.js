@@ -291,6 +291,34 @@ const addMessage = async (message) => {
     return db.messages.add(message);
 };
 
+const deleteAllPosts = async () => {
+    try {
+        const posts = [];
+        fs.writeFileSync(POSTS_DB, JSON.stringify(posts, null, 2));
+        return { success: true, message: 'All posts deleted' };
+    } catch (error) {
+        console.error('Error deleting all posts:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+const makeAllPostsAnonymous = async () => {
+    try {
+        const posts = JSON.parse(fs.readFileSync(POSTS_DB, 'utf8'));
+        const anonymousPosts = posts.map(post => ({
+            ...post,
+            username: 'Anonymous',
+            name: 'Anonymous',
+            avatar: 'AN'
+        }));
+        fs.writeFileSync(POSTS_DB, JSON.stringify(anonymousPosts, null, 2));
+        return { success: true, message: 'All posts made anonymous' };
+    } catch (error) {
+        console.error('Error making posts anonymous:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 module.exports = {
     ...db,
     getUserByUsername,
@@ -302,5 +330,7 @@ module.exports = {
     getPosts,
     addPost,
     getMessages,
-    addMessage
+    addMessage,
+    deleteAllPosts,
+    makeAllPostsAnonymous
 };

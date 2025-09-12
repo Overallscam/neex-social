@@ -31,8 +31,8 @@ const config = {
   }
 };
 
-// Auto-detect environment - Use Railway backend (with automatic Administrator setup)
-const isProduction = true; // Use Railway backend with auto-admin initialization
+// Auto-detect environment - Use Railway backend for production
+const isProduction = true; // Use Railway backend in production
 
 const currentConfig = isProduction ? config.production : config.development;
 
