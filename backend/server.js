@@ -1444,6 +1444,161 @@ app.delete('/admin/users/:username', isAdmin, async (req, res) => {
     }
 });
 
+// Admin: Create new user
+app.post('/admin/users', isAdmin, async (req, res) => {
+    try {
+        const { username, password, email, name, role = 'user', isAdmin: userIsAdmin = false } = req.body;
+        
+        if (!username || !password || !email) {
+            return res.status(400).json({ message: 'Username, password, and email are required' });
+        }
+        
+        // Check if user already exists
+        const existingUser = await database.getUserByUsername(username);
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const newUser = {
+            username,
+            password: hashedPassword,
+            name: name || username.charAt(0).toUpperCase() + username.slice(1),
+            email,
+            avatar: username.substring(0, 2).toUpperCase(),
+            bio: `Hello! I'm ${name || username} 👋`,
+            verified: true, // Admin-created users are auto-verified
+            isAdmin: userIsAdmin,
+            role: role,
+            followers: 0,
+            following: 0,
+            joinDate: new Date().toISOString()
+        };
+        
+        const savedUser = await database.addUser(newUser);
+        const { password: _, ...safeUser } = savedUser;
+        
+        res.status(201).json({
+            message: 'User created successfully',
+            user: safeUser,
+            adminUser: req.adminUser.username,
+            action: 'create_user'
+        });
+    } catch (error) {
+        console.error('Admin create user error:', error);
+        res.status(500).json({ message: 'Failed to create user' });
+    }
+});
+
+// Admin: Update user role
+app.patch('/admin/users/:username/role', isAdmin, async (req, res) => {
+    try {
+        const { username } = req.params;
+        const { role, isAdmin: userIsAdmin } = req.body;
+        
+        if (!role) {
+            return res.status(400).json({ message: 'Role is required' });
+        }
+        
+        const user = await database.getUserByUsername(username);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        const updatedUser = {
+            ...user,
+            role,
+            isAdmin: userIsAdmin || false
+        };
+        
+        await database.updateUser(username, updatedUser);
+        const { password: _, ...safeUser } = updatedUser;
+        
+        res.json({
+            message: `User ${username} role updated to ${role}`,
+            user: safeUser,
+            adminUser: req.adminUser.username,
+            action: 'update_role'
+        });
+    } catch (error) {
+        console.error('Admin update role error:', error);
+        res.status(500).json({ message: 'Failed to update user role' });
+    }
+});
+
+// Admin: Get all posts with full details
+app.get('/admin/posts/detailed', isAdmin, async (req, res) => {
+    try {
+        const posts = await database.getPosts();
+        
+        // Add additional metadata for each post
+        const detailedPosts = posts.map(post => ({
+            ...post,
+            likeCount: post.likes ? post.likes.length : 0,
+            commentCount: post.comments ? post.comments.length : 0,
+            shareCount: post.shares || 0,
+            viewCount: post.views || 0,
+            isVisible: post.visible !== false,
+            hasMedia: !!(post.media),
+            createdAgo: new Date() - new Date(post.date)
+        }));
+        
+        res.json({
+            posts: detailedPosts,
+            totalPosts: detailedPosts.length,
+            adminUser: req.adminUser.username,
+            adminAction: true
+        });
+    } catch (error) {
+        console.error('Admin get detailed posts error:', error);
+        res.status(500).json({ message: 'Failed to get posts' });
+    }
+});
+
+// Admin: Update post content
+app.put('/admin/posts/:postId/content', isAdmin, async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { content } = req.body;
+        
+        if (!content) {
+            return res.status(400).json({ message: 'Content is required' });
+        }
+        
+        const posts = await database.getPosts();
+        const postIndex = posts.findIndex(p => p.id === postId);
+        
+        if (postIndex === -1) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        const post = posts[postIndex];
+        const originalContent = post.content;
+        post.content = content;
+        
+        // Add admin edit marker
+        post.editedByAdmin = {
+            adminUser: req.adminUser.username,
+            editDate: new Date().toISOString(),
+            originalContent
+        };
+        
+        await database.updatePost(postId, post);
+        
+        res.json({
+            message: 'Post content updated successfully',
+            post,
+            adminUser: req.adminUser.username,
+            action: 'update_content'
+        });
+    } catch (error) {
+        console.error('Admin update post error:', error);
+        res.status(500).json({ message: 'Failed to update post' });
+    }
+});
+
 // Enhanced Comments system
 app.post('/posts/:postId/comments', async (req, res) => {
     const { postId } = req.params;

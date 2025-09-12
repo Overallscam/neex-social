@@ -72,7 +72,7 @@
             color: #ccc;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #333;
@@ -83,7 +83,7 @@
             color: #fff;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #dc2626;
         }
@@ -354,6 +354,43 @@
             <div class="management-section">
                 <h2><i class="fas fa-users"></i> User Management</h2>
                 
+                <!-- Add User Form -->
+                <div style="background: #0a0a0a; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333;">
+                    <h3 style="color: #10b981; margin-bottom: 15px;"><i class="fas fa-user-plus"></i> Add New User</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div class="form-group">
+                            <label for="newUsername">Username</label>
+                            <input type="text" id="newUsername" placeholder="Enter username" style="padding: 8px; border: 1px solid #333; background: #111; color: #fff; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">Password</label>
+                            <input type="password" id="newPassword" placeholder="Enter password" style="padding: 8px; border: 1px solid #333; background: #111; color: #fff; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newEmail">Email</label>
+                            <input type="email" id="newEmail" placeholder="Enter email" style="padding: 8px; border: 1px solid #333; background: #111; color: #fff; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newName">Full Name</label>
+                            <input type="text" id="newName" placeholder="Enter full name" style="padding: 8px; border: 1px solid #333; background: #111; color: #fff; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newRole">Role</label>
+                            <select id="newRole" style="padding: 8px; border: 1px solid #333; background: #111; color: #fff; border-radius: 6px;">
+                                <option value="user">User</option>
+                                <option value="moderator">Moderator</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: end;">
+                            <button class="action-btn btn-success" onclick="createUser()" style="width: 100%; margin: 0;">
+                                <i class="fas fa-plus"></i> Create User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <table class="users-table">
                     <thead>
                         <tr>
@@ -363,13 +400,55 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Verified</th>
+                            <th>Posts</th>
+                            <th>Followers</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px;">
+                            <td colspan="9" style="text-align: center; padding: 40px;">
                                 <i class="fas fa-spinner fa-spin"></i> Loading users...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Post Management -->
+            <div class="management-section">
+                <h2><i class="fas fa-file-alt"></i> Complete Post Management</h2>
+                
+                <div class="action-buttons">
+                    <button class="action-btn btn-info" onclick="refreshPosts()">
+                        <i class="fas fa-sync-alt"></i> Refresh Posts
+                    </button>
+                    <button class="action-btn btn-warning" onclick="makeAllPostsAnonymous()">
+                        <i class="fas fa-user-secret"></i> Make All Anonymous
+                    </button>
+                    <button class="action-btn btn-danger" onclick="deleteAllPosts()">
+                        <i class="fas fa-trash-alt"></i> Delete All Posts
+                    </button>
+                </div>
+
+                <table class="users-table" style="margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Author</th>
+                            <th>Content</th>
+                            <th>Date</th>
+                            <th>Likes</th>
+                            <th>Comments</th>
+                            <th>Media</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px;">
+                                <i class="fas fa-spinner fa-spin"></i> Loading posts...
                             </td>
                         </tr>
                     </tbody>
@@ -521,6 +600,7 @@
                 await refreshStats();
                 await loadUsers();
                 await loadChats();
+                await refreshPosts(); // Add this line
             } catch (error) {
                 console.error('Error loading dashboard:', error);
             }
@@ -570,8 +650,13 @@
 
         async function loadUsers() {
             try {
-                // Use simple users endpoint for Railway backend
-                const response = await fetch(`${API_BASE_URL}/users`);
+                // Use admin users endpoint for Railway backend
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const tbody = document.getElementById('usersTableBody');
 
                 if (response.ok) {
@@ -580,7 +665,7 @@
                     if (users.length === 0) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
                                     <i class="fas fa-users"></i> No users found
                                 </td>
                             </tr>
@@ -588,36 +673,383 @@
                         return;
                     }
 
-                    tbody.innerHTML = users.map((username, index) => `
+                    tbody.innerHTML = users.map((user, index) => `
                         <tr>
                             <td>${index + 1}</td>
-                            <td>${username}</td>
-                            <td>${username.charAt(0).toUpperCase() + username.slice(1)}</td>
-                            <td>${username}@example.com</td>
-                            <td><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">User</span></td>
-                            <td><span style="color: #10b981;">Yes</span></td>
+                            <td>${user.username || 'N/A'}</td>
+                            <td>${user.name || user.username || 'N/A'}</td>
+                            <td>${user.email || user.username + '@example.com'}</td>
+                            <td>
+                                <select onchange="updateUserRole('${user.username}', this.value)" style="background: #111; color: #fff; border: 1px solid #333; padding: 4px 8px; border-radius: 4px;">
+                                    <option value="user" ${(user.role === 'user' || !user.role) ? 'selected' : ''}>User</option>
+                                    <option value="moderator" ${user.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                                    <option value="admin" ${user.role === 'admin' || user.isAdmin ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </td>
+                            <td><span style="color: ${user.verified ? '#10b981' : '#f59e0b'};">${user.verified ? 'Yes' : 'No'}</span></td>
+                            <td>${user.postCount || 0}</td>
+                            <td>${user.followers || 0}</td>
                             <td>
                                 <div class="user-actions">
-                                    <button class="small-btn btn-info" onclick="viewUser('${username}')">
+                                    <button class="small-btn btn-info" onclick="viewUser('${user.username}')">
                                         <i class="fas fa-eye"></i> View
                                     </button>
+                                    <button class="small-btn btn-warning" onclick="editUser('${user.username}')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    ${user.username !== 'Administrator' && user.username !== 'john' ? 
+                                        `<button class="small-btn btn-danger" onclick="deleteUser('${user.username}')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>` : ''
+                                    }
                                 </div>
                             </td>
                         </tr>
                     `).join('');
                 } else {
-                    throw new Error(`Failed to load users: ${response.status}`);
+                    // Fallback to simple users endpoint
+                    const fallbackResponse = await fetch(`${API_BASE_URL}/users`);
+                    if (fallbackResponse.ok) {
+                        const users = await fallbackResponse.json();
+                        tbody.innerHTML = users.map((user, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${typeof user === 'string' ? user : user.username}</td>
+                                <td>${typeof user === 'string' ? user.charAt(0).toUpperCase() + user.slice(1) : (user.name || user.username)}</td>
+                                <td>${typeof user === 'string' ? user + '@example.com' : user.email}</td>
+                                <td>
+                                    <select onchange="updateUserRole('${typeof user === 'string' ? user : user.username}', this.value)" style="background: #111; color: #fff; border: 1px solid #333; padding: 4px 8px; border-radius: 4px;">
+                                        <option value="user">User</option>
+                                        <option value="moderator">Moderator</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </td>
+                                <td><span style="color: #10b981;">Yes</span></td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>
+                                    <div class="user-actions">
+                                        <button class="small-btn btn-info" onclick="viewUser('${typeof user === 'string' ? user : user.username}')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button class="small-btn btn-warning" onclick="editUser('${typeof user === 'string' ? user : user.username}')">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        throw new Error(`Failed to load users: ${response.status}`);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading users:', error);
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #dc2626;">
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #dc2626;">
                             <i class="fas fa-exclamation-triangle"></i> Error loading users: ${error.message}
                         </td>
                     </tr>
                 `;
+            }
+        }
+
+        async function createUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const email = document.getElementById('newEmail').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (!username || !password || !email) {
+                showAlert(document.getElementById('dashboardAlert'), 'Username, password, and email are required', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        email,
+                        name: name || username,
+                        role,
+                        isAdmin: role === 'admin'
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert(document.getElementById('dashboardAlert'), `✅ User ${username} created successfully!`, 'success');
+                    
+                    // Clear form
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('newEmail').value = '';
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newRole').value = 'user';
+                    
+                    // Reload users
+                    await loadUsers();
+                    await refreshStats();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to create user');
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error creating user: ${error.message}`, 'error');
+            }
+        }
+
+        async function updateUserRole(username, newRole) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/users/${username}/role`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        role: newRole,
+                        isAdmin: newRole === 'admin'
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert(document.getElementById('dashboardAlert'), `✅ ${username} role updated to ${newRole}`, 'success');
+                    await loadUsers();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to update role');
+                }
+            } catch (error) {
+                console.error('Error updating role:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error updating role: ${error.message}`, 'error');
+                // Reload users to reset the dropdown
+                await loadUsers();
+            }
+        }
+
+        function editUser(username) {
+            const newName = prompt(`Enter new name for ${username}:`);
+            if (newName && newName.trim()) {
+                alert(`Edit user feature coming soon!\n\nUsername: ${username}\nNew Name: ${newName}`);
+            }
+        }
+
+        async function refreshPosts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/posts/detailed`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const tbody = document.getElementById('postsTableBody');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const posts = data.posts || [];
+                    
+                    if (posts.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
+                                    <i class="fas fa-file-alt"></i> No posts found
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    tbody.innerHTML = posts.map((post, index) => `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span>${post.username || 'Anonymous'}</span>
+                                    ${post.isAnonymous ? '<i class="fas fa-user-secret" style="color: #f59e0b;" title="Anonymous post"></i>' : ''}
+                                </div>
+                            </td>
+                            <td>
+                                <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${post.content}">
+                                    ${post.content}
+                                </div>
+                            </td>
+                            <td>${new Date(post.date).toLocaleDateString()}</td>
+                            <td>${post.likeCount || 0}</td>
+                            <td>${post.commentCount || 0}</td>
+                            <td>
+                                ${post.hasMedia ? 
+                                    `<i class="fas fa-${post.mediaType === 'video' ? 'video' : 'image'}" style="color: #10b981;"></i>` : 
+                                    '<i class="fas fa-minus" style="color: #666;"></i>'
+                                }
+                            </td>
+                            <td>
+                                <span style="color: ${post.isVisible ? '#10b981' : '#dc2626'};">
+                                    ${post.isVisible ? 'Visible' : 'Hidden'}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="user-actions">
+                                    <button class="small-btn btn-info" onclick="viewPost('${post.id}')" title="View Post">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="small-btn btn-warning" onclick="editPost('${post.id}')" title="Edit Post">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="small-btn ${post.isVisible ? 'btn-warning' : 'btn-success'}" onclick="togglePostVisibility('${post.id}', ${!post.isVisible})" title="${post.isVisible ? 'Hide' : 'Show'} Post">
+                                        <i class="fas fa-${post.isVisible ? 'eye-slash' : 'eye'}"></i>
+                                    </button>
+                                    <button class="small-btn btn-danger" onclick="deletePost('${post.id}')" title="Delete Post">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                    
+                    showAlert(document.getElementById('dashboardAlert'), `✅ Loaded ${posts.length} posts successfully`, 'success');
+                } else {
+                    // Fallback to simple posts endpoint
+                    const fallbackResponse = await fetch(`${API_BASE_URL}/posts`);
+                    if (fallbackResponse.ok) {
+                        const posts = await fallbackResponse.json();
+                        const postArray = posts.posts || posts || [];
+                        
+                        tbody.innerHTML = postArray.slice(0, 20).map((post, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${post.username || 'Anonymous'}</td>
+                                <td>
+                                    <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${post.content}">
+                                        ${post.content}
+                                    </div>
+                                </td>
+                                <td>${new Date(post.date).toLocaleDateString()}</td>
+                                <td>${post.likes ? post.likes.length : 0}</td>
+                                <td>${post.comments ? post.comments.length : 0}</td>
+                                <td>
+                                    ${post.media ? 
+                                        `<i class="fas fa-image" style="color: #10b981;"></i>` : 
+                                        '<i class="fas fa-minus" style="color: #666;"></i>'
+                                    }
+                                </td>
+                                <td><span style="color: #10b981;">Visible</span></td>
+                                <td>
+                                    <div class="user-actions">
+                                        <button class="small-btn btn-info" onclick="viewPost('${post.id}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="small-btn btn-danger" onclick="deletePost('${post.id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        throw new Error(`Failed to load posts: ${response.status}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                const tbody = document.getElementById('postsTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #dc2626;">
+                            <i class="fas fa-exclamation-triangle"></i> Error loading posts: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function viewPost(postId) {
+            alert(`View post details for Post ID: ${postId}\n\nThis would show the full post content, comments, and engagement metrics.`);
+        }
+
+        async function editPost(postId) {
+            const newContent = prompt('Enter new content for this post:');
+            if (newContent && newContent.trim()) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}/content`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${currentAdmin.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content: newContent.trim() })
+                    });
+
+                    if (response.ok) {
+                        showAlert(document.getElementById('dashboardAlert'), '✅ Post content updated successfully!', 'success');
+                        await refreshPosts();
+                    } else {
+                        throw new Error('Failed to update post');
+                    }
+                } catch (error) {
+                    console.error('Error editing post:', error);
+                    showAlert(document.getElementById('dashboardAlert'), `❌ Error updating post: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function togglePostVisibility(postId, visible) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}/visibility`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ visible })
+                });
+
+                if (response.ok) {
+                    showAlert(document.getElementById('dashboardAlert'), `✅ Post ${visible ? 'shown' : 'hidden'} successfully!`, 'success');
+                    await refreshPosts();
+                } else {
+                    throw new Error('Failed to toggle visibility');
+                }
+            } catch (error) {
+                console.error('Error toggling post visibility:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error toggling visibility: ${error.message}`, 'error');
+            }
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert(document.getElementById('dashboardAlert'), '✅ Post deleted successfully!', 'success');
+                    await refreshPosts();
+                    await refreshStats();
+                } else {
+                    throw new Error('Failed to delete post');
+                }
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error deleting post: ${error.message}`, 'error');
             }
         }
 
@@ -716,51 +1148,81 @@
         // Chat Management Functions
         async function loadChats() {
             try {
-                // Use simple chats endpoint for Railway backend
-                const response = await fetch(`${API_BASE_URL}/chats`);
-                const tbody = document.getElementById('chatsTableBody');
-
-                if (response.ok) {
-                    const chats = await response.json();
+                // Try admin chats endpoint first
+                let response;
+                let chats = [];
+                
+                try {
+                    response = await fetch(`${API_BASE_URL}/admin/chats`, {
+                        headers: {
+                            'Authorization': `Bearer ${currentAdmin.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
-                    if (chats.length === 0) {
-                        tbody.innerHTML = `
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
-                                    <i class="fas fa-comments"></i> No chats found
-                                </td>
-                            </tr>
-                        `;
-                        return;
+                    if (response.ok) {
+                        const data = await response.json();
+                        chats = data.chats || [];
+                    } else {
+                        throw new Error('Admin endpoint failed');
                     }
+                } catch (adminError) {
+                    // Fallback to simple chats endpoint
+                    response = await fetch(`${API_BASE_URL}/chats`);
+                    if (response.ok) {
+                        chats = await response.json();
+                    } else {
+                        throw new Error(`Failed to load chats: ${response.status}`);
+                    }
+                }
 
-                    tbody.innerHTML = chats.map((chat, index) => `
+                const tbody = document.getElementById('chatsTableBody');
+                
+                if (!chats || chats.length === 0) {
+                    tbody.innerHTML = `
                         <tr>
-                            <td>${chat.id}</td>
-                            <td>${chat.name}</td>
-                            <td>${chat.lastMessage || 'No messages'}</td>
-                            <td>${chat.timestamp}</td>
-                            <td>${chat.messages ? chat.messages.length : 0}</td>
-                            <td>
-                                <span style="color: ${chat.online ? '#10b981' : '#f59e0b'};">
-                                    ${chat.online ? 'Online' : 'Offline'}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="user-actions">
-                                    <button class="small-btn btn-info" onclick="viewChat(${chat.id})">
-                                        <i class="fas fa-eye"></i> View
-                                    </button>
-                                    <button class="small-btn btn-warning" onclick="exportSingleChat(${chat.id})">
-                                        <i class="fas fa-download"></i> Export
-                                    </button>
-                                </div>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                                <i class="fas fa-comments"></i> No chats found
                             </td>
                         </tr>
-                    `).join('');
-                } else {
-                    throw new Error(`Failed to load chats: ${response.status}`);
+                    `;
+                    return;
                 }
+
+                tbody.innerHTML = chats.map((chat, index) => `
+                    <tr>
+                        <td>${chat.id || index + 1}</td>
+                        <td>
+                            <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${chat.name || chat.participants || 'Unknown'}">
+                                ${chat.name || chat.participants || `Chat ${index + 1}`}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${chat.lastMessage || 'No messages'}">
+                                ${chat.lastMessage || 'No messages yet'}
+                            </div>
+                        </td>
+                        <td>${chat.timestamp ? new Date(chat.timestamp).toLocaleDateString() : 'N/A'}</td>
+                        <td>${chat.messages ? chat.messages.length : chat.messageCount || 0}</td>
+                        <td>
+                            <span style="color: ${chat.online ? '#10b981' : '#f59e0b'};">
+                                ${chat.status || (chat.online ? 'Active' : 'Inactive')}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="user-actions">
+                                <button class="small-btn btn-info" onclick="viewChat('${chat.id || index}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button class="small-btn btn-warning" onclick="exportSingleChat('${chat.id || index}')">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                showAlert(document.getElementById('dashboardAlert'), `✅ Loaded ${chats.length} chats successfully`, 'success');
             } catch (error) {
                 console.error('Error loading chats:', error);
                 const tbody = document.getElementById('chatsTableBody');

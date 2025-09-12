@@ -258,7 +258,18 @@ const updateUser = async (username, updatedUser) => {
 };
 
 const deleteUser = async (username) => {
-    return db.users.delete(username);
+    const success = db.users.delete(username);
+    return { success, message: success ? 'User deleted' : 'User not found' };
+};
+
+const updatePost = async (postId, updatedPost) => {
+    const posts = db.posts.getAll();
+    const index = posts.findIndex(p => p.id === postId);
+    if (index !== -1) {
+        posts[index] = { ...posts[index], ...updatedPost };
+        return db.posts.save(posts) ? posts[index] : null;
+    }
+    return null;
 };
 
 const getUsers = async () => {
@@ -329,6 +340,7 @@ module.exports = {
     addUser,
     getPosts,
     addPost,
+    updatePost,
     getMessages,
     addMessage,
     deleteAllPosts,
