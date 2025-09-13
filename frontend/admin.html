@@ -189,6 +189,7 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #333;
+            table-layout: fixed;
         }
 
         .users-table th,
@@ -212,12 +213,14 @@
         }
 
         .small-btn {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: none;
-            border-radius: 6px;
-            font-size: 12px;
+            border-radius: 4px;
+            font-size: 11px;
             cursor: pointer;
             transition: opacity 0.2s;
+            margin: 0 2px;
+            display: inline-block;
         }
 
         .small-btn:hover {
@@ -225,15 +228,15 @@
         }
 
         .admin-select {
-            padding: 4px 8px;
+            padding: 3px 6px;
             border: 1px solid #374151;
             border-radius: 4px;
             background: #1f2937;
             color: #f3f4f6;
-            font-size: 11px;
+            font-size: 10px;
             cursor: pointer;
-            min-width: 85px;
-            max-width: 95px;
+            min-width: 75px;
+            max-width: 85px;
             transition: all 0.2s;
         }
 
@@ -455,7 +458,7 @@
                             <th>Comments</th>
                             <th>Media</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th style="min-width: 350px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="postsTableBody">
@@ -1019,19 +1022,154 @@
             }
         }
 
-        function editUser(username) {
+        async function editUser(username) {
             console.log('editUser called with username:', username);
             
-            const newName = prompt(`Enter new name for ${username}:`, username);
-            if (newName && newName.trim() && newName.trim() !== username) {
-                showAlert(document.getElementById('dashboardAlert'), `📝 User ${username} name updated to: ${newName.trim()}`, 'success');
-                console.log('Edit user request:', { username, newName: newName.trim() });
+            if (!username) {
+                showAlert(document.getElementById('dashboardAlert'), '❌ Invalid username', 'error');
+                return;
+            }
+
+            try {
+                // First, fetch current user details
+                showAlert(document.getElementById('dashboardAlert'), '🔄 Loading user for editing...', 'info');
+
+                const response = await fetch(`${API_BASE_URL}/admin/users/${username}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch user details');
+                }
+
+                const userData = await response.json();
                 
-                // In a full implementation, this would call the backend API
-                // For now, we show success message
-                setTimeout(() => {
-                    showAlert(document.getElementById('dashboardAlert'), `✅ User edit completed for ${username}`, 'success');
-                }, 1000);
+                // Create edit form
+                const formHtml = `
+                    <div id="editUserModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                         background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                        <div style="background: #1a1a1a; padding: 30px; border-radius: 10px; width: 500px; max-width: 90%; 
+                             border: 2px solid #4F46E5; color: #fff;">
+                            <h3 style="color: #4F46E5; margin-bottom: 20px;">✏️ Edit User: ${username}</h3>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px;">📧 Email:</label>
+                                <input type="email" id="editEmail" value="${userData.email || ''}" 
+                                       style="width: 100%; padding: 10px; border: 1px solid #374151; background: #111; color: #fff; border-radius: 5px;">
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px;">🏷️ Full Name:</label>
+                                <input type="text" id="editName" value="${userData.name || ''}" 
+                                       style="width: 100%; padding: 10px; border: 1px solid #374151; background: #111; color: #fff; border-radius: 5px;">
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px;">🎭 Role:</label>
+                                <select id="editRole" style="width: 100%; padding: 10px; border: 1px solid #374151; background: #111; color: #fff; border-radius: 5px;">
+                                    <option value="user" ${userData.role === 'user' ? 'selected' : ''}>User</option>
+                                    <option value="moderator" ${userData.role === 'moderator' ? 'selected' : ''}>Moderator</option>
+                                    <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="editIsAdmin" ${userData.isAdmin ? 'checked' : ''}>
+                                    ⭐ Administrator Privileges
+                                </label>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px;">🔐 New Password (leave blank to keep current):</label>
+                                <input type="password" id="editPassword" placeholder="Enter new password..." 
+                                       style="width: 100%; padding: 10px; border: 1px solid #374151; background: #111; color: #fff; border-radius: 5px;">
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                <button onclick="closeEditUserModal()" 
+                                        style="padding: 10px 20px; background: #666; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+                                    ❌ Cancel
+                                </button>
+                                <button onclick="saveUserChanges('${username}')" 
+                                        style="padding: 10px 20px; background: #4F46E5; color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+                                    ✅ Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', formHtml);
+                
+                showAlert(document.getElementById('dashboardAlert'), '📝 Edit form loaded', 'success');
+                
+            } catch (error) {
+                console.error('Error loading user for edit:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function closeEditUserModal() {
+            const modal = document.getElementById('editUserModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        async function saveUserChanges(username) {
+            try {
+                const email = document.getElementById('editEmail').value;
+                const name = document.getElementById('editName').value;
+                const role = document.getElementById('editRole').value;
+                const isAdmin = document.getElementById('editIsAdmin').checked;
+                const password = document.getElementById('editPassword').value;
+
+                showAlert(document.getElementById('dashboardAlert'), '🔄 Saving user changes...', 'info');
+
+                const updateData = {
+                    email: email.trim(),
+                    name: name.trim(),
+                    role,
+                    isAdmin
+                };
+
+                // Only include password if it's provided
+                if (password && password.trim()) {
+                    updateData.password = password.trim();
+                }
+
+                const response = await fetch(`${API_BASE_URL}/admin/users/${username}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to update user');
+                }
+
+                const result = await response.json();
+                
+                closeEditUserModal();
+                showAlert(document.getElementById('dashboardAlert'), `✅ User ${username} updated successfully!`, 'success');
+                
+                // Refresh user list
+                await loadUsers();
+                
+            } catch (error) {
+                console.error('Error saving user changes:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error saving changes: ${error.message}`, 'error');
             }
         }
 
@@ -1089,7 +1227,7 @@
                                 </span>
                             </td>
                             <td>
-                                <div style="display: flex; gap: 8px; align-items: center;">
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; min-width: 340px;">
                                     <!-- Visibility Dropdown -->
                                     <select class="admin-select" onchange="changePostVisibility('${post.id}', this.value)" title="Change Visibility">
                                         <option value="visible" ${post.isVisible ? 'selected' : ''}>👁️ Visible</option>
@@ -1154,7 +1292,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; min-width: 340px;">
                                         <!-- Visibility Dropdown -->
                                         <select class="admin-select" onchange="changePostVisibility('${post.id}', this.value)" title="Change Visibility">
                                             <option value="visible" ${(post.isVisible !== undefined ? post.isVisible : true) ? 'selected' : ''}>👁️ Visible</option>
@@ -1579,7 +1717,7 @@
             // Hide any loading spinner
         }
 
-        function viewUser(username) {
+        async function viewUser(username) {
             console.log('viewUser called with username:', username);
             
             if (!username) {
@@ -1587,26 +1725,58 @@
                 return;
             }
 
-            // Create a detailed user info popup
-            const userInfo = `🔍 USER DETAILS
+            try {
+                showAlert(document.getElementById('dashboardAlert'), '🔄 Loading user details...', 'info');
 
-👤 Username: ${username}
-📧 Email: ${username}@example.com
-🎭 Role: User (estimated)
-✅ Status: Active
-📅 Join Date: Recent
-👥 Followers: 0
-💬 Posts: 0
+                if (!currentAdmin || !currentAdmin.token) {
+                    throw new Error('No admin token available');
+                }
 
-🔧 ADMIN ACTIONS AVAILABLE:
-- Edit user information
-- Change user role
-- Delete user account
-- View user activity
+                const response = await fetch(`${API_BASE_URL}/admin/users/${username}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-This is a preview. Full user management features are implemented.`;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch user details');
+                }
 
-            alert(userInfo);
+                const userData = await response.json();
+                
+                // Create detailed user info modal
+                const userInfo = `🔍 USER DETAILS
+
+👤 Username: ${userData.username}
+📧 Email: ${userData.email || 'Not provided'}
+🏷️ Name: ${userData.name || 'Not provided'}
+🎭 Role: ${userData.role || 'user'}
+⭐ Admin: ${userData.isAdmin ? 'Yes' : 'No'}
+📅 Join Date: ${new Date(userData.stats.joinDate).toLocaleDateString()}
+� Last Updated: ${userData.updatedAt ? new Date(userData.updatedAt).toLocaleDateString() : 'Never'}
+
+� ACTIVITY STATS:
+📝 Total Posts: ${userData.stats.totalPosts}
+❤️ Total Likes: ${userData.stats.totalLikes}
+💬 Total Comments: ${userData.stats.totalComments}
+
+${userData.recentPosts && userData.recentPosts.length > 0 ? 
+`🔖 RECENT POSTS:
+${userData.recentPosts.map(post => `• "${post.content.substring(0, 50)}${post.content.length > 50 ? '...' : ''}"`).join('\n')}` : 
+'📝 No recent posts'}
+
+✅ User details loaded successfully!`;
+
+                alert(userInfo);
+                showAlert(document.getElementById('dashboardAlert'), '✅ User details loaded successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error viewing user:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Error loading user: ${error.message}`, 'error');
+            }
         }
 
         async function viewPost(postId) {
@@ -1843,14 +2013,75 @@ ${chat.messages ? chat.messages.slice(-3).map(msg =>
             }
         }
 
-        function exportSingleChat(chatId) {
+        async function exportSingleChat(chatId) {
             if (!chatId) {
                 showAlert(document.getElementById('dashboardAlert'), '❌ Invalid chat ID', 'error');
                 return;
             }
 
-            showAlert(document.getElementById('dashboardAlert'), `📥 Export request logged for chat ${chatId} (Manual processing required on Railway)`, 'warning');
-            console.log('Export single chat request:', { chatId, timestamp: new Date().toISOString() });
+            try {
+                showAlert(document.getElementById('dashboardAlert'), '📥 Exporting chat data...', 'info');
+
+                if (!currentAdmin || !currentAdmin.token) {
+                    throw new Error('No admin token available');
+                }
+
+                const response = await fetch(`${API_BASE_URL}/admin/chats/${chatId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentAdmin.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch chat data');
+                }
+
+                const chatData = await response.json();
+                
+                // Format chat data for export
+                const exportData = {
+                    chatId: chatId,
+                    exportDate: new Date().toISOString(),
+                    chat: chatData.chat,
+                    messageCount: chatData.messageCount,
+                    status: chatData.status,
+                    exportedBy: currentAdmin.username
+                };
+
+                // Create downloadable JSON file
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                // Create download link
+                const downloadUrl = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `chat_${chatId}_export_${new Date().toISOString().split('T')[0]}.json`;
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up
+                URL.revokeObjectURL(downloadUrl);
+                
+                showAlert(document.getElementById('dashboardAlert'), `✅ Chat ${chatId} exported successfully!`, 'success');
+                console.log('Chat exported:', { chatId, exportDate: new Date().toISOString() });
+                
+            } catch (error) {
+                console.error('Export chat error:', error);
+                showAlert(document.getElementById('dashboardAlert'), `❌ Export failed: ${error.message}`, 'error');
+                
+                // Fallback: at least log the request
+                console.log('Export single chat request (failed):', { 
+                    chatId, 
+                    timestamp: new Date().toISOString(),
+                    error: error.message 
+                });
+            }
         }
 
         function showAlert(container, message, type) {

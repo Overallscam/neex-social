@@ -1454,6 +1454,44 @@ app.get('/admin/users', isAdmin, async (req, res) => {
     }
 });
 
+// Admin: Get individual user details
+app.get('/admin/users/:username', isAdmin, async (req, res) => {
+    const { username } = req.params;
+    
+    try {
+        const user = await database.getUserByUsername(username);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Get user's posts and activity
+        const posts = await database.getPosts();
+        const userPosts = posts.filter(post => post.username === username);
+        
+        // Get user stats
+        const totalLikes = userPosts.reduce((sum, post) => sum + (post.likes || 0), 0);
+        const totalComments = userPosts.reduce((sum, post) => sum + (post.comments ? post.comments.length : 0), 0);
+        
+        // Remove sensitive data
+        const { password, ...safeUser } = user;
+        
+        // Return detailed user info
+        res.json({
+            ...safeUser,
+            stats: {
+                totalPosts: userPosts.length,
+                totalLikes,
+                totalComments,
+                joinDate: user.createdAt || new Date().toISOString()
+            },
+            recentPosts: userPosts.slice(-5) // Last 5 posts
+        });
+    } catch (error) {
+        console.error('Admin get user details error:', error);
+        res.status(500).json({ message: 'Failed to get user details' });
+    }
+});
+
 // Admin: Delete all posts
 app.delete('/admin/posts', isAdmin, async (req, res) => {
     try {
@@ -1507,6 +1545,51 @@ app.delete('/admin/users/:username', isAdmin, async (req, res) => {
     } catch (error) {
         console.error('Admin delete user error:', error);
         res.status(500).json({ message: 'Failed to delete user' });
+    }
+});
+
+// Admin: Update user details
+app.put('/admin/users/:username', isAdmin, async (req, res) => {
+    try {
+        const { username } = req.params;
+        const { email, name, role, isAdmin: userIsAdmin, password } = req.body;
+        
+        const user = await database.getUserByUsername(username);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Update user properties
+        const updatedUser = { ...user };
+        if (email !== undefined) updatedUser.email = email;
+        if (name !== undefined) updatedUser.name = name;
+        if (role !== undefined) updatedUser.role = role;
+        if (userIsAdmin !== undefined) updatedUser.isAdmin = userIsAdmin;
+        
+        // Hash new password if provided
+        if (password && password.trim()) {
+            updatedUser.password = await bcrypt.hash(password, 10);
+        }
+        
+        // Update last modified
+        updatedUser.updatedAt = new Date().toISOString();
+        updatedUser.updatedBy = req.adminUser.username;
+        
+        const result = await database.updateUser(username, updatedUser);
+        if (result.success) {
+            // Remove password from response
+            const { password: pwd, ...safeUser } = updatedUser;
+            res.json({
+                message: `User ${username} updated successfully`,
+                user: safeUser,
+                adminUser: req.adminUser.username
+            });
+        } else {
+            res.status(500).json({ message: 'Failed to update user' });
+        }
+    } catch (error) {
+        console.error('Admin update user error:', error);
+        res.status(500).json({ message: 'Failed to update user' });
     }
 });
 
