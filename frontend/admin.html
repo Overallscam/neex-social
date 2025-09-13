@@ -679,6 +679,24 @@
             }
         }
 
+        function showDashboard() {
+            // Hide login section and show dashboard
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            
+            // Load dashboard data
+            loadDashboardData();
+            
+            // Update admin info in the UI
+            if (currentAdmin && currentAdmin.user) {
+                document.querySelectorAll('.admin-name').forEach(el => {
+                    el.textContent = currentAdmin.user.name || currentAdmin.user.username;
+                });
+            }
+            
+            console.log('✅ Admin dashboard displayed');
+        }
+
         function adminLogout() {
             currentAdmin = null;
             document.getElementById('adminDashboard').style.display = 'none';
