@@ -1068,6 +1068,69 @@ app.get('/posts', async (req, res) => {
     }
 });
 
+// Get individual post details
+app.get('/posts/:postId', async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const posts = await database.getPosts();
+        const post = posts.find(p => p.id === parseInt(postId));
+        
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        // Add computed fields for admin panel
+        const postDetails = {
+            ...post,
+            commentCount: post.comments ? post.comments.length : 0,
+            likeCount: post.reactions ? Object.values(post.reactions).reduce((sum, count) => sum + count, 0) : 0,
+            viewCount: post.views || 0,
+            hasMedia: !!(post.mediaUrl || post.videoUrl || post.imageUrl),
+            mediaType: post.videoUrl ? 'video' : (post.imageUrl || post.mediaUrl) ? 'image' : null,
+            engagementRate: post.views ? ((post.reactions ? Object.values(post.reactions).reduce((sum, count) => sum + count, 0) : 0) / post.views * 100).toFixed(1) : '0.0'
+        };
+        
+        res.json(postDetails);
+    } catch (error) {
+        console.error('Get post details error:', error);
+        res.status(500).json({ message: 'Failed to get post details' });
+    }
+});
+
+// Admin: Get individual post details (with admin info)
+app.get('/admin/posts/:postId', isAdmin, async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const posts = await database.getPosts();
+        const post = posts.find(p => p.id === parseInt(postId));
+        
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        
+        // Add computed fields and admin info
+        const postDetails = {
+            ...post,
+            commentCount: post.comments ? post.comments.length : 0,
+            likeCount: post.reactions ? Object.values(post.reactions).reduce((sum, count) => sum + count, 0) : 0,
+            viewCount: post.views || 0,
+            hasMedia: !!(post.mediaUrl || post.videoUrl || post.imageUrl),
+            mediaType: post.videoUrl ? 'video' : (post.imageUrl || post.mediaUrl) ? 'image' : null,
+            engagementRate: post.views ? ((post.reactions ? Object.values(post.reactions).reduce((sum, count) => sum + count, 0) : 0) / post.views * 100).toFixed(1) : '0.0',
+            adminInfo: {
+                adminUser: req.adminUser.username,
+                accessTime: new Date().toISOString(),
+                adminAction: true
+            }
+        };
+        
+        res.json(postDetails);
+    } catch (error) {
+        console.error('Admin get post details error:', error);
+        res.status(500).json({ message: 'Failed to get post details' });
+    }
+});
+
 // Enhanced post reactions
 app.post('/posts/:postId/react', async (req, res) => {
     const { postId } = req.params;
@@ -1187,22 +1250,22 @@ app.delete('/admin/posts/:postId', isAdmin, async (req, res) => {
     const { postId } = req.params;
     
     try {
-        const posts = await database.getPosts();
-        const postIndex = posts.findIndex(p => p.id === parseInt(postId));
+        console.log(`Admin ${req.adminUser.username} attempting to delete post ${postId}`);
         
-        if (postIndex === -1) {
-            return res.status(404).json({ message: 'Post not found' });
+        const result = await database.deletePost(postId);
+        
+        if (!result.success) {
+            return res.status(404).json({ message: result.message || 'Post not found' });
         }
-        
-        // Remove post (in a real app, you'd call database.deletePost)
-        const deletedPost = posts.splice(postIndex, 1)[0];
         
         // Emit real-time update
         io.emit('post-deleted', { postId: parseInt(postId), adminUser: req.adminUser.username });
         
+        console.log(`Post ${postId} deleted successfully by admin ${req.adminUser.username}`);
+        
         res.json({ 
             message: 'Post deleted successfully',
-            deletedPost,
+            deletedPost: result.deletedPost,
             adminAction: true
         });
     } catch (error) {
@@ -1238,13 +1301,16 @@ app.put('/admin/posts/:postId', isAdmin, async (req, res) => {
                 delete post.originalUser;
             }
         }
-        if (visible !== undefined) post.visible = visible;
+        if (visible !== undefined) post.isVisible = visible;
         
         // Add admin edit marker
         post.editedByAdmin = {
             adminUser: req.adminUser.username,
             editDate: new Date().toISOString()
         };
+
+        // Save changes to database
+        await database.updatePost(parseInt(postId), post);
         
         // Emit real-time update
         io.emit('post-updated', { 
@@ -1536,12 +1602,13 @@ app.get('/admin/posts/detailed', isAdmin, async (req, res) => {
         // Add additional metadata for each post
         const detailedPosts = posts.map(post => ({
             ...post,
-            likeCount: post.likes ? post.likes.length : 0,
+            likeCount: post.likes ? post.likes.length : (post.reactions ? Object.values(post.reactions).reduce((sum, count) => sum + count, 0) : 0),
             commentCount: post.comments ? post.comments.length : 0,
             shareCount: post.shares || 0,
             viewCount: post.views || 0,
-            isVisible: post.visible !== false,
-            hasMedia: !!(post.media),
+            isVisible: post.isVisible !== false && post.visible !== false,
+            hasMedia: !!(post.media || post.mediaUrl || post.videoUrl || post.imageUrl),
+            mediaType: post.videoUrl ? 'video' : (post.imageUrl || post.mediaUrl) ? 'image' : null,
             createdAgo: new Date() - new Date(post.date)
         }));
         
@@ -1568,7 +1635,7 @@ app.put('/admin/posts/:postId/content', isAdmin, async (req, res) => {
         }
         
         const posts = await database.getPosts();
-        const postIndex = posts.findIndex(p => p.id === postId);
+        const postIndex = posts.findIndex(p => p.id === parseInt(postId));
         
         if (postIndex === -1) {
             return res.status(404).json({ message: 'Post not found' });
@@ -2262,6 +2329,40 @@ app.get('/admin/chats', isAdmin, (req, res) => {
     } catch (error) {
         console.error('Admin get chats error:', error);
         res.status(500).json({ message: 'Failed to get chats' });
+    }
+});
+
+// Admin: Get specific chat details
+app.get('/admin/chats/:chatId', isAdmin, (req, res) => {
+    try {
+        const fs = require('fs');
+        const chatId = parseInt(req.params.chatId);
+        const chatsPath = path.join(__dirname, 'data', 'chats.json');
+        
+        if (fs.existsSync(chatsPath)) {
+            const chatsData = fs.readFileSync(chatsPath, 'utf8');
+            const chats = JSON.parse(chatsData);
+            const chat = chats.find(c => c.id === chatId);
+            
+            if (chat) {
+                res.json({
+                    chat,
+                    adminUser: req.adminUser.username,
+                    adminAction: true,
+                    messageCount: chat.messages ? chat.messages.length : 0,
+                    lastActivity: chat.timestamp,
+                    participants: chat.name,
+                    status: chat.online ? 'Active' : 'Inactive'
+                });
+            } else {
+                res.status(404).json({ message: 'Chat not found' });
+            }
+        } else {
+            res.status(404).json({ message: 'No chats data available' });
+        }
+    } catch (error) {
+        console.error('Admin get chat details error:', error);
+        res.status(500).json({ message: 'Failed to get chat details' });
     }
 });
 

@@ -293,6 +293,28 @@ const addPost = async (post) => {
     return db.posts.add(post);
 };
 
+const deletePost = async (postId) => {
+    try {
+        const posts = db.posts.getAll();
+        const index = posts.findIndex(p => p.id === parseInt(postId));
+        if (index === -1) {
+            return { success: false, message: 'Post not found' };
+        }
+        
+        const deletedPost = posts.splice(index, 1)[0];
+        const success = db.posts.save(posts);
+        
+        return { 
+            success, 
+            message: success ? 'Post deleted successfully' : 'Failed to save changes',
+            deletedPost 
+        };
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 // Enhanced async wrapper functions for messages management
 const getMessages = async () => {
     return db.messages.getAll();
@@ -340,6 +362,7 @@ module.exports = {
     addUser,
     getPosts,
     addPost,
+    deletePost,
     updatePost,
     getMessages,
     addMessage,
