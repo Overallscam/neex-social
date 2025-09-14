@@ -2452,6 +2452,234 @@ app.get('/admin/chats/:chatId', isAdmin, (req, res) => {
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Simple admin panel route since static files aren't working on Railway
+app.get('/admin', (req, res) => {
+    const adminHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEEX Admin - Working Delete</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #f59e0b; margin-bottom: 30px; text-align: center; }
+        .section { background: #1a1a1a; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #333; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .posts-container { max-height: 400px; overflow-y: auto; }
+        .post-item { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .post-item:hover { background: #2a2a2a; }
+        .login-form { max-width: 400px; margin: 0 auto; }
+        .form-group { margin: 15px 0; }
+        .form-group input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; }
+        .alert { padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .alert-success { background: #065f46; color: #10b981; }
+        .alert-error { background: #7f1d1d; color: #ef4444; }
+        .alert-info { background: #164e63; color: #06b6d4; }
+        #loginSection { display: block; }
+        #adminSection { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ NEEX Admin Panel - Working Delete</h1>
+        
+        <div id="loginSection">
+            <div class="section">
+                <h2>🔐 Admin Login</h2>
+                <div class="login-form">
+                    <div id="loginAlert"></div>
+                    <div class="form-group">
+                        <input type="text" id="username" placeholder="Username" value="john">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" placeholder="Password" value="123">
+                    </div>
+                    <button class="btn btn-primary" onclick="login()" style="width: 100%;">Login as Admin</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminSection">
+            <div class="section">
+                <div style="text-align: right; margin-bottom: 20px;">
+                    Logged in as: <strong id="currentUser"></strong> |
+                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+                </div>
+                
+                <div id="alertArea"></div>
+
+                <h2>📋 Post Management</h2>
+                <button class="btn btn-success" onclick="loadPosts()">Refresh Posts</button>
+                <button class="btn btn-danger" onclick="deleteAllPosts()">Delete ALL Posts</button>
+                
+                <div id="postsContainer" class="posts-container">
+                    <div style="padding: 20px; text-align: center; color: #666;">
+                        Click "Refresh Posts" to load posts
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        let authToken = '';
+        let currentUser = '';
+        let allPosts = [];
+
+        function showAlert(message, type = 'info', containerId = 'alertArea') {
+            const container = document.getElementById(containerId);
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-' + type;
+            alert.innerHTML = message;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                showAlert('🔐 Logging in...', 'info', 'loginAlert');
+                
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token && data.user.isAdmin) {
+                    authToken = data.token;
+                    currentUser = data.user.username;
+                    
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('adminSection').style.display = 'block';
+                    document.getElementById('currentUser').textContent = currentUser;
+                    
+                    showAlert('✅ Login successful!', 'success');
+                    loadPosts();
+                } else {
+                    showAlert('❌ Login failed: ' + (data.message || 'Invalid credentials'), 'error', 'loginAlert');
+                }
+            } catch (error) {
+                showAlert('❌ Login error: ' + error.message, 'error', 'loginAlert');
+            }
+        }
+
+        function logout() {
+            authToken = '';
+            currentUser = '';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('adminSection').style.display = 'none';
+        }
+
+        async function loadPosts() {
+            try {
+                showAlert('📥 Loading posts...', 'info');
+                
+                const response = await fetch('/posts');
+                const data = await response.json();
+                
+                allPosts = data.posts || data;
+                displayPosts();
+                showAlert('✅ Loaded ' + allPosts.length + ' posts', 'success');
+            } catch (error) {
+                showAlert('❌ Error loading posts: ' + error.message, 'error');
+            }
+        }
+
+        function displayPosts() {
+            const container = document.getElementById('postsContainer');
+            
+            if (!allPosts || allPosts.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No posts found</div>';
+                return;
+            }
+
+            container.innerHTML = allPosts.map(post => 
+                '<div class="post-item" id="post-' + post.id + '">' +
+                    '<div>' +
+                        '<strong>#' + post.id + '</strong> by ' + (post.username || 'Anonymous') + '<br>' +
+                        '<small>' + (post.content || '').substring(0, 80) + '...</small>' +
+                    '</div>' +
+                    '<button class="btn btn-danger" onclick="deletePost(' + post.id + ')">🗑️ DELETE</button>' +
+                '</div>'
+            ).join('');
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('🚨 DELETE POST #' + postId + '?\\n\\nThis cannot be undone!')) return;
+
+            try {
+                showAlert('🗑️ Deleting post ' + postId + '...', 'info');
+                
+                const response = await fetch('/admin/posts/' + postId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('✅ Post ' + postId + ' deleted!', 'success');
+                    document.getElementById('post-' + postId).style.background = '#065f46';
+                    setTimeout(() => {
+                        document.getElementById('post-' + postId).remove();
+                        allPosts = allPosts.filter(p => p.id != postId);
+                    }, 1000);
+                } else {
+                    throw new Error(result.message || 'Delete failed');
+                }
+            } catch (error) {
+                showAlert('❌ Delete failed: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteAllPosts() {
+            if (!confirm('🚨🚨 DELETE ALL POSTS?\\n\\nThis will delete ALL ' + allPosts.length + ' posts!')) return;
+            if (prompt('Type "DELETE ALL" to confirm:') !== 'DELETE ALL') return;
+
+            try {
+                showAlert('🗑️ Deleting all posts...', 'info');
+                
+                const response = await fetch('/admin/posts', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showAlert('✅ All posts deleted!', 'success');
+                    allPosts = [];
+                    displayPosts();
+                } else {
+                    throw new Error('Delete all failed');
+                }
+            } catch (error) {
+                showAlert('❌ Delete all failed: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>`;
+    
+    res.send(adminHTML);
+});
+
 // Initialize database and start server
 const startServer = async () => {
     try {
