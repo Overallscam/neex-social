@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEEX Admin - Debug Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .debug-section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .btn {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .debug-log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .posts-list {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .post-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .post-item:hover {
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 NEEX Admin Debug Panel</h1>
+    
+    <div class="debug-section">
+        <h2>🔍 Authentication Test</h2>
+        <button class="btn btn-primary" onclick="testLogin()">Test Login</button>
+        <button class="btn btn-success" onclick="testAdminAccess()">Test Admin Access</button>
+        <div id="authStatus" style="margin-top: 10px; color: #fbbf24;"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>📋 Posts Management</h2>
+        <button class="btn btn-primary" onclick="loadPosts()">Load Posts</button>
+        <button class="btn btn-danger" onclick="testDelete()">Test Delete Function</button>
+        
+        <div id="postsContainer" class="posts-list" style="margin-top: 15px;">
+            <div style="padding: 20px; text-align: center; color: #666;">
+                Click "Load Posts" to see available posts
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>📊 Debug Console</h2>
+        <button class="btn btn-danger" onclick="clearLog()">Clear Log</button>
+        <div id="debugLog" class="debug-log"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://neex-social-production.up.railway.app';
+        let authToken = '';
+        let currentUser = '';
+        let allPosts = [];
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('debugLog');
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').textContent = '';
+        }
+
+        async function testLogin() {
+            log('🔐 Testing login with john/123...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'john', password: '123' })
+                });
+                
+                log(`Login response status: ${response.status} ${response.statusText}`);
+                
+                const data = await response.json();
+                log(`Login response data: ${JSON.stringify(data, null, 2)}`);
+                
+                if (response.ok && data.token) {
+                    authToken = data.token;
+                    currentUser = data.user.username;
+                    log(`✅ Login successful! Token: ${authToken.substring(0, 20)}...`);
+                    log(`User: ${currentUser}, isAdmin: ${data.user.isAdmin}`);
+                    
+                    document.getElementById('authStatus').innerHTML = `
+                        <strong>✅ Logged in as: ${currentUser}</strong><br>
+                        Admin: ${data.user.isAdmin ? '✅ Yes' : '❌ No'}<br>
+                        Token: ${authToken.substring(0, 30)}...
+                    `;
+                } else {
+                    log(`❌ Login failed: ${data.message}`);
+                    document.getElementById('authStatus').innerHTML = `<strong>❌ Login failed</strong>`;
+                }
+                
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`);
+                document.getElementById('authStatus').innerHTML = `<strong>❌ Login error</strong>`;
+            }
+        }
+
+        async function testAdminAccess() {
+            if (!authToken) {
+                log('❌ No auth token - run login test first');
+                return;
+            }
+
+            log('🛡️ Testing admin endpoint access...');
+            
+            try {
+                // Test admin endpoint without post ID first
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`Admin access test: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Admin access confirmed - got ${data.users?.length || 0} users`);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    log(`❌ Admin access denied: ${errorData.message || 'Unknown error'}`);
+                }
+
+            } catch (error) {
+                log(`❌ Admin access error: ${error.message}`);
+            }
+        }
+
+        async function loadPosts() {
+            log('📥 Loading posts from backend...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/posts`);
+                log(`Posts response: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    allPosts = data.posts || data;
+                    log(`✅ Loaded ${allPosts.length} posts`);
+                    
+                    displayPosts();
+                } else {
+                    log(`❌ Failed to load posts: ${response.status}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Load posts error: ${error.message}`);
+            }
+        }
+
+        function displayPosts() {
+            const container = document.getElementById('postsContainer');
+            
+            if (allPosts.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No posts found</div>';
+                return;
+            }
+
+            container.innerHTML = allPosts.map(post => `
+                <div class="post-item">
+                    <div>
+                        <strong>#${post.id}</strong> by ${post.username || 'Anonymous'}<br>
+                        <small>${(post.content || '').substring(0, 50)}...</small>
+                    </div>
+                    <button class="btn btn-danger" onclick="debugDelete('${post.id}')" style="margin: 0;">
+                        🗑️ Delete ${post.id}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function debugDelete(postId) {
+            if (!authToken) {
+                log('❌ No auth token - run login test first');
+                return;
+            }
+
+            log(`🗑️ DEBUGGING DELETE for post ${postId}...`);
+            log(`Using token: ${authToken.substring(0, 30)}...`);
+            log(`Current user: ${currentUser}`);
+            
+            try {
+                const url = `${API_BASE_URL}/admin/posts/${postId}`;
+                log(`DELETE URL: ${url}`);
+                
+                const headers = {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                };
+                log(`Headers: ${JSON.stringify(headers, null, 2)}`);
+                
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+
+                log(`Delete response status: ${response.status} ${response.statusText}`);
+                
+                let responseData;
+                try {
+                    responseData = await response.json();
+                    log(`Delete response data: ${JSON.stringify(responseData, null, 2)}`);
+                } catch {
+                    responseData = { message: 'No JSON response' };
+                    log('No JSON response received');
+                }
+
+                if (response.ok) {
+                    log(`✅ Post ${postId} deleted successfully!`);
+                    // Refresh posts
+                    setTimeout(loadPosts, 1000);
+                } else {
+                    log(`❌ Delete failed: ${response.status} - ${responseData.message}`);
+                }
+
+            } catch (error) {
+                log(`❌ Delete error: ${error.message}`);
+                log(`Error stack: ${error.stack}`);
+            }
+        }
+
+        async function testDelete() {
+            if (allPosts.length === 0) {
+                log('❌ No posts loaded - load posts first');
+                return;
+            }
+
+            const testPost = allPosts[0];
+            log(`🧪 Running delete test on post ${testPost.id}`);
+            await debugDelete(testPost.id);
+        }
+
+        // Auto-run basic tests
+        window.addEventListener('load', () => {
+            log('🚀 Admin Debug Panel loaded');
+            log('Click "Test Login" to authenticate, then "Load Posts" to see available posts');
+        });
+    </script>
+</body>
+</html>
