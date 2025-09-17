@@ -9,6 +9,6 @@
   NPM_CONFIG_PRODUCTION = "false"
 
 [deploy]
-  startCommand = "npm start"
-  restartPolicyType = "on-failure"
+  startCommand = "npm run start"
+  restartPolicyType = "always"
   workingDirectory = "/app"
