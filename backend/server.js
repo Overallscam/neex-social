@@ -1302,6 +1302,40 @@ app.post('/posts/:postId/share', async (req, res) => {
 // ADMIN ENDPOINTS - Full Control for Administrator
 // =============================================================================
 
+// Admin: Get all users
+app.get('/admin/users', isAdmin, async (req, res) => {
+    try {
+        const users = await database.getUsers();
+        res.json(users);
+    } catch (error) {
+        console.error('Admin get users error:', error);
+        res.status(500).json({ message: 'Failed to get users' });
+    }
+});
+
+// Admin: Get detailed posts
+app.get('/admin/posts/detailed', isAdmin, async (req, res) => {
+    try {
+        const posts = await database.getPosts();
+        // Add more details if needed
+        res.json(posts);
+    } catch (error) {
+        console.error('Admin get detailed posts error:', error);
+        res.status(500).json({ message: 'Failed to get detailed posts' });
+    }
+});
+
+// Admin: Get all chats (stub)
+app.get('/chats', isAdmin, async (req, res) => {
+    try {
+        // TODO: Implement actual chat retrieval logic
+        res.json([]);
+    } catch (error) {
+        console.error('Admin get chats error:', error);
+        res.status(500).json({ message: 'Failed to get chats' });
+    }
+});
+
 // Admin: Delete any post
 app.delete('/admin/posts/:postId', isAdmin, async (req, res) => {
     const { postId } = req.params;
