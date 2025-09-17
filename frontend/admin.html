@@ -729,6 +729,17 @@
     </div>
 
     <script>
+        // Stub for displayFilteredPosts to prevent JS error
+        function displayFilteredPosts(posts) {
+            // TODO: Implement actual post rendering logic
+            console.warn('displayFilteredPosts called with', posts);
+        }
+
+        // Stub for loadChats to prevent JS error
+        function loadChats() {
+            // TODO: Implement actual chat loading logic
+            console.warn('loadChats called');
+        }
         // Show alert utility for login and admin actions
         function showAlert(element, message, type = 'error') {
             element.innerHTML = `<div style="background: ${type === 'error' ? '#dc3545' : '#28a745'}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px;">${message}</div>`;
