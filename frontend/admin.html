@@ -729,6 +729,10 @@
     </div>
 
     <script>
+        // Show alert utility for login and admin actions
+        function showAlert(element, message, type = 'error') {
+            element.innerHTML = `<div style="background: ${type === 'error' ? '#dc3545' : '#28a745'}; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px;">${message}</div>`;
+        }
         // API Configuration - Live Railway Backend for Admin Functions
         let API_BASE_URL = 'https://neex-social-production.up.railway.app'; // Railway Backend
         let isLocalMode = false; // Using Railway backend for admin panel
