@@ -485,6 +485,63 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Admin Login endpoint - separate from regular login for enhanced security
+app.post('/admin/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+    }
+    
+    try {
+        const user = await database.getUserByUsername(username);
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid admin credentials' });
+        }
+        
+        // Check if user has admin permissions
+        if (!user.isAdmin && user.role !== 'admin' && username !== 'Administrator') {
+            return res.status(403).json({ message: 'Admin access required' });
+        }
+        
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ message: 'Invalid admin credentials' });
+        }
+
+        // Generate JWT token with admin permissions
+        const token = jwt.sign(
+            { 
+                username: user.username, 
+                email: user.email, 
+                isAdmin: true,
+                role: 'admin',
+                permissions: user.permissions || {}
+            },
+            JWT_SECRET,
+            { expiresIn: '8h' } // Shorter expiry for admin sessions
+        );
+        
+        const { password: _, verificationToken, passwordResetToken, ...safeUser } = user;
+        
+        console.log(`🔧 Admin login successful: ${username}`);
+        
+        res.json({ 
+            message: 'Admin login successful',
+            user: { 
+                ...safeUser,
+                isAdmin: true,
+                role: 'admin'
+            },
+            token,
+            adminAccess: true
+        });
+    } catch (error) {
+        console.error('Admin login error:', error);
+        res.status(500).json({ message: 'Admin login failed' });
+    }
+});
+
 // Enhanced Signup with JWT
 app.post('/signup', async (req, res) => {
     const { username, password, email, name, bio } = req.body;
