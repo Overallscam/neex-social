@@ -1,0 +1,17 @@
+{
+  "services": [
+    {
+      "name": "neex-backend",
+      "source": "backend",
+      "build": {
+        "buildCommand": "npm install"
+      },
+      "deploy": {
+        "startCommand": "npm start"
+      },
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
