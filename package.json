@@ -4,6 +4,7 @@
   "description": "Advanced Social Media Platform with React and Express.js",
   "main": "backend/server.js",
   "scripts": {
+    "postinstall": "npm --prefix backend install --omit=dev",
     "start": "cd backend && node server.js",
     "dev": "cd backend && nodemon server.js",
     "frontend": "cd frontend && python -m http.server 8080",
