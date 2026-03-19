@@ -1,0 +1,14 @@
+# Railway Deployment Configuration for NEEX Backend
+
+[build]
+  builder = "heroku/buildpacks:20"
+  buildCommand = "npm install"
+
+[build.env]
+  NODE_ENV = "production"
+  NPM_CONFIG_PRODUCTION = "false"
+
+[deploy]
+  startCommand = "npm run start"
+  restartPolicyType = "always"
+  workingDirectory = "/app"

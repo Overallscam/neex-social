@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Test</title>
+</head>
+<body>
+    <h1>Admin Login Test</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin() {
+            const testCredentials = [
+                { username: 'Administrator', password: 'bi+jJZ9t' },
+                { username: 'john', password: 'john123' }
+            ];
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h2>Testing Admin Login...</h2>';
+            
+            for (const creds of testCredentials) {
+                try {
+                    console.log(`Testing login for: ${creds.username}`);
+                    
+                    const response = await fetch('http://localhost:5001/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(creds)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    resultDiv.innerHTML += `
+                        <div style="margin: 10px 0; padding: 10px; border: 1px solid ${response.ok ? 'green' : 'red'};">
+                            <strong>Username:</strong> ${creds.username}<br>
+                            <strong>Password:</strong> ${creds.password}<br>
+                            <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                            <strong>Response:</strong> ${JSON.stringify(result, null, 2)}
+                        </div>
+                    `;
+                    
+                } catch (error) {
+                    console.error(`Error testing ${creds.username}:`, error);
+                    resultDiv.innerHTML += `
+                        <div style="margin: 10px 0; padding: 10px; border: 1px solid red;">
+                            <strong>Username:</strong> ${creds.username}<br>
+                            <strong>Error:</strong> ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Run test when page loads
+        document.addEventListener('DOMContentLoaded', testLogin);
+    </script>
+</body>
+</html>

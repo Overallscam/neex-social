@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEEX Admin - Final Working Version</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #1e40af, #7c3aed);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: #111827;
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid #374151;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        .management-section {
+            background: #111827;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #374151;
+        }
+        
+        .section-title {
+            color: #f59e0b;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #e5e7eb;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #374151;
+            border-radius: 5px;
+            background: #1f2937;
+            color: white;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px;
+        }
+        
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-info { background: #06b6d4; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1f2937;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .data-table th {
+            background: #374151;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #374151;
+            color: #e5e7eb;
+        }
+        
+        .data-table tr:hover {
+            background: #374151;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success { background: #065f46; color: #10b981; }
+        .alert-error { background: #7f1d1d; color: #ef4444; }
+        .alert-info { background: #164e63; color: #06b6d4; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .small-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .small-btn.btn-danger { background: #ef4444; }
+        .small-btn.btn-info { background: #06b6d4; }
+        .small-btn.btn-warning { background: #f59e0b; }
+        
+        .user-info {
+            text-align: right;
+            color: #9ca3af;
+            margin-bottom: 20px;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1><i class="fas fa-shield-alt"></i> NEEX Admin Panel</h1>
+        <p>Final Working Delete Version</p>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginContainer" class="login-container">
+        <h2 style="text-align: center; margin-bottom: 20px; color: #f59e0b;">
+            <i class="fas fa-lock"></i> Admin Login
+        </h2>
+        
+        <div id="loginAlert"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="john" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" value="123" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Login as Admin
+            </button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 15px; color: #6b7280; font-size: 14px;">
+            Default: john / 123
+        </p>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="admin-container" id="adminDashboard">
+        <div class="user-info">
+            Logged in as: <strong id="currentUser"></strong> | 
+            <button class="btn btn-danger" onclick="logout()" style="margin: 0; padding: 5px 10px; font-size: 12px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <div class="management-section">
+            <h2 class="section-title">
+                <i class="fas fa-file-alt"></i> Post Management - WORKING DELETE
+            </h2>
+            
+            <button class="btn btn-info" onclick="loadPosts()">
+                <i class="fas fa-sync"></i> Refresh Posts
+            </button>
+            
+            <button class="btn btn-danger" onclick="deleteAllPosts()" style="margin-left: 10px;">
+                <i class="fas fa-trash-alt"></i> Delete ALL Posts
+            </button>
+
+            <div style="overflow-x: auto; margin-top: 20px;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Author</th>
+                            <th>Content</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px;">
+                                Click "Refresh Posts" to load data
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://neex-social-production.up.railway.app';
+        let authToken = '';
+        let currentUser = '';
+        let allPosts = [];
+
+        function showAlert(message, type = 'info', container = 'alertArea') {
+            const alertArea = document.getElementById(container);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i> ${message}`;
+            
+            alertArea.innerHTML = '';
+            alertArea.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                showAlert('🔐 Logging in as admin...', 'info', 'loginAlert');
+                
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.token) {
+                    authToken = data.token;
+                    currentUser = data.user.username;
+                    
+                    // Check if user is admin
+                    if (!data.user.isAdmin) {
+                        showAlert('❌ Access denied: Admin privileges required', 'error', 'loginAlert');
+                        return;
+                    }
+                    
+                    showAlert('✅ Login successful! Loading admin dashboard...', 'success', 'loginAlert');
+                    
+                    setTimeout(() => {
+                        document.getElementById('loginContainer').style.display = 'none';
+                        document.getElementById('adminDashboard').style.display = 'block';
+                        document.getElementById('currentUser').textContent = currentUser;
+                        loadPosts();
+                    }, 1000);
+                    
+                } else {
+                    showAlert(`❌ Login failed: ${data.message || 'Invalid credentials'}`, 'error', 'loginAlert');
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert(`❌ Login error: ${error.message}`, 'error', 'loginAlert');
+            }
+        });
+
+        function logout() {
+            authToken = '';
+            currentUser = '';
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('username').value = 'john';
+            document.getElementById('password').value = '123';
+        }
+
+        // Load posts from backend
+        async function loadPosts() {
+            try {
+                showAlert('📥 Loading posts from backend...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/posts`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                allPosts = data.posts || data;
+                
+                displayPosts(allPosts);
+                showAlert(`✅ Loaded ${allPosts.length} posts successfully`, 'success');
+                
+            } catch (error) {
+                console.error('Load error:', error);
+                showAlert(`❌ Error loading posts: ${error.message}`, 'error');
+            }
+        }
+
+        function displayPosts(posts) {
+            const tbody = document.getElementById('postsTableBody');
+            
+            if (!posts || posts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No posts found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = posts.map(post => `
+                <tr id="row-${post.id}">
+                    <td><strong>#${post.id}</strong></td>
+                    <td>${post.username || 'Anonymous'}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                        ${(post.content || 'No content').substring(0, 100)}${post.content?.length > 100 ? '...' : ''}
+                    </td>
+                    <td>${new Date(post.date || post.timestamp || Date.now()).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="small-btn btn-info" onclick="viewPost('${post.id}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="small-btn btn-danger" onclick="deletePost('${post.id}')">
+                                <i class="fas fa-trash"></i> DELETE
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // DELETE POST - WITH PROPER AUTHENTICATION
+        async function deletePost(postId) {
+            if (!authToken) {
+                showAlert('❌ Authentication required. Please log in first.', 'error');
+                return;
+            }
+
+            if (!confirm(`🚨 PERMANENT DELETION\n\nDelete post #${postId}?\n\nThis CANNOT be undone!`)) {
+                return;
+            }
+
+            try {
+                showAlert(`🗑️ Deleting post ${postId}...`, 'info');
+                
+                console.log('DELETE REQUEST:', {
+                    url: `${API_BASE_URL}/admin/posts/${postId}`,
+                    token: authToken ? 'Present' : 'Missing',
+                    user: currentUser
+                });
+
+                const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('DELETE RESPONSE:', response.status, response.statusText);
+                
+                const result = await response.json();
+                console.log('DELETE RESULT:', result);
+
+                if (response.ok) {
+                    showAlert(`✅ Post ${postId} deleted successfully!`, 'success');
+                    
+                    // Remove from UI
+                    const row = document.getElementById(`row-${postId}`);
+                    if (row) {
+                        row.style.background = '#065f46';
+                        row.innerHTML = `<td colspan="5" style="text-align: center; color: #10b981;">
+                            <i class="fas fa-check-circle"></i> POST ${postId} DELETED ✅
+                        </td>`;
+                        setTimeout(() => row.remove(), 2000);
+                    }
+                    
+                    // Remove from local array
+                    allPosts = allPosts.filter(post => post.id != postId);
+                    
+                } else {
+                    throw new Error(result.message || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+            } catch (error) {
+                console.error('Delete error:', error);
+                showAlert(`❌ Delete failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Delete All Posts
+        async function deleteAllPosts() {
+            if (!authToken) {
+                showAlert('❌ Authentication required. Please log in first.', 'error');
+                return;
+            }
+
+            if (!confirm(`🚨🚨 DANGER: DELETE ALL POSTS 🚨🚨\n\nThis will DELETE ALL ${allPosts.length} POSTS!\n\nType "DELETE ALL" to confirm:`)) {
+                return;
+            }
+
+            const confirmation = prompt('Type "DELETE ALL" to confirm:');
+            if (confirmation !== 'DELETE ALL') {
+                showAlert('❌ Deletion cancelled - incorrect confirmation', 'error');
+                return;
+            }
+
+            try {
+                showAlert('🗑️ Deleting all posts...', 'info');
+
+                const response = await fetch(`${API_BASE_URL}/admin/posts`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('✅ All posts deleted successfully!', 'success');
+                    allPosts = [];
+                    displayPosts([]);
+                } else {
+                    throw new Error(result.message || `HTTP ${response.status}`);
+                }
+
+            } catch (error) {
+                console.error('Delete all error:', error);
+                showAlert(`❌ Delete all failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function viewPost(postId) {
+            const post = allPosts.find(p => p.id == postId);
+            if (!post) {
+                alert('Post not found');
+                return;
+            }
+
+            const details = `📝 POST DETAILS
+
+ID: ${post.id}
+Author: ${post.username || 'Anonymous'}
+Content: ${post.content || 'No content'}
+Date: ${new Date(post.date || Date.now()).toLocaleString()}
+Likes: ${post.likes?.length || 0}
+Reactions: ${JSON.stringify(post.reactions || {})}
+
+Status: Loaded from backend
+Platform: NEEX Social`;
+
+            alert(details);
+        }
+    </script>
+</body>
+</html>

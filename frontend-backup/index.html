@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neex - Ultimate Social Media Platform</title>
+  <meta name="description" content="Advanced Social Media Platform with comprehensive features">
+  <meta name="theme-color" content="#1d9bf0">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #000;
+      --bg-secondary: #111;
+      --bg-tertiary: #1a1a1a;
+      --text: #fff;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --primary: #1d9bf0;
+      --primary-hover: #1a8cd8;
+      --border: #333;
+      --border-light: #444;
+      --success: #00ba7c;
+      --warning: #f7931e;
+      --error: #f4212e;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --gradient: linear-gradient(135deg, #1d9bf0, #8b5cf6);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text);
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    body.light {
+      --bg-primary: #fff;
+      --bg-secondary: #f7f9fa;
+      --bg-tertiary: #f0f0f0;
+      --text: #0f1419;
+      --text-secondary: #536471;
+      --text-muted: #8899a6;
+      --border: #eff3f4;
+      --border-light: #e1e8ed;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    
+    .app { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* NAVIGATION STYLES */
+    .nav-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 15px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .nav-center {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .nav-logo {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--primary);
+      text-decoration: none;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    /* BOTTOM NAVIGATION */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 600px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: var(--text-secondary);
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.1);
+    }
+
+    .nav-item:hover {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.05);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item.active i {
+      transform: scale(1.1);
+    }
+
+    .nav-item span {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 4px;
+      right: 12px;
+      background: var(--error);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    /* Add bottom padding to main content to account for bottom nav */
+    .app {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: 80px;
+    }
+
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      padding: 10px 15px 10px 40px;
+      color: var(--text);
+      font-size: 15px;
+      width: 300px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+      width: 350px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 16px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-toggle, .nav-btn {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      padding: 10px 16px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .theme-toggle:hover, .nav-btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-tertiary);
+      transform: translateY(-1px);
+    }
+
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      padding: 8px 14px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .profile-btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-tertiary);
+    }
+
+    .profile-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
+
+    /* COMPOSER STYLES */
+    .composer {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 25px;
+      margin: 20px;
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .composer-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 16px;
+    }
+
+    .composer-main textarea {
+      width: 100%;
+      min-height: 120px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.5;
+      resize: none;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .composer-main textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .media-tools {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 20px 0;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border-radius: 15px;
+      flex-wrap: wrap;
+    }
+
+    .media-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .media-btn:hover {
+      background: var(--bg-primary);
+      transform: scale(1.1);
+      color: var(--primary-hover);
+    }
+
+    .media-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .composer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .char-counter {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .char-counter.warning { color: var(--warning); }
+    .char-counter.error { color: var(--error); }
+
+    .post-btn {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(29, 155, 240, 0.3);
+    }
+
+    .post-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(29, 155, 240, 0.4);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* FEED STYLES */
+    .feed {
+      padding: 0 20px 20px;
+    }
+
+    .post {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .post:hover {
+      border-color: var(--border-light);
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .post-info h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .post-info span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .post-content {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      color: var(--text);
+    }
+
+    .post-image {
+      width: 100%;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      max-height: 400px;
+      object-fit: cover;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 10px 15px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .action-btn.liked {
+      color: var(--error);
+    }
+
+    /* NOTIFICATIONS */
+    .notification {
+      position: fixed;
+      top: 90px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 15px 20px;
+      color: var(--text);
+      max-width: 350px;
+      box-shadow: 0 8px 30px var(--shadow);
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+    }
+
+    .notification.success { border-left: 4px solid var(--success); }
+    .notification.warning { border-left: 4px solid var(--warning); }
+    .notification.error { border-left: 4px solid var(--error); }
+    .notification.info { border-left: 4px solid var(--primary); }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* EMOJI PICKER */
+    .emoji-picker {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 8px 30px var(--shadow);
+      z-index: 1000;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      max-width: 300px;
+    }
+
+    .emoji-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .emoji-btn:hover {
+      background: var(--bg-tertiary);
+      transform: scale(1.2);
+    }
+
+    /* FILE PREVIEW */
+    .file-preview {
+      position: relative;
+      margin: 15px 0;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .file-preview img {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* LOGIN FORM */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px;
+      background: var(--gradient);
+    }
+
+    .login-card {
+      background: var(--bg-secondary);
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 20px 60px var(--shadow);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 32px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 15px;
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 15px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(29, 155, 240, 0.3);
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .app {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .nav-container {
+        padding: 12px 15px;
+      }
+
+      .search-input {
+        width: 200px;
+      }
+
+      .search-input:focus {
+        width: 220px;
+      }
+
+      .nav-btn span, .theme-toggle span {
+        display: none;
+      }
+
+      .composer {
+        margin: 15px;
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .media-tools {
+        gap: 10px;
+      }
+
+      .media-btn {
+        padding: 8px;
+        font-size: 16px;
+      }
+
+      .feed {
+        padding: 0 15px 20px;
+      }
+
+      .post {
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .notification {
+        right: 15px;
+        left: 15px;
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-logo {
+        font-size: 24px;
+      }
+
+      .search-container {
+        display: none;
+      }
+
+      .composer-main textarea {
+        font-size: 16px;
+        min-height: 100px;
+      }
+
+      .media-tools {
+        justify-content: center;
+      }
+
+      .post-btn {
+        padding: 10px 25px;
+        font-size: 14px;
+      }
+    }
+
+    /* DARK MODE ENHANCED */
+    .app.dark-mode {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #151515;
+      --bg-tertiary: #202020;
+    }
+
+    /* ANIMATIONS */
+    .fade-in {
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bounce {
+      animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 60%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      80% { transform: translateY(-5px); }
+    }
+
+    /* ACCESSIBILITY */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ANONYMOUS POST STYLES */
+    .post-mode-dropdown {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      min-width: 120px;
+      transition: all 0.3s ease;
+    }
+
+    .post-mode-dropdown.anonymous {
+      background: linear-gradient(135deg, #6b46c1, #9333ea);
+      border-color: #9333ea;
+      color: white;
+    }
+
+    .post-mode-dropdown:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+    }
+
+    .post-mode-dropdown option {
+      background: var(--bg-secondary);
+      color: var(--text);
+      padding: 8px;
+    }
+
+    .anonymous-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .anonymous-toggle.active {
+      background: linear-gradient(135deg, #6b46c1, #9333ea);
+      color: white;
+    }
+
+    .anonymous-toggle input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      background: var(--bg-primary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .anonymous-toggle input[type="checkbox"]:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .anonymous-toggle input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .anonymous-post {
+      border-left: 3px solid #9333ea;
+      position: relative;
+    }
+
+    .anonymous-post::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 8px;
+      height: 8px;
+      background: #9333ea;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* SCROLL BEHAVIOR */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .app::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .app::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    .app::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .app::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function App() {
+      // Authentication & User State
+      const [loggedIn, setLoggedIn] = useState(false);
+      const [username, setUsername] = useState('');
+      const [password, setPassword] = useState('');
+      const [email, setEmail] = useState('');
+      const [confirmPassword, setConfirmPassword] = useState('');
+      const [currentUser, setCurrentUser] = useState(null);
+      const [showLoginModal, setShowLoginModal] = useState(false);
+      const [isSignupMode, setIsSignupMode] = useState(false);
+      const [bio, setBio] = useState('');
+      const [avatar, setAvatar] = useState('');
+
+      // Theme & UI State
+      const [isDarkMode, setIsDarkMode] = useState(true);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [notifications, setNotifications] = useState([]);
+      
+      // Navigation State
+      const [activeTab, setActiveTab] = useState('home');
+
+      // Post Composer State
+      const [newPost, setNewPost] = useState('');
+      const [postVisibility, setPostVisibility] = useState('public');
+      const [postMode, setPostMode] = useState('regular'); // 'regular' or 'anonymous'
+      const [selectedFile, setSelectedFile] = useState(null);
+      const [imagePreview, setImagePreview] = useState(null);
+      const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+      const [isRecording, setIsRecording] = useState(false);
+
+      // Posts State
+      const [posts, setPosts] = useState([
+        {
+          id: 1,
+          username: 'john_doe',
+          name: 'John Doe',
+          avatar: 'JD',
+          content: '🚀 Welcome to Neex Social! The ultimate social media platform with advanced features like voice messages, stories, real-time messaging, and now anonymous posting! #NeexSocial #SocialMedia',
+          timestamp: '2h',
+          likes: 42,
+          comments: 8,
+          shares: 12,
+          liked: false,
+          image: null,
+          isAnonymous: false
+        },
+        {
+          id: 2,
+          username: 'anonymous',
+          name: 'Anonymous',
+          avatar: '👤',
+          content: 'Finally! A place where I can share my thoughts without worrying about judgment. The anonymous feature on Neex is exactly what social media needed. 🔒✨',
+          timestamp: '3h',
+          likes: 28,
+          comments: 15,
+          shares: 7,
+          liked: true,
+          image: null,
+          isAnonymous: true
+        },
+        {
+          id: 3,
+          username: 'tech_guru',
+          name: 'Tech Guru',
+          avatar: 'TG',
+          content: 'Just discovered this amazing new platform! The navigation system is incredible and the user experience is top-notch. Loving the dark mode! 🌙',
+          timestamp: '4h',
+          likes: 35,
+          comments: 5,
+          shares: 9,
+          liked: false,
+          image: null,
+          isAnonymous: false
+        }
+      ]);
+
+      // Effects
+      useEffect(() => {
+        document.body.className = isDarkMode ? '' : 'light';
+      }, [isDarkMode]);
+
+      // Check localStorage for saved user
+      useEffect(() => {
+        const savedUser = localStorage.getItem('neexUser');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          setCurrentUser(user);
+          setLoggedIn(true);
+        }
+      }, []);
+
+      // Notification System
+      const addNotification = (message, type = 'info') => {
+        const id = Date.now();
+        const notification = { id, message, type };
+        setNotifications(prev => [...prev, notification]);
+        
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== id));
+        }, 4000);
+      };
+
+      // Authentication Functions
+      const handleLogin = async () => {
+        if (!username || !password) {
+          addNotification('Please enter username and password', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch('`${API_BASE_URL}/login`', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            setLoggedIn(true);
+            setCurrentUser(data.user);
+            localStorage.setItem('neexUser', JSON.stringify(data.user));
+            setShowLoginModal(false);
+            setUsername('');
+            setPassword('');
+            addNotification(`Welcome back, ${data.user.name}! 🎉`, 'success');
+          } else {
+            addNotification(data.message || 'Login failed', 'error');
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          // Fallback to simple login for development
+          const user = {
+            name: username.charAt(0).toUpperCase() + username.slice(1),
+            username: '@' + username,
+            avatar: username.substring(0, 2).toUpperCase()
+          };
+          setLoggedIn(true);
+          setCurrentUser(user);
+          localStorage.setItem('neexUser', JSON.stringify(user));
+          setShowLoginModal(false);
+          addNotification('Welcome back to Neex Social! 🎉', 'success');
+        }
+      };
+
+      const handleSignup = async () => {
+        // Validation
+        if (!username || !email || !password || !confirmPassword) {
+          addNotification('Please fill in all fields', 'error');
+          return;
+        }
+        
+        if (password !== confirmPassword) {
+          addNotification('Passwords do not match', 'error');
+          return;
+        }
+        
+        if (password.length < 6) {
+          addNotification('Password must be at least 6 characters', 'error');
+          return;
+        }
+
+        try {
+          // Create user object
+          const newUser = {
+            name: username.charAt(0).toUpperCase() + username.slice(1),
+            username: '@' + username,
+            email: email,
+            bio: bio || 'New to Neex Social! 🌟',
+            avatar: avatar || username.substring(0, 2).toUpperCase(),
+            joinDate: new Date().toISOString(),
+            followers: 0,
+            following: 0,
+            posts: 0
+          };
+
+          // Save user to backend
+          const response = await fetch('`${API_BASE_URL}/users`', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newUser)
+          });
+
+          if (response.ok) {
+            setLoggedIn(true);
+            setCurrentUser(newUser);
+            localStorage.setItem('neexUser', JSON.stringify(newUser));
+            setShowLoginModal(false);
+            setIsSignupMode(false);
+            
+            // Reset form
+            setUsername('');
+            setPassword('');
+            setConfirmPassword('');
+            setEmail('');
+            setBio('');
+            setAvatar('');
+            
+            addNotification('🎉 Welcome to Neex Social! Your account has been created successfully!', 'success');
+          } else {
+            addNotification('Failed to create account. Please try again.', 'error');
+          }
+        } catch (error) {
+          console.error('Signup error:', error);
+          addNotification('Network error. Please check your connection.', 'error');
+        }
+      };
+
+      const handleLogout = () => {
+        setLoggedIn(false);
+        setCurrentUser(null);
+        setUsername('');
+        setPassword('');
+        localStorage.removeItem('neexUser');
+        addNotification('See you later! 👋', 'info');
+      };
+
+      // Show login modal when user tries to interact
+      const requireLogin = (action) => {
+        if (!loggedIn) {
+          setShowLoginModal(true);
+          addNotification('Please login to ' + action, 'info');
+          return false;
+        }
+        return true;
+      };
+
+      // Theme Functions
+      const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
+        addNotification(`Switched to ${isDarkMode ? 'light' : 'dark'} mode! 🎨`, 'info');
+      };
+
+      // API Configuration - Simple fallback
+      const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'https://neex-social-production.up.railway.app';
+      console.log('🌍 NEEX Global Network - API:', API_BASE_URL);
+
+      // Initialize posts from backend and setup real-time updates
+      const fetchPosts = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts`);
+          if (response.ok) {
+            const backendPosts = await response.json();
+            // Sort posts by creation date (newest first)
+            const sortedPosts = backendPosts.sort((a, b) => {
+              const dateA = new Date(a.createdAt || a.date || a.timestamp);
+              const dateB = new Date(b.createdAt || b.date || b.timestamp);
+              return dateB - dateA; // Newest first
+            });
+            
+            // Remove duplicates based on post ID
+            const uniquePosts = sortedPosts.filter((post, index, self) => 
+              index === self.findIndex(p => p.id === post.id)
+            );
+            
+            setPosts(uniquePosts);
+          }
+        } catch (error) {
+          console.log('Backend offline, using sample data');
+        }
+      };
+
+      // Fetch posts on component mount and setup polling for real-time updates
+      useEffect(() => {
+        fetchPosts();
+        
+        // Poll for new posts every 3 seconds for real-time updates
+        const interval = setInterval(fetchPosts, 3000);
+        
+        return () => clearInterval(interval);
+      }, []);
+
+      // Post Functions
+      const handlePost = async () => {
+        // Check if user is logged in
+        if (!requireLogin('post')) return;
+        
+        if (!newPost.trim() && !selectedFile) {
+          addNotification('Please write something or select an image to post', 'warning');
+          return;
+        }
+        
+        if (newPost.trim() || selectedFile) {
+          const isAnonymous = postMode === 'anonymous';
+          const username = currentUser?.username ? currentUser.username.substring(1) : 'Guest';
+          
+          try {
+            let response;
+            
+            if (selectedFile) {
+              // Use FormData for file uploads
+              const formData = new FormData();
+              formData.append('username', username);
+              formData.append('content', newPost.trim());
+              formData.append('isAnonymous', isAnonymous);
+              formData.append('image', selectedFile);
+              
+              console.log('Posting with image:', { username, content: newPost.trim(), isAnonymous, hasImage: true });
+              
+              response = await fetch(`${API_BASE_URL}/posts`, {
+                method: 'POST',
+                body: formData // Don't set Content-Type header for FormData
+              });
+            } else {
+              // Use JSON for text-only posts
+              const post = {
+                username: username,
+                content: newPost.trim(),
+                isAnonymous: isAnonymous
+              };
+              
+              console.log('Posting text only:', post);
+              
+              response = await fetch(`${API_BASE_URL}/posts`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(post)
+              });
+            }
+            
+            if (response.ok) {
+              const result = await response.json();
+              console.log('Post response:', result);
+              
+              // Clear form
+              setNewPost('');
+              setSelectedFile(null);
+              setImagePreview(null);
+              setPostMode('regular');
+              
+              // Show success message
+              const successMsg = selectedFile 
+                ? (isAnonymous ? 'Anonymous post with image shared! 🔒📸' : 'Post with image shared successfully! 🎊📸')
+                : (isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊');
+              
+              addNotification(successMsg, 'success');
+              
+              // Refresh posts to show the new one
+              setTimeout(() => {
+                fetchPosts();
+              }, 500);
+            } else {
+              const errorData = await response.json();
+              console.error('Post failed:', errorData);
+              addNotification(errorData.message || 'Failed to post. Please try again.', 'error');
+            }
+          } catch (error) {
+            console.error('Error posting:', error);
+            addNotification('Network error. Please check your connection.', 'error');
+          }
+        }
+      };
+
+      const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setSelectedFile(file);
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => setImagePreview(e.target.result);
+            reader.readAsDataURL(file);
+          }
+          addNotification('File uploaded successfully! 📎', 'success');
+        }
+      };
+
+      const removePreview = () => {
+        setSelectedFile(null);
+        setImagePreview(null);
+      };
+
+      // Social Actions
+      const toggleLike = (postId) => {
+        if (!requireLogin('like posts')) return;
+        
+        setPosts(prev => prev.map(post => 
+          post.id === postId 
+            ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
+            : post
+        ));
+      };
+
+      // Emoji Functions
+      const emojis = ['😀', '😂', '🥺', '😍', '🤔', '👍', '❤️', '🔥', '💯', '🎉', '🚀', '💡', '🌟', '⚡', '🎯', '💪'];
+      
+      const addEmoji = (emoji) => {
+        setNewPost(prev => prev + emoji);
+        setShowEmojiPicker(false);
+      };
+
+      // Character count and validation
+      const charCount = newPost.length;
+      const isOverLimit = charCount > 280;
+      const isNearLimit = charCount > 250;
+
+      // Main App - Always show the feed
+      return (
+        <div className="app">
+          {/* Login/Signup Modal */}
+          {showLoginModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000
+            }}>
+              <div style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: '20px',
+                padding: '30px',
+                maxWidth: '400px',
+                width: '90%',
+                position: 'relative',
+                maxHeight: '90vh',
+                overflowY: 'auto'
+              }}>
+                <button 
+                  style={{
+                    position: 'absolute',
+                    top: '15px',
+                    right: '15px',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text)',
+                    fontSize: '20px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    setIsSignupMode(false);
+                    setUsername('');
+                    setPassword('');
+                    setConfirmPassword('');
+                    setEmail('');
+                    setBio('');
+                  }}
+                >
+                  ✕
+                </button>
+                
+                {/* NEEX Logo */}
+                <div style={{
+                  textAlign: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    marginBottom: '10px'
+                  }}>
+                    <img 
+                      src="logo.png" 
+                      alt="NEEX Logo" 
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <span style={{
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                      background: 'var(--gradient)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>
+                      NEEX
+                    </span>
+                  </div>
+                </div>
+                
+                <h2 style={{textAlign: 'center', marginBottom: '10px', color: 'var(--primary)'}}>
+                  {isSignupMode ? 'Join Neex' : 'Login to Neex'}
+                </h2>
+                <p style={{textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '20px'}}>
+                  {isSignupMode ? 'Create your account and start connecting!' : 'Welcome back! Join the conversation!'}
+                </p>
+                
+                {/* Signup Form */}
+                {isSignupMode ? (
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      className="form-input"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      className="form-input"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Password (min 6 characters)"
+                      className="form-input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Confirm Password"
+                      className="form-input"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <textarea
+                      placeholder="Bio (optional)"
+                      className="form-input"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      style={{marginBottom: '20px', minHeight: '60px', resize: 'vertical'}}
+                    />
+                    <button 
+                      style={{
+                        width: '100%',
+                        background: 'var(--gradient)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginBottom: '15px'
+                      }}
+                      onClick={handleSignup}
+                    >
+                      Create Account
+                    </button>
+                    <p style={{textAlign: 'center', fontSize: '14px', color: 'var(--text-secondary)'}}>
+                      Already have an account?{' '}
+                      <span 
+                        style={{color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline'}}
+                        onClick={() => {
+                          setIsSignupMode(false);
+                          setUsername('');
+                          setPassword('');
+                          setConfirmPassword('');
+                          setEmail('');
+                          setBio('');
+                        }}
+                      >
+                        Login here
+                      </span>
+                    </p>
+                  </>
+                ) : (
+                  /* Login Form */
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      className="form-input"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      className="form-input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                      style={{marginBottom: '20px'}}
+                    />
+                    <button 
+                      style={{
+                        width: '100%',
+                        background: 'var(--gradient)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginBottom: '15px'
+                      }}
+                      onClick={handleLogin}
+                    >
+                      Login
+                    </button>
+                    <p style={{textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '10px'}}>
+                      Enter any username and password to continue
+                    </p>
+                    <p style={{textAlign: 'center', fontSize: '14px', color: 'var(--text-secondary)'}}>
+                      Don't have an account?{' '}
+                      <span 
+                        style={{color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline'}}
+                        onClick={() => {
+                          setIsSignupMode(true);
+                          setUsername('');
+                          setPassword('');
+                        }}
+                      >
+                        Sign up here
+                      </span>
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          {/* Simple Navigation Bar */}
+          <nav className="nav-container">
+            <div className="nav-center">
+              <div className="logo-container">
+                <img src="logo.png" alt="NEEX Logo" className="logo-img" />
+                <span className="nav-logo">NEEX</span>
+              </div>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              {loggedIn ? (
+                <>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '14px'}}>
+                    <div className="user-avatar" style={{width: '24px', height: '24px', fontSize: '10px'}}>
+                      {currentUser?.avatar}
+                    </div>
+                    <span>{currentUser?.name}</span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    style={{
+                      background: 'none',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      padding: '6px 12px',
+                      borderRadius: '15px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  style={{
+                    background: 'var(--primary)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '15px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Login
+                </button>
+              )}
+            </div>
+          </nav>
+
+          {/* Main Content based on active tab */}
+          {activeTab === 'home' && (
+            <>
+              {/* Notifications */}
+              {notifications.map(notification => (
+                <div key={notification.id} className={`notification ${notification.type} fade-in`}>
+                  {notification.message}
+                </div>
+              ))}
+
+          {/* Post Composer */}
+          <div className="composer fade-in">
+            {loggedIn ? (
+              <>
+                <div className="composer-header">
+                  <div className="user-avatar">{postMode === 'anonymous' ? '👤' : currentUser?.avatar}</div>
+                  <div>
+                    <h3>{postMode === 'anonymous' ? 'Anonymous' : currentUser?.name}</h3>
+                    <p style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                      {postMode === 'anonymous' ? '@anonymous' : currentUser?.username}
+                    </p>
+                  </div>
+                  <div style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                    <select
+                      value={postMode}
+                      onChange={(e) => setPostMode(e.target.value)}
+                      className={`post-mode-dropdown ${postMode === 'anonymous' ? 'anonymous' : ''}`}
+                      style={{
+                        background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--bg-primary)',
+                        border: `1px solid ${postMode === 'anonymous' ? '#9333ea' : 'var(--border)'}`,
+                        borderRadius: '20px',
+                        padding: '8px 12px',
+                        color: postMode === 'anonymous' ? 'white' : 'var(--text)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        minWidth: '120px'
+                      }}
+                    >
+                      <option value="regular" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                        👤 Regular
+                      </option>
+                      <option value="anonymous" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                        🔒 Anonymous
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div className="composer-main">
+                  <textarea
+                    placeholder={postMode === 'anonymous' ? "Share something anonymously..." : "What's happening on Neex?"}
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    maxLength="500"
+                  />
+                </div>
+              </>
+            ) : (
+              <div style={{textAlign: 'center', padding: '30px'}}>
+                <div style={{fontSize: '48px', marginBottom: '15px'}}>👋</div>
+                <h3 style={{marginBottom: '10px'}}>Welcome to NEEX!</h3>
+                <p style={{color: 'var(--text-secondary)', marginBottom: '20px'}}>
+                  Browse posts from the community or login to share your thoughts
+                </p>
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  style={{
+                    background: 'var(--gradient)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Login to Post
+                </button>
+              </div>
+            )}
+
+            {loggedIn && (
+              <>
+                {imagePreview && (
+                  <div className="file-preview">
+                    <img src={imagePreview} alt="Preview" />
+                    <button className="remove-preview" onClick={removePreview}>
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
+
+                <div className="media-tools">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    style={{display: 'none'}}
+                    accept="image/*,video/*,audio/*"
+                    onChange={handleFileUpload}
+                  />
+                  <label htmlFor="file-upload" className="media-btn" title="Upload Photo">
+                    <i className="fas fa-image"></i>
+                  </label>
+                  
+                  <button className="media-btn" title="Upload Video">
+                    <i className="fas fa-video"></i>
+                  </button>
+                  
+                  <button className="media-btn" title="Upload Audio">
+                    <i className="fas fa-microphone"></i>
+                  </button>
+                  
+                  <div style={{position: 'relative'}}>
+                    <button 
+                      className="media-btn" 
+                      title="Add Emoji"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <i className="fas fa-smile"></i>
+                    </button>
+                    
+                    {showEmojiPicker && (
+                      <div className="emoji-picker">
+                        {emojis.map((emoji, index) => (
+                          <button
+                            key={index}
+                            className="emoji-btn"
+                            onClick={() => addEmoji(emoji)}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button className="media-btn" title="Add Poll">
+                    <i className="fas fa-poll"></i>
+                  </button>
+                  
+                  <button className="media-btn" title="Schedule Post">
+                    <i className="fas fa-calendar"></i>
+                  </button>
+                </div>
+
+                <div className="composer-footer">
+                  <div className={`char-counter ${isNearLimit ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
+                    {charCount}/280
+                  </div>
+                  <button 
+                    className="post-btn bounce"
+                    onClick={handlePost}
+                    disabled={isOverLimit || (!newPost.trim() && !selectedFile)}
+                    style={{
+                      background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)'
+                    }}
+                  >
+                    <i className={`fas ${postMode === 'anonymous' ? 'fa-mask' : 'fa-paper-plane'}`} style={{marginRight: '8px'}}></i>
+                    {postMode === 'anonymous' ? 'Post Anonymously' : 'Post to Neex'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Feed */}
+          <div className="feed">
+            {posts.map(post => (
+              <div key={post.id} className={`post fade-in ${post.isAnonymous ? 'anonymous-post' : ''}`}>
+                <div className="post-header">
+                  <div className="post-avatar" style={{
+                    background: post.isAnonymous ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)',
+                    fontSize: post.isAnonymous ? '20px' : 'inherit'
+                  }}>
+                    {post.avatar}
+                  </div>
+                  <div className="post-info">
+                    <h4 style={{
+                      color: post.isAnonymous ? '#9333ea' : 'var(--text)'
+                    }}>
+                      {post.name}
+                      {post.isAnonymous && <i className="fas fa-mask" style={{marginLeft: '8px', fontSize: '12px'}}></i>}
+                    </h4>
+                    <span>@{post.username} • {post.timestamp}</span>
+                  </div>
+                </div>
+                
+                <div className="post-content">{post.content}</div>
+                
+                {post.image && (
+                  <img src={post.image} alt="Post" className="post-image" />
+                )}
+                
+                <div className="post-actions">
+                  <button className="action-btn">
+                    <i className="fas fa-comment"></i>
+                    <span>{post.comments}</span>
+                  </button>
+                  
+                  <button 
+                    className={`action-btn ${post.liked ? 'liked' : ''}`}
+                    onClick={() => toggleLike(post.id)}
+                  >
+                    <i className={`${post.liked ? 'fas' : 'far'} fa-heart`}></i>
+                    <span>{post.likes}</span>
+                  </button>
+                  
+                  <button className="action-btn">
+                    <i className="fas fa-share"></i>
+                    <span>{post.shares}</span>
+                  </button>
+                  
+                  <button className="action-btn">
+                    <i className="fas fa-bookmark"></i>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+            </>
+          )}
+
+          {activeTab === 'search' && (
+            <div className="search-page">
+              <div style={{padding: '20px'}}>
+                <div style={{background: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px', marginBottom: '20px', textAlign: 'center'}}>
+                  <i className="fas fa-search" style={{fontSize: '48px', color: 'var(--primary)', marginBottom: '16px'}}></i>
+                  <h3>Search NEEX</h3>
+                  <p style={{color: 'var(--text-secondary)', marginBottom: '20px'}}>Discover posts, people, and trending topics</p>
+                  <input 
+                    type="text" 
+                    placeholder="Search for posts, users, hashtags..." 
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text)',
+                      fontSize: '16px'
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                {searchQuery && (
+                  <div>
+                    <h4 style={{marginBottom: '16px'}}>Search Results for "{searchQuery}"</h4>
+                    {posts.filter(post => 
+                      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      post.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (!post.isAnonymous && post.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ).map(post => (
+                      <div key={post.id} className={`post fade-in ${post.isAnonymous ? 'anonymous-post' : ''}`} style={{marginBottom: '16px'}}>
+                        <div className="post-header">
+                          <div className="post-avatar" style={{
+                            background: post.isAnonymous ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)',
+                            fontSize: post.isAnonymous ? '20px' : 'inherit'
+                          }}>
+                            {post.avatar}
+                          </div>
+                          <div className="post-info">
+                            <h4 style={{
+                              color: post.isAnonymous ? '#9333ea' : 'var(--text)'
+                            }}>
+                              {post.name}
+                              {post.isAnonymous && <i className="fas fa-mask" style={{marginLeft: '8px', fontSize: '12px'}}></i>}
+                            </h4>
+                            <span>@{post.username} • {post.timestamp}</span>
+                          </div>
+                        </div>
+                        <div className="post-content">{post.content}</div>
+                      </div>
+                    ))}
+                    {posts.filter(post => 
+                      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      post.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (!post.isAnonymous && post.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                    ).length === 0 && (
+                      <p style={{color: 'var(--text-secondary)', textAlign: 'center', padding: '20px'}}>
+                        No results found for "{searchQuery}"
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {!searchQuery && (
+                  <div>
+                    <h4 style={{marginBottom: '16px'}}>Trending Topics</h4>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                      {['#NeexSocial', '#Anonymous', '#SocialMedia', '#TechNews', '#Trending', '#ReactJS'].map(tag => (
+                        <div key={tag} style={{
+                          background: 'var(--bg-secondary)',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          border: tag === '#Anonymous' ? '1px solid #9333ea' : '1px solid var(--border)'
+                        }} onClick={() => setSearchQuery(tag)}>
+                          <strong style={{color: tag === '#Anonymous' ? '#9333ea' : 'var(--text)'}}>
+                            {tag === '#Anonymous' && <i className="fas fa-mask" style={{marginRight: '8px'}}></i>}
+                            {tag}
+                          </strong>
+                          <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                            {Math.floor(Math.random() * 1000) + 100} posts
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className="notifications-page">
+              <div style={{padding: '20px'}}>
+                <h3 style={{marginBottom: '20px'}}>Notifications</h3>
+                {notifications.length > 0 ? (
+                  notifications.map(notification => (
+                    <div key={notification.id} style={{
+                      background: 'var(--bg-secondary)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      marginBottom: '12px',
+                      border: '1px solid var(--border)'
+                    }}>
+                      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                        <i className="fas fa-bell" style={{color: 'var(--primary)'}}></i>
+                        <div>
+                          {notification.message}
+                          <div style={{fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px'}}>
+                            Just now
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{textAlign: 'center', padding: '40px 20px'}}>
+                    <i className="fas fa-bell" style={{fontSize: '48px', color: 'var(--primary)', marginBottom: '16px'}}></i>
+                    <h4>No notifications yet</h4>
+                    <p style={{color: 'var(--text-secondary)'}}>When you get notifications, they'll show up here</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="profile-page">
+              <div style={{padding: '20px'}}>
+                <div style={{
+                  background: 'var(--bg-secondary)',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{
+                    fontSize: '64px',
+                    marginBottom: '16px'
+                  }}>
+                    {currentUser?.avatar}
+                  </div>
+                  <h2>{currentUser?.name}</h2>
+                  <p style={{color: 'var(--text-secondary)', marginBottom: '16px'}}>@{currentUser?.username}</p>
+                  <p style={{marginBottom: '20px'}}>{currentUser?.bio}</p>
+                  <div style={{display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '20px'}}>
+                    <div>
+                      <strong>{posts.filter(p => p.username === currentUser?.username.substring(1) && !p.isAnonymous).length}</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Posts</div>
+                    </div>
+                    <div>
+                      <strong>156</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Following</div>
+                    </div>
+                    <div>
+                      <strong>1.2K</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Followers</div>
+                    </div>
+                  </div>
+                  <button style={{
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginRight: '12px'
+                  }}>
+                    Edit Profile
+                  </button>
+                </div>
+
+                <div>
+                  <h4 style={{marginBottom: '16px'}}>My Posts</h4>
+                  {posts.filter(post => post.username === currentUser?.username.substring(1) && !post.isAnonymous).length > 0 ? (
+                    posts.filter(post => post.username === currentUser?.username.substring(1) && !post.isAnonymous).map(post => (
+                      <div key={post.id} className="post fade-in" style={{marginBottom: '16px'}}>
+                        <div className="post-content" style={{marginBottom: '12px'}}>{post.content}</div>
+                        <div style={{fontSize: '14px', color: 'var(--text-secondary)'}}>
+                          {post.likes} likes • {post.comments} comments • {post.timestamp}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{textAlign: 'center', padding: '20px', color: 'var(--text-secondary)'}}>
+                      <p>You haven't posted anything yet!</p>
+                      <button 
+                        style={{
+                          background: 'var(--primary)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '8px 16px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          marginTop: '10px'
+                        }}
+                        onClick={() => setActiveTab('home')}
+                      >
+                        Create Your First Post
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Navigation */}
+          <div className="bottom-nav">
+            <div 
+              className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
+              onClick={() => setActiveTab('home')}
+            >
+              <i className={activeTab === 'home' ? 'fas fa-home' : 'far fa-home'}></i>
+              <span>Home</span>
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
+              onClick={() => setActiveTab('search')}
+            >
+              <i className="fas fa-search"></i>
+              <span>Search</span>
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'notifications' ? 'active' : ''}`}
+              onClick={() => setActiveTab('notifications')}
+            >
+              <i className={activeTab === 'notifications' ? 'fas fa-bell' : 'far fa-bell'}></i>
+              <span>Notifications</span>
+              {notifications.length > 0 && (
+                <div className="notification-badge">{notifications.length}</div>
+              )}
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <i className={activeTab === 'profile' ? 'fas fa-user' : 'far fa-user'}></i>
+              <span>Profile</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

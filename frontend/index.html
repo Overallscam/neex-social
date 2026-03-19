@@ -1,0 +1,4628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neex - Ultimate Social Media Platform</title>
+  <meta name="description" content="Advanced Social Media Platform with comprehensive features">
+  <meta name="theme-color" content="#1d9bf0">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #000;
+      --bg-secondary: #111;
+      --bg-tertiary: #1a1a1a;
+      --text: #fff;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --primary: #1d9bf0;
+      --primary-hover: #1a8cd8;
+      --border: #333;
+      --border-light: #444;
+      --success: #00ba7c;
+      --warning: #f7931e;
+      --error: #f4212e;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --gradient: linear-gradient(135deg, #1d9bf0, #8b5cf6);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text);
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    body.light {
+      --bg-primary: #fff;
+      --bg-secondary: #f7f9fa;
+      --bg-tertiary: #f0f0f0;
+      --text: #0f1419;
+      --text-secondary: #536471;
+      --text-muted: #8899a6;
+      --border: #eff3f4;
+      --border-light: #e1e8ed;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    
+    .app { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* NAVIGATION STYLES */
+    .nav-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 15px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .nav-center {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .nav-logo {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--primary);
+      text-decoration: none;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    /* BOTTOM NAVIGATION */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 600px;
+      width: 100%;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: var(--text-secondary);
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.1);
+    }
+
+    .nav-item:hover {
+      color: var(--primary);
+      background: rgba(29, 155, 240, 0.05);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-item.active i {
+      transform: scale(1.1);
+    }
+
+    .nav-item span {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 4px;
+      right: 12px;
+      background: var(--error);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    /* Messages Styles */
+    .messages-page {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-item:hover {
+      background: var(--bg-secondary) !important;
+    }
+
+    .message-bubble {
+      animation: messageSlideIn 0.3s ease-out;
+    }
+
+    @keyframes messageSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .typing-indicator {
+      animation: typingPulse 1.5s infinite;
+    }
+
+    @keyframes typingPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Add bottom padding to main content to account for bottom nav */
+    .app {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: 80px;
+    }
+
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      padding: 10px 15px 10px 40px;
+      color: var(--text);
+      font-size: 15px;
+      width: 300px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+      width: 350px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 16px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-toggle, .nav-btn {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      padding: 10px 16px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .theme-toggle:hover, .nav-btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-tertiary);
+      transform: translateY(-1px);
+    }
+
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      padding: 8px 14px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .profile-btn:hover {
+      border-color: var(--primary);
+      background: var(--bg-tertiary);
+    }
+
+    .profile-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
+
+    /* COMPOSER STYLES */
+    .composer {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 25px;
+      margin: 20px;
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .composer-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 16px;
+    }
+
+    .composer-main textarea {
+      width: 100%;
+      min-height: 120px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.5;
+      resize: none;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .composer-main textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .media-tools {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 20px 0;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border-radius: 15px;
+      flex-wrap: wrap;
+    }
+
+    .media-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .media-btn:hover {
+      background: var(--bg-primary);
+      transform: scale(1.1);
+      color: var(--primary-hover);
+    }
+
+    .media-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .composer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .char-counter {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .char-counter.warning { color: var(--warning); }
+    .char-counter.error { color: var(--error); }
+
+    .post-btn {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(29, 155, 240, 0.3);
+    }
+
+    .post-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(29, 155, 240, 0.4);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* FEED STYLES */
+    .feed {
+      padding: 0 20px 20px;
+    }
+
+    .post {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .post:hover {
+      border-color: var(--border-light);
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .post-info h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .post-info span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .post-content {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      color: var(--text);
+    }
+
+    .post-image {
+      width: 100%;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      max-height: 400px;
+      object-fit: cover;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 10px 15px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .action-btn.liked {
+      color: var(--error);
+    }
+
+    /* NOTIFICATIONS */
+    .notification {
+      position: fixed;
+      top: 90px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 15px 20px;
+      color: var(--text);
+      max-width: 350px;
+      box-shadow: 0 8px 30px var(--shadow);
+      z-index: 2000;
+      animation: slideInRight 0.3s ease;
+    }
+
+    .notification.success { border-left: 4px solid var(--success); }
+    .notification.warning { border-left: 4px solid var(--warning); }
+    .notification.error { border-left: 4px solid var(--error); }
+    .notification.info { border-left: 4px solid var(--primary); }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* EMOJI PICKER */
+    .emoji-picker {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 8px 30px var(--shadow);
+      z-index: 1000;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      max-width: 300px;
+    }
+
+    .emoji-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .emoji-btn:hover {
+      background: var(--bg-tertiary);
+      transform: scale(1.2);
+    }
+
+    /* FILE PREVIEW */
+    .file-preview {
+      position: relative;
+      margin: 15px 0;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .file-preview img {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* LOGIN FORM */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px;
+      background: var(--gradient);
+    }
+
+    .login-card {
+      background: var(--bg-secondary);
+      border-radius: 25px;
+      padding: 40px;
+      box-shadow: 0 20px 60px var(--shadow);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 32px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-card p {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 15px;
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 15px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(29, 155, 240, 0.3);
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .app {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .nav-container {
+        padding: 12px 15px;
+      }
+
+      .search-input {
+        width: 200px;
+      }
+
+      .search-input:focus {
+        width: 220px;
+      }
+
+      .nav-btn span, .theme-toggle span {
+        display: none;
+      }
+
+      .composer {
+        margin: 15px;
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .media-tools {
+        gap: 10px;
+      }
+
+      .media-btn {
+        padding: 8px;
+        font-size: 16px;
+      }
+
+      .feed {
+        padding: 0 15px 20px;
+      }
+
+      .post {
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .notification {
+        right: 15px;
+        left: 15px;
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-logo {
+        font-size: 24px;
+      }
+
+      .search-container {
+        display: none;
+      }
+
+      .composer-main textarea {
+        font-size: 16px;
+        min-height: 100px;
+      }
+
+      .media-tools {
+        justify-content: center;
+      }
+
+      .post-btn {
+        padding: 10px 25px;
+        font-size: 14px;
+      }
+    }
+
+    /* DARK MODE ENHANCED */
+    .app.dark-mode {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #151515;
+      --bg-tertiary: #202020;
+    }
+
+    /* ANIMATIONS */
+    .fade-in {
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bounce {
+      animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 60%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      80% { transform: translateY(-5px); }
+    }
+
+    /* ACCESSIBILITY */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ANONYMOUS POST STYLES */
+    .post-mode-dropdown {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      min-width: 120px;
+      transition: all 0.3s ease;
+    }
+
+    .post-mode-dropdown.anonymous {
+      background: linear-gradient(135deg, #6b46c1, #9333ea);
+      border-color: #9333ea;
+      color: white;
+    }
+
+    .post-mode-dropdown:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(29, 155, 240, 0.1);
+    }
+
+    .post-mode-dropdown option {
+      background: var(--bg-secondary);
+      color: var(--text);
+      padding: 8px;
+    }
+
+    .anonymous-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .anonymous-toggle.active {
+      background: linear-gradient(135deg, #6b46c1, #9333ea);
+      color: white;
+    }
+
+    .anonymous-toggle input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      background: var(--bg-primary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .anonymous-toggle input[type="checkbox"]:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .anonymous-toggle input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .anonymous-post {
+      border-left: 3px solid #9333ea;
+      position: relative;
+    }
+
+    .anonymous-post::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 8px;
+      height: 8px;
+      background: #9333ea;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid var(--border);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* SCROLL BEHAVIOR */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .app::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .app::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    .app::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .app::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    /* Comments Styles */
+    .comments-section {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .comments-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .comment-item {
+      transition: background 0.2s ease;
+    }
+
+    .comment-item:hover {
+      background: var(--bg-primary);
+    }
+
+    .comment-input {
+      transition: border-color 0.2s ease;
+    }
+
+    .comment-input:focus {
+      border-color: var(--primary) !important;
+    }
+
+    .comment-send-btn {
+      transition: all 0.2s ease;
+    }
+
+    /* INSTAGRAM MESSAGING STYLES */
+    .ig-messaging-container {
+      height: 100vh;
+      max-height: 100vh;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ig-messaging-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .ig-messaging-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ig-messaging-user h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .ig-new-message-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .ig-new-message-btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    .ig-messaging-content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ig-conversations-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .ig-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .ig-empty-icon {
+      width: 96px;
+      height: 96px;
+      border: 2px solid var(--text-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: 40px;
+    }
+
+    .ig-empty-state h4 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      font-weight: 300;
+    }
+
+    .ig-empty-state p {
+      margin: 0 0 24px 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .ig-send-message-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .ig-send-message-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .ig-conversation-item {
+      padding: 8px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s ease;
+      position: relative;
+    }
+
+    .ig-conversation-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .ig-conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ig-conversation-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .ig-conversation-preview {
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ig-conversation-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .ig-unread-badge {
+      background: var(--primary);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .ig-user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .ig-user-avatar.ig-active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      background: #44d362;
+      border: 2px solid var(--bg-primary);
+      border-radius: 50%;
+    }
+
+    .ig-user-avatar.online::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 12px;
+      height: 12px;
+      background: #44d362;
+      border: 2px solid var(--bg-primary);
+      border-radius: 50%;
+    }
+
+    .ig-user-avatar.ig-large {
+      width: 80px;
+      height: 80px;
+      font-size: 24px;
+    }
+
+    .ig-chat-interface {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ig-chat-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-primary);
+    }
+
+    .ig-back-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .ig-chat-user-info {
+      flex: 1;
+    }
+
+    .ig-chat-user-info h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .ig-user-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .ig-chat-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ig-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s ease;
+    }
+
+    .ig-action-btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    .ig-messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px 0;
+    }
+
+    .ig-empty-messages {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .ig-empty-messages h4 {
+      margin: 16px 0 4px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .ig-empty-messages p {
+      margin: 0 0 20px 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .ig-wave-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .ig-wave-btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    .ig-messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-bottom: 16px;
+    }
+
+    .ig-message {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .ig-message.own {
+      flex-direction: row-reverse;
+    }
+
+    .ig-message.own .ig-message-bubble {
+      background: var(--primary);
+      color: white;
+    }
+
+    .ig-message-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .ig-message-bubble {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 8px 12px;
+      max-width: 236px;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .ig-message.own .ig-message-bubble {
+      border: none;
+    }
+
+    .ig-message-time {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin: 4px 8px 0;
+      text-align: center;
+    }
+
+    .ig-typing-indicator {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .ig-typing-dots {
+      display: flex;
+      gap: 2px;
+    }
+
+    .ig-typing-dots span {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .ig-typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .ig-typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing {
+      0%, 80%, 100% { 
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% { 
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .ig-message-input-container {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-primary);
+    }
+
+    .ig-message-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 8px 16px;
+      background: var(--bg-primary);
+    }
+
+    .ig-emoji-btn, .ig-media-btn, .ig-like-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .ig-emoji-btn:hover, .ig-media-btn:hover, .ig-like-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .ig-message-input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      padding: 4px 8px;
+    }
+
+    .ig-message-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .ig-send-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      transition: color 0.2s ease;
+    }
+
+    .ig-send-btn:hover {
+      color: var(--primary-hover);
+    }
+
+    .ig-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .ig-modal {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90vw;
+      max-height: 70vh;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .ig-modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+    }
+
+    .ig-modal-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .ig-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .ig-modal-content {
+      padding: 0;
+      max-height: calc(70vh - 60px);
+      overflow-y: auto;
+    }
+
+    .ig-search-input-wrapper {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ig-search-input {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .ig-search-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .ig-user-list {
+      padding: 8px 0;
+    }
+
+    .ig-suggestions-header {
+      padding: 8px 20px;
+    }
+
+    .ig-suggestions-header h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .ig-no-users {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .ig-no-users i {
+      font-size: 32px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .ig-user-item {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      text-align: left;
+    }
+
+    .ig-user-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .ig-user-item .ig-user-avatar {
+      width: 44px;
+      height: 44px;
+      font-size: 14px;
+    }
+
+    .ig-user-info h4 {
+      margin: 0 0 2px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .ig-user-info p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Responsive Design for Instagram Messaging */
+    @media (max-width: 768px) {
+      .ig-messaging-container {
+        height: calc(100vh - 60px);
+      }
+
+      .ig-user-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .ig-user-avatar.ig-large {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+      }
+
+      .ig-message-bubble {
+        max-width: calc(100vw - 100px);
+      }
+
+      .ig-modal {
+        width: 95vw;
+        max-height: 80vh;
+      }
+    }
+
+    .comment-send-btn:hover {
+      background: var(--primary-dark) !important;
+      transform: scale(1.05);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1.1); }
+      50% { transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="config.js?v=1.0.2"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function App() {
+      // Authentication & User State
+      const [isLoggedIn, setIsLoggedIn] = useState(false);
+      const [username, setUsername] = useState('');
+      const [password, setPassword] = useState('');
+      const [email, setEmail] = useState('');
+      const [confirmPassword, setConfirmPassword] = useState('');
+      const [currentUser, setCurrentUser] = useState(null);
+      const [isAdmin, setIsAdmin] = useState(false);
+      const [showLoginModal, setShowLoginModal] = useState(true); // Show login by default
+      const [isSignupMode, setIsSignupMode] = useState(false); // Add signup mode
+      const [bio, setBio] = useState('');
+      const [avatar, setAvatar] = useState('');
+
+      // Theme & UI State
+      const [isDarkMode, setIsDarkMode] = useState(true);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [searchResults, setSearchResults] = useState({ posts: [], users: [], hashtags: [] });
+      const [searchType, setSearchType] = useState('all');
+      const [isSearching, setIsSearching] = useState(false);
+      const [notifications, setNotifications] = useState([]);
+      const [isAppLoading, setIsAppLoading] = useState(true);
+      
+      // Navigation State
+      const [activeTab, setActiveTab] = useState('home');
+      const [showAdminPanel, setShowAdminPanel] = useState(false);
+
+      // Post Composer State
+      const [newPost, setNewPost] = useState('');
+      const [postVisibility, setPostVisibility] = useState('public');
+      const [postMode, setPostMode] = useState('regular'); // 'regular' or 'anonymous'
+      const [selectedFile, setSelectedFile] = useState(null);
+      const [imagePreview, setImagePreview] = useState(null);
+      const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+      const [isRecording, setIsRecording] = useState(false);
+
+      // Comments State
+      const [comments, setComments] = useState({});
+      const [showComments, setShowComments] = useState({});
+      const [newComment, setNewComment] = useState({});
+
+      // Messages State
+      const [messages, setMessages] = useState([]);
+      const [chats, setChats] = useState([]);
+      const [activeChat, setActiveChat] = useState(null);
+      const [newMessage, setNewMessage] = useState('');
+      const [unreadMessages, setUnreadMessages] = useState(0);
+      const [isTyping, setIsTyping] = useState(false);
+      const [showNewChatModal, setShowNewChatModal] = useState(false);
+      const [searchUsers, setSearchUsers] = useState('');
+
+      // Instagram Messaging State
+      const [conversations, setConversations] = useState([]);
+      const [selectedConversation, setSelectedConversation] = useState(null);
+      const [allUsers, setAllUsers] = useState([]);
+      const [onlineUsers, setOnlineUsers] = useState([]);
+      const [typingUsers, setTypingUsers] = useState({});
+      const [showUserList, setShowUserList] = useState(false);
+      const [socket, setSocket] = useState(null);
+      const messagesEndRef = useRef(null);
+      const messagesContainerRef = useRef(null);
+
+      // Posts State
+      const [posts, setPosts] = useState([
+        {
+          id: 1,
+          username: 'john_doe',
+          name: 'John Doe',
+          avatar: 'JD',
+          content: '🚀 Welcome to Neex Social! The ultimate social media platform with advanced features like voice messages, stories, real-time messaging, and now anonymous posting! #NeexSocial #SocialMedia',
+          timestamp: '2h',
+          likes: 42,
+          comments: 8,
+          shares: 12,
+          liked: false,
+          image: null,
+          isAnonymous: false
+        },
+        {
+          id: 2,
+          username: 'anonymous',
+          name: 'Anonymous',
+          avatar: '👤',
+          content: 'Finally! A place where I can share my thoughts without worrying about judgment. The anonymous feature on Neex is exactly what social media needed. 🔒✨',
+          timestamp: '3h',
+          likes: 28,
+          comments: 15,
+          shares: 7,
+          liked: true,
+          image: null,
+          isAnonymous: true
+        },
+        {
+          id: 3,
+          username: 'tech_guru',
+          name: 'Tech Guru',
+          avatar: 'TG',
+          content: 'Just discovered this amazing new platform! The navigation system is incredible and the user experience is top-notch. Loving the dark mode! 🌙',
+          timestamp: '4h',
+          likes: 35,
+          comments: 5,
+          shares: 9,
+          liked: false,
+          image: null,
+          isAnonymous: false
+        }
+      ]);
+
+      // Effects
+      useEffect(() => {
+        document.body.className = isDarkMode ? '' : 'light';
+      }, [isDarkMode]);
+
+      // Check localStorage for saved user
+      useEffect(() => {
+        console.log('🚀 App initializing...');
+        const savedUser = localStorage.getItem('neexUser');
+        if (savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            setCurrentUser(user);
+            setIsLoggedIn(true);
+            
+            // Grant admin privileges to "Administrator" and "john" usernames
+            console.log('🔍 Checking admin status for user:', user);
+            console.log('🔍 Username:', user?.username);
+            console.log('🔍 isAdmin:', user?.isAdmin);
+            console.log('🔍 role:', user?.role);
+            
+            const isAdministrator = (user?.username === 'Administrator' || user?.username === 'john') && 
+                                   user?.isAdmin === true && 
+                                   user?.role === 'admin';
+            console.log('🔍 Final admin check result:', isAdministrator);
+            setIsAdmin(isAdministrator);
+            
+            setShowLoginModal(false); // Hide login modal for existing users
+            console.log('✅ User auto-logged in:', user.name);
+            if (isAdministrator) {
+              console.log('�️ Administrator privileges detected and activated');
+            }
+          } catch (error) {
+            console.log('❌ Error parsing saved user:', error);
+            localStorage.removeItem('neexUser');
+          }
+        }
+        
+        // Force app to load after 1 second maximum
+        setTimeout(() => {
+          setIsAppLoading(false);
+          console.log('✅ App loaded successfully');
+        }, 1000);
+      }, []);
+
+      // Sample Chats Data (will be replaced by API data)
+      useEffect(() => {
+        if (isLoggedIn && chats.length === 0) {
+          setChats([
+            {
+              id: 1,
+              otherUser: {
+                id: 2,
+                name: 'Sarah Wilson',
+                username: 'sarah_w',
+                avatar: 'SW'
+              },
+              lastMessage: {
+                content: 'Hey! Did you see the new update? The anonymous posting feature is amazing! 🎭',
+                timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+                sender: 2
+              },
+              unreadCount: 2
+            },
+            {
+              id: 2,
+              otherUser: {
+                id: 3,
+                name: 'Mike Chen',
+                username: 'mike_c',
+                avatar: 'MC'
+              },
+              lastMessage: {
+                content: 'Thanks for sharing that post about React! Very helpful 👍',
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                sender: 3
+              },
+              unreadCount: 0
+            },
+            {
+              id: 3,
+              otherUser: {
+                id: 4,
+                name: 'Emma Davis',
+                username: 'emma_d',
+                avatar: 'ED'
+              },
+              lastMessage: {
+                content: 'Are you coming to the meetup this weekend?',
+                timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                sender: 4
+              },
+              unreadCount: 1
+            }
+          ]);
+
+          // Update unread messages count
+          setUnreadMessages(3);
+        }
+      }, [isLoggedIn]);
+
+      // Notification System
+      const addNotification = (message, type = 'info') => {
+        const id = Date.now();
+        const notification = { id, message, type };
+        setNotifications(prev => [...prev, notification]);
+        
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== id));
+        }, 4000);
+      };
+
+      // Authentication Functions
+      const handleLogin = async () => {
+        if (!username || !password) {
+          addNotification('Please enter username and password', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            backendConnected = true;
+            setIsLoggedIn(true);
+            setCurrentUser(data.user);
+            
+            // Grant admin privileges to "Administrator" and "john" usernames
+            console.log('🔍 LOGIN: Checking admin status for user:', data.user);
+            console.log('🔍 LOGIN: Username:', data.user?.username);
+            console.log('🔍 LOGIN: isAdmin:', data.user?.isAdmin);
+            console.log('🔍 LOGIN: role:', data.user?.role);
+            
+            const isAdministrator = (data.user?.username === 'Administrator' || data.user?.username === 'john') && 
+                                   data.user?.isAdmin === true && 
+                                   data.user?.role === 'admin';
+            console.log('🔍 LOGIN: Final admin check result:', isAdministrator);
+            setIsAdmin(isAdministrator);
+            
+            localStorage.setItem('neexUser', JSON.stringify(data.user));
+            setShowLoginModal(false);
+            setUsername('');
+            setPassword('');
+            
+            if (isAdministrator) {
+              addNotification(`🔧 Administrator Access Granted - Full Control Enabled ⚡`, 'success');
+              console.log('🛡️ Administrator privileges activated');
+            } else {
+              addNotification(`Welcome back, ${data.user.name}! 🎉`, 'success');
+            }
+          } else {
+            addNotification(data.message || 'Login failed', 'error');
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          backendConnected = false;
+          // Fallback to simple login when backend is unavailable
+          const user = {
+            name: username.charAt(0).toUpperCase() + username.slice(1),
+            username: '@' + username,
+            avatar: username.substring(0, 2).toUpperCase()
+          };
+          setIsLoggedIn(true);
+          setCurrentUser(user);
+          localStorage.setItem('neexUser', JSON.stringify(user));
+          setShowLoginModal(false);
+          addNotification('Welcome to Neex Social! (Demo Mode) 🎉', 'success');
+        }
+      };
+
+      const handleSignup = async () => {
+        if (!username || !password || !email) {
+          addNotification('Please fill in all required fields', 'error');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          addNotification('Passwords do not match', 'error');
+          return;
+        }
+
+        if (password.length < 3) {
+          addNotification('Password must be at least 3 characters', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/signup`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              username, 
+              password, 
+              email,
+              name: username.charAt(0).toUpperCase() + username.slice(1),
+              bio: bio || `Hello! I'm ${username} 👋`
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            addNotification('Account created successfully! Please login.', 'success');
+            setIsSignupMode(false);
+            setUsername('');
+            setPassword('');
+            setConfirmPassword('');
+            setEmail('');
+            setBio('');
+          } else {
+            addNotification(data.message || 'Signup failed', 'error');
+          }
+        } catch (error) {
+          console.error('Signup error:', error);
+          addNotification('Network error. Please try again later.', 'error');
+        }
+      };
+
+      const handleLogout = () => {
+        setIsLoggedIn(false);
+        setCurrentUser(null);
+        setIsAdmin(false);
+        setUsername('');
+        setPassword('');
+        localStorage.removeItem('neexUser');
+        addNotification('See you later! 👋', 'info');
+      };
+
+      // =============================================================================
+      // ADMIN FUNCTIONS - Administrator Control Panel
+      // =============================================================================
+
+      const adminDeletePost = async (postId) => {
+        if (!isAdmin) {
+          addNotification('Admin access required', 'error');
+          return;
+        }
+
+        if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: currentUser.username })
+          });
+
+          if (response.ok) {
+            setPosts(posts.filter(p => p.id !== postId));
+            addNotification('🗑️ Post deleted by Administrator', 'success');
+          } else {
+            addNotification('Failed to delete post', 'error');
+          }
+        } catch (error) {
+          console.error('Admin delete error:', error);
+          addNotification('Error deleting post', 'error');
+        }
+      };
+
+      const adminToggleAnonymity = async (postId, makeAnonymous) => {
+        if (!isAdmin) {
+          addNotification('Admin access required', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}/anonymity`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              username: currentUser.username,
+              makeAnonymous: makeAnonymous
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setPosts(posts.map(p => p.id === postId ? data.post : p));
+            addNotification(`🎭 Post ${makeAnonymous ? 'made anonymous' : 'identity revealed'} by Administrator`, 'success');
+          } else {
+            addNotification('Failed to toggle anonymity', 'error');
+          }
+        } catch (error) {
+          console.error('Admin anonymity toggle error:', error);
+          addNotification('Error toggling anonymity', 'error');
+        }
+      };
+
+      const adminToggleVisibility = async (postId, visible) => {
+        if (!isAdmin) {
+          addNotification('Admin access required', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}/visibility`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              username: currentUser.username,
+              visible: visible
+            })
+          });
+
+          if (response.ok) {
+            setPosts(posts.map(p => p.id === postId ? {...p, visible: visible} : p));
+            addNotification(`👁️ Post ${visible ? 'made visible' : 'hidden'} by Administrator`, 'success');
+          } else {
+            addNotification('Failed to toggle visibility', 'error');
+          }
+        } catch (error) {
+          console.error('Admin visibility toggle error:', error);
+          addNotification('Error toggling visibility', 'error');
+        }
+      };
+
+      const adminEditPost = async (postId, newContent) => {
+        if (!isAdmin) {
+          addNotification('Admin access required', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/admin/posts/${postId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              username: currentUser.username,
+              content: newContent
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setPosts(posts.map(p => p.id === postId ? data.post : p));
+            addNotification('✏️ Post edited by Administrator', 'success');
+          } else {
+            addNotification('Failed to edit post', 'error');
+          }
+        } catch (error) {
+          console.error('Admin edit error:', error);
+          addNotification('Error editing post', 'error');
+        }
+      };
+
+      // Show login modal when user tries to interact
+      const requireLogin = (action) => {
+        if (!isLoggedIn) {
+          setShowLoginModal(true);
+          addNotification('Please login to ' + action, 'info');
+          return false;
+        }
+        return true;
+      };
+
+      // Theme Functions
+      const toggleTheme = () => {
+        setIsDarkMode(!isDarkMode);
+        addNotification(`Switched to ${isDarkMode ? 'light' : 'dark'} mode! 🎨`, 'info');
+      };
+
+      // API Configuration - Use config.js settings with debugging
+      console.log('🔍 Checking APP_CONFIG:', window.APP_CONFIG);
+      const API_BASE_URL = window.APP_CONFIG ? window.APP_CONFIG.API_BASE_URL : 'https://neex-social-production.up.railway.app';
+      console.log('🌍 NEEX Global Network - API:', API_BASE_URL);
+      console.log('🚀 Railway Backend - ACTIVE CONNECTION TEST');
+
+      // Backend connection status
+      let backendConnected = false;
+
+      // Initialize posts from backend and setup real-time updates
+      const fetchPosts = async () => {
+        try {
+          console.log('🔄 Fetching posts from:', `${API_BASE_URL}/posts`);
+          const response = await fetch(`${API_BASE_URL}/posts`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            // Add cache buster to ensure fresh request
+            cache: 'no-cache'
+          });
+          
+          console.log('📡 Response status:', response.status, response.statusText);
+          
+          if (response.ok) {
+            backendConnected = true;
+            const backendPosts = await response.json();
+            console.log('✅ Backend connected! Posts received:', backendPosts.length);
+            // Sort posts by creation date (newest first)
+            const sortedPosts = backendPosts.sort((a, b) => {
+              const dateA = new Date(a.createdAt || a.date || a.timestamp);
+              const dateB = new Date(b.createdAt || b.date || b.timestamp);
+              return dateB - dateA; // Newest first
+            });
+            
+            // Remove duplicates based on post ID
+            const uniquePosts = sortedPosts.filter((post, index, self) => 
+              index === self.findIndex(p => p.id === post.id)
+            );
+            
+            setPosts(uniquePosts);
+          } else {
+            throw new Error(`Backend responded with error: ${response.status} ${response.statusText}`);
+          }
+        } catch (error) {
+          console.error('❌ Backend connection failed:', error.message);
+          console.log('Backend offline, using sample data');
+          backendConnected = false;
+          // Initialize with sample posts when backend is unavailable
+          const samplePosts = [
+            {
+              id: '1',
+              author: 'Neex Demo',
+              username: 'neex_demo',
+              avatar: 'ND',
+              content: '🚀 Welcome to Neex Social! Your ultimate social media experience awaits. Connect, share, and discover amazing content! #NeexSocial #SocialMedia',
+              timestamp: new Date().toISOString(),
+              likes: 42,
+              comments: 5,
+              shares: 12,
+              visibility: 'public',
+              verified: true
+            },
+            {
+              id: '2', 
+              author: 'Tech Explorer',
+              username: 'tech_explorer',
+              avatar: 'TE',
+              content: '💡 The future of social media is here! Real-time messaging, beautiful UI, and seamless experience. What more could you ask for? #TechTalk #Innovation',
+              timestamp: new Date(Date.now() - 3600000).toISOString(),
+              likes: 28,
+              comments: 3,
+              shares: 8,
+              visibility: 'public'
+            }
+          ];
+          setPosts(samplePosts);
+          addNotification('⚠️ Backend offline - Using demo mode', 'warning');
+        }
+      };
+
+      // Fetch posts on component mount and setup polling for real-time updates
+      useEffect(() => {
+        fetchPosts();
+        
+        // Poll for new posts every 3 seconds for real-time updates
+        const interval = setInterval(fetchPosts, 3000);
+        
+        return () => clearInterval(interval);
+      }, []);
+
+      // Fetch chats when messages tab is active
+      useEffect(() => {
+        if (activeTab === 'messages' && isLoggedIn) {
+          fetchChats();
+        }
+      }, [activeTab, isLoggedIn]);
+
+      // Fetch messages when active chat changes
+      useEffect(() => {
+        if (activeChat) {
+          fetchMessages(activeChat);
+        }
+      }, [activeChat]);
+
+      // Post Functions
+      const handlePost = async () => {
+        // Check if user is logged in
+        if (!requireLogin('post')) return;
+        
+        if (!newPost.trim() && !selectedFile) {
+          addNotification('Please write something or select an image to post', 'warning');
+          return;
+        }
+        
+        if (newPost.trim() || selectedFile) {
+          const isAnonymous = postMode === 'anonymous';
+          const username = currentUser?.username ? currentUser.username.substring(1) : 'Guest';
+          
+          try {
+            let response;
+            
+            if (selectedFile) {
+              // Use FormData for file uploads
+              const formData = new FormData();
+              formData.append('username', username);
+              formData.append('content', newPost.trim());
+              formData.append('isAnonymous', isAnonymous);
+              formData.append('image', selectedFile);
+              
+              console.log('Posting with image:', { username, content: newPost.trim(), isAnonymous, hasImage: true });
+              
+              response = await fetch(`${API_BASE_URL}/posts`, {
+                method: 'POST',
+                body: formData // Don't set Content-Type header for FormData
+              });
+            } else {
+              // Use JSON for text-only posts
+              const post = {
+                username: username,
+                content: newPost.trim(),
+                isAnonymous: isAnonymous
+              };
+              
+              console.log('Posting text only:', post);
+              
+              response = await fetch(`${API_BASE_URL}/posts`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(post)
+              });
+            }
+            
+            if (response.ok) {
+              backendConnected = true;
+              const result = await response.json();
+              console.log('Post response:', result);
+              
+              // Clear form
+              setNewPost('');
+              setSelectedFile(null);
+              setImagePreview(null);
+              setPostMode('regular');
+              
+              // Show success message
+              const successMsg = selectedFile 
+                ? (isAnonymous ? 'Anonymous post with image shared! 🔒📸' : 'Post with image shared successfully! 🎊📸')
+                : (isAnonymous ? 'Anonymous post shared! 🔒' : 'Post shared successfully! 🎊');
+              
+              addNotification(successMsg, 'success');
+              
+              // Refresh posts to show the new one
+              setTimeout(() => {
+                fetchPosts();
+              }, 500);
+            } else {
+              const errorData = await response.json();
+              console.error('Post failed:', errorData);
+              addNotification(errorData.message || 'Failed to post. Please try again.', 'error');
+            }
+          } catch (error) {
+            console.error('Error posting:', error);
+            backendConnected = false;
+            
+            // Fallback: Create post locally when backend is unavailable
+            const localPost = {
+              id: Date.now().toString(),
+              author: isAnonymous ? 'Anonymous' : currentUser?.name || 'User',
+              username: isAnonymous ? '@anonymous' : currentUser?.username || '@user',
+              avatar: isAnonymous ? '👤' : currentUser?.avatar || 'U',
+              content: newPost.trim(),
+              timestamp: new Date().toISOString(),
+              likes: 0,
+              comments: 0,
+              shares: 0,
+              visibility: 'public',
+              image: selectedFile ? URL.createObjectURL(selectedFile) : null
+            };
+            
+            // Add to local posts
+            setPosts(prevPosts => [localPost, ...prevPosts]);
+            
+            // Clear form
+            setNewPost('');
+            setSelectedFile(null);
+            setImagePreview(null);
+            setPostMode('regular');
+            
+            // Show success message
+            const successMsg = selectedFile 
+              ? 'Post created locally! (Demo Mode) 📱📸'
+              : 'Post created locally! (Demo Mode) 📱';
+            
+            addNotification(successMsg, 'warning');
+          }
+        }
+      };
+
+      const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setSelectedFile(file);
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => setImagePreview(e.target.result);
+            reader.readAsDataURL(file);
+          }
+          addNotification('File uploaded successfully! 📎', 'success');
+        }
+      };
+
+      const removePreview = () => {
+        setSelectedFile(null);
+        setImagePreview(null);
+      };
+
+      // Social Actions
+      const toggleLike = (postId) => {
+        if (!requireLogin('like posts')) return;
+        
+        setPosts(prev => prev.map(post => 
+          post.id === postId 
+            ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
+            : post
+        ));
+      };
+
+      // Emoji Functions
+      const emojis = ['😀', '😂', '🥺', '😍', '🤔', '👍', '❤️', '🔥', '💯', '🎉', '🚀', '💡', '🌟', '⚡', '🎯', '💪'];
+      
+      const addEmoji = (emoji) => {
+        setNewPost(prev => prev + emoji);
+        setShowEmojiPicker(false);
+      };
+
+      // Character count and validation
+      const charCount = newPost.length;
+      const isOverLimit = charCount > 280;
+      const isNearLimit = charCount > 250;
+
+      // Comments Functions
+      const fetchComments = async (postId) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`);
+          if (response.ok) {
+            const postComments = await response.json();
+            setComments(prev => ({ ...prev, [postId]: postComments }));
+          }
+        } catch (error) {
+          console.error('Failed to fetch comments:', error);
+        }
+      };
+
+      const toggleComments = (postId) => {
+        const isCurrentlyShown = showComments[postId];
+        setShowComments(prev => ({ ...prev, [postId]: !isCurrentlyShown }));
+        
+        if (!isCurrentlyShown && !comments[postId]) {
+          fetchComments(postId);
+        }
+      };
+
+      const addComment = async (postId) => {
+        if (!requireLogin('comment')) return;
+        
+        const commentText = newComment[postId];
+        if (!commentText || !commentText.trim()) return;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: currentUser?.username?.substring(1) || 'Guest',
+              content: commentText.trim()
+            })
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            setComments(prev => ({
+              ...prev,
+              [postId]: [...(prev[postId] || []), result.comment]
+            }));
+            setNewComment(prev => ({ ...prev, [postId]: '' }));
+            
+            // Update post comment count
+            setPosts(prev => prev.map(post => 
+              post.id === postId 
+                ? { ...post, comments: post.comments + 1 }
+                : post
+            ));
+            
+            addNotification('💬 Comment added!', 'success');
+          }
+        } catch (error) {
+          console.error('Failed to add comment:', error);
+          addNotification('Failed to add comment', 'error');
+        }
+      };
+
+      // Messages Functions
+      const fetchChats = async () => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/chats`);
+          if (response.ok) {
+            const data = await response.json();
+            setChats(data);
+            
+            // Calculate unread messages
+            const unread = data.reduce((count, chat) => {
+              return count + (chat.unreadCount || 0);
+            }, 0);
+            setUnreadMessages(unread);
+          }
+        } catch (error) {
+          console.error('Error fetching chats:', error);
+        }
+      };
+
+      const fetchMessages = async (chatId) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/chats/${chatId}/messages`);
+          if (response.ok) {
+            const data = await response.json();
+            setMessages(data);
+          } else {
+            // Fallback to sample data if API is not available
+            const sampleMessages = {
+              1: [
+                {
+                  id: 1,
+                  content: 'Hey! How are you doing?',
+                  sender: 2,
+                  timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString()
+                },
+                {
+                  id: 2,
+                  content: 'I\'m doing great! Thanks for asking. How about you?',
+                  sender: currentUser,
+                  timestamp: new Date(Date.now() - 50 * 60 * 1000).toISOString()
+                },
+                {
+                  id: 3,
+                  content: 'Did you see the new update? The anonymous posting feature is amazing! 🎭',
+                  sender: 2,
+                  timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+                }
+              ],
+              2: [
+                {
+                  id: 4,
+                  content: 'Hey Mike! I saw your latest post about React hooks.',
+                  sender: currentUser,
+                  timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                  id: 5,
+                  content: 'Thanks for sharing that post about React! Very helpful 👍',
+                  sender: 3,
+                  timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+                }
+              ],
+              3: [
+                {
+                  id: 6,
+                  content: 'Hi Emma! Hope you\'re having a great week.',
+                  sender: currentUser,
+                  timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                  id: 7,
+                  content: 'Are you coming to the meetup this weekend?',
+                  sender: 4,
+                  timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                }
+              ]
+            };
+            setMessages(sampleMessages[chatId] || []);
+          }
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+          // Fallback to sample data on error
+          const sampleMessages = {
+            1: [
+              {
+                id: 1,
+                content: 'Hey! How are you doing?',
+                sender: 2,
+                timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString()
+              },
+              {
+                id: 2,
+                content: 'I\'m doing great! Thanks for asking. How about you?',
+                sender: currentUser,
+                timestamp: new Date(Date.now() - 50 * 60 * 1000).toISOString()
+              },
+              {
+                id: 3,
+                content: 'Did you see the new update? The anonymous posting feature is amazing! 🎭',
+                sender: 2,
+                timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+              }
+            ],
+            2: [
+              {
+                id: 4,
+                content: 'Hey Mike! I saw your latest post about React hooks.',
+                sender: currentUser,
+                timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+              },
+              {
+                id: 5,
+                content: 'Thanks for sharing that post about React! Very helpful 👍',
+                sender: 3,
+                timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+              }
+            ],
+            3: [
+              {
+                id: 6,
+                content: 'Hi Emma! Hope you\'re having a great week.',
+                sender: currentUser,
+                timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+              },
+              {
+                id: 7,
+                content: 'Are you coming to the meetup this weekend?',
+                sender: 4,
+                timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+              }
+            ]
+          };
+          setMessages(sampleMessages[chatId] || []);
+        }
+      };
+
+      // Enhanced Search Function
+      const performEnhancedSearch = (query) => {
+        if (!query.trim()) {
+          setSearchResults({ posts: [], users: [], hashtags: [] });
+          return;
+        }
+
+        setIsSearching(true);
+        
+        const lowercaseQuery = query.toLowerCase();
+        
+        // Search posts
+        const matchedPosts = posts.filter(post => 
+          post.content.toLowerCase().includes(lowercaseQuery) ||
+          post.name.toLowerCase().includes(lowercaseQuery) ||
+          (!post.isAnonymous && post.username.toLowerCase().includes(lowercaseQuery))
+        );
+
+        // Mock users for demonstration
+        const mockUsers = [
+          { id: 1, username: 'tech_guru', name: 'Tech Guru', avatar: 'TG', followers: 1240, bio: 'Technology enthusiast and developer', isFollowing: false },
+          { id: 2, username: 'design_master', name: 'Design Master', avatar: 'DM', followers: 856, bio: 'UI/UX Designer creating beautiful experiences', isFollowing: false },
+          { id: 3, username: 'code_ninja', name: 'Code Ninja', avatar: 'CN', followers: 2103, bio: 'Full-stack developer and open source contributor', isFollowing: true }
+        ];
+        
+        const matchedUsers = mockUsers.filter(user =>
+          user.username.toLowerCase().includes(lowercaseQuery) ||
+          user.name.toLowerCase().includes(lowercaseQuery) ||
+          user.bio.toLowerCase().includes(lowercaseQuery)
+        );
+
+        // Extract hashtags from posts
+        const hashtags = [];
+        posts.forEach(post => {
+          const postHashtags = post.content.match(/#\w+/g) || [];
+          hashtags.push(...postHashtags);
+        });
+        
+        const uniqueHashtags = [...new Set(hashtags)];
+        const matchedHashtags = uniqueHashtags
+          .filter(tag => tag.toLowerCase().includes(lowercaseQuery))
+          .map((tag, index) => ({
+            id: index,
+            tag: tag,
+            count: posts.filter(post => post.content.includes(tag)).length
+          }));
+
+        setSearchResults({
+          posts: matchedPosts,
+          users: matchedUsers,
+          hashtags: matchedHashtags
+        });
+        
+        setIsSearching(false);
+      };
+
+      // Instagram Messaging Functions
+      const initializeSocket = () => {
+        if (!socket && isLoggedIn) {
+          const newSocket = io(API_BASE_URL);
+          
+          newSocket.on('connect', () => {
+            console.log('Connected to messaging server');
+            newSocket.emit('user_online', currentUser?.username);
+          });
+
+          newSocket.on('user_online', (users) => {
+            setOnlineUsers(users);
+          });
+
+          newSocket.on('user_offline', (username) => {
+            setOnlineUsers(prev => prev.filter(user => user !== username));
+          });
+
+          newSocket.on('new_message', (message) => {
+            if (selectedConversation && message.conversationId === selectedConversation.id) {
+              setMessages(prev => [...prev, message]);
+              scrollToBottom();
+            }
+            updateConversationsList(message);
+          });
+
+          newSocket.on('typing_start', (data) => {
+            setTypingUsers(prev => ({...prev, [data.username]: true}));
+          });
+
+          newSocket.on('typing_stop', (data) => {
+            setTypingUsers(prev => ({...prev, [data.username]: false}));
+          });
+
+          setSocket(newSocket);
+        }
+      };
+
+      const loadConversations = async () => {
+        try {
+          const response = await fetch(`https://neex-social-fresh-production.up.railway.app/api/conversations`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setConversations(data);
+          }
+        } catch (error) {
+          console.log('Using mock conversations');
+          setConversations([
+            {
+              id: 1,
+              username: 'john_doe',
+              name: 'John Doe',
+              avatar: 'JD',
+              lastMessage: 'Hey there! How are you?',
+              timestamp: new Date().toISOString(),
+              unreadCount: 2
+            },
+            {
+              id: 2,
+              username: 'jane_smith',
+              name: 'Jane Smith',
+              avatar: 'JS',
+              lastMessage: 'Thanks for sharing that post!',
+              timestamp: new Date(Date.now() - 3600000).toISOString(),
+              unreadCount: 0
+            }
+          ]);
+        }
+      };
+
+      const loadAllUsers = async () => {
+        try {
+          const response = await fetch(`https://neex-social-fresh-production.up.railway.app/api/users`);
+          if (response.ok) {
+            const data = await response.json();
+            setAllUsers(data.filter(user => user.username !== currentUser?.username));
+          }
+        } catch (error) {
+          console.log('Using mock users');
+          setAllUsers([
+            { username: 'alice_wilson', name: 'Alice Wilson', avatar: 'AW' },
+            { username: 'bob_johnson', name: 'Bob Johnson', avatar: 'BJ' },
+            { username: 'carol_brown', name: 'Carol Brown', avatar: 'CB' },
+            { username: 'david_miller', name: 'David Miller', avatar: 'DM' }
+          ]);
+        }
+      };
+
+      const loadMessages = async (conversationId) => {
+        try {
+          const response = await fetch(`https://neex-social-fresh-production.up.railway.app/api/conversations/${conversationId}/messages`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setMessages(data);
+            setTimeout(scrollToBottom, 100);
+          }
+        } catch (error) {
+          console.log('Using mock messages');
+          setMessages([
+            {
+              id: 1,
+              from: selectedConversation?.username,
+              content: 'Hello! How are you doing?',
+              timestamp: new Date(Date.now() - 3600000).toISOString()
+            },
+            {
+              id: 2,
+              from: currentUser?.username,
+              content: 'I\'m doing great! Thanks for asking.',
+              timestamp: new Date(Date.now() - 3500000).toISOString()
+            },
+            {
+              id: 3,
+              from: selectedConversation?.username,
+              content: 'That\'s wonderful to hear!',
+              timestamp: new Date(Date.now() - 3400000).toISOString()
+            }
+          ]);
+          setTimeout(scrollToBottom, 100);
+        }
+      };
+
+      const sendMessage = async (content = newMessage) => {
+        if (!content?.trim() || !selectedConversation) return;
+
+        const messageData = {
+          conversationId: selectedConversation.id,
+          to: selectedConversation.username,
+          content: content,
+          from: currentUser?.username,
+          timestamp: new Date().toISOString()
+        };
+
+        try {
+          const response = await fetch(`https://neex-social-fresh-production.up.railway.app/api/messages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(messageData)
+          });
+
+          if (response.ok) {
+            const savedMessage = await response.json();
+            setMessages(prev => [...prev, savedMessage]);
+            if (socket) {
+              socket.emit('send_message', savedMessage);
+            }
+          } else {
+            // Fallback to local state
+            const localMessage = { ...messageData, id: Date.now() };
+            setMessages(prev => [...prev, localMessage]);
+          }
+        } catch (error) {
+          // Offline mode
+          const localMessage = { ...messageData, id: Date.now() };
+          setMessages(prev => [...prev, localMessage]);
+        }
+
+        setNewMessage('');
+        updateConversationsList({
+          conversationId: selectedConversation.id,
+          content: content,
+          timestamp: new Date().toISOString()
+        });
+        setTimeout(scrollToBottom, 100);
+      };
+
+      const startNewConversation = (user) => {
+        const existingConversation = conversations.find(conv => conv.username === user.username);
+        
+        if (existingConversation) {
+          setSelectedConversation(existingConversation);
+          loadMessages(existingConversation.id);
+        } else {
+          const newConversation = {
+            id: Date.now(),
+            username: user.username,
+            name: user.name,
+            avatar: user.avatar,
+            lastMessage: '',
+            timestamp: new Date().toISOString(),
+            unreadCount: 0
+          };
+          setConversations(prev => [newConversation, ...prev]);
+          setSelectedConversation(newConversation);
+          setMessages([]);
+        }
+        
+        setShowUserList(false);
+      };
+
+      const handleTyping = (isTyping) => {
+        if (socket && selectedConversation) {
+          if (isTyping) {
+            socket.emit('typing_start', {
+              conversationId: selectedConversation.id,
+              username: currentUser?.username
+            });
+          } else {
+            socket.emit('typing_stop', {
+              conversationId: selectedConversation.id,
+              username: currentUser?.username
+            });
+          }
+        }
+      };
+
+      const updateConversationsList = (message) => {
+        setConversations(prev => {
+          const updated = prev.map(conv => {
+            if (conv.id === message.conversationId) {
+              return {
+                ...conv,
+                lastMessage: message.content,
+                timestamp: message.timestamp,
+                unreadCount: selectedConversation?.id === conv.id ? 0 : conv.unreadCount + 1
+              };
+            }
+            return conv;
+          });
+          
+          // Move the updated conversation to the top
+          const updatedConv = updated.find(conv => conv.id === message.conversationId);
+          if (updatedConv) {
+            const others = updated.filter(conv => conv.id !== message.conversationId);
+            return [updatedConv, ...others];
+          }
+          
+          return updated;
+        });
+      };
+
+      const scrollToBottom = () => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+
+      // Instagram Messaging Effects
+      useEffect(() => {
+        if (isLoggedIn) {
+          initializeSocket();
+          loadConversations();
+          loadAllUsers();
+        }
+
+        return () => {
+          if (socket) {
+            socket.disconnect();
+          }
+        };
+      }, [isLoggedIn]);
+
+      useEffect(() => {
+        if (activeTab === 'messages' && isLoggedIn) {
+          loadConversations();
+        }
+      }, [activeTab, isLoggedIn]);
+
+      useEffect(() => {
+        scrollToBottom();
+      }, [messages]);
+
+      // Main App - Always show the feed
+      if (isAppLoading) {
+        return (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'var(--bg-primary)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text)',
+            zIndex: 3000
+          }}>
+            <div style={{
+              fontSize: '48px',
+              background: 'var(--gradient)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontWeight: 'bold',
+              marginBottom: '20px',
+              animation: 'pulse 2s infinite'
+            }}>
+              Neex
+            </div>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              border: '3px solid var(--border)',
+              borderTop: '3px solid var(--primary)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+              }
+            `}</style>
+          </div>
+        );
+      }
+
+      return (
+        <div className="app">
+          {/* Login/Signup Modal */}
+          {showLoginModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000
+            }}>
+              <div style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: '20px',
+                padding: '30px',
+                maxWidth: '400px',
+                width: '90%',
+                position: 'relative',
+                maxHeight: '90vh',
+                overflowY: 'auto'
+              }}>
+                <button 
+                  style={{
+                    position: 'absolute',
+                    top: '15px',
+                    right: '15px',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text)',
+                    fontSize: '20px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    setIsSignupMode(false);
+                    setUsername('');
+                    setPassword('');
+                    setConfirmPassword('');
+                    setEmail('');
+                    setBio('');
+                  }}
+                >
+                  ✕
+                </button>
+                
+                {/* NEEX Logo */}
+                <div style={{
+                  textAlign: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    marginBottom: '10px'
+                  }}>
+                    <img 
+                      src="logo.png" 
+                      alt="NEEX Logo" 
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <span style={{
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                      background: 'var(--gradient)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>
+                      NEEX
+                    </span>
+                  </div>
+                </div>
+                
+                <h2 style={{textAlign: 'center', marginBottom: '10px', color: 'var(--primary)'}}>
+                  {isSignupMode ? 'Create Account' : 'Login to Neex'}
+                </h2>
+                <p style={{textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '20px'}}>
+                  {isSignupMode ? 'Join the conversation!' : 'Welcome back! Join the conversation!'}
+                </p>
+                
+                {/* Form Fields */}
+                <input
+                  type="text"
+                  placeholder="Username"
+                  className="form-input"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (isSignupMode ? handleSignup() : handleLogin())}
+                  style={{marginBottom: '15px'}}
+                />
+                
+                {isSignupMode && (
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="form-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSignup()}
+                    style={{marginBottom: '15px'}}
+                  />
+                )}
+                
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="form-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (isSignupMode ? handleSignup() : handleLogin())}
+                  style={{marginBottom: isSignupMode ? '15px' : '20px'}}
+                />
+                
+                {isSignupMode && (
+                  <>
+                    <input
+                      type="password"
+                      placeholder="Confirm Password"
+                      className="form-input"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSignup()}
+                      style={{marginBottom: '15px'}}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Bio (optional)"
+                      className="form-input"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSignup()}
+                      style={{marginBottom: '20px'}}
+                    />
+                  </>
+                )}
+                
+                <button 
+                  style={{
+                    width: '100%',
+                    background: 'var(--gradient)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    marginBottom: '15px'
+                  }}
+                  onClick={isSignupMode ? handleSignup : handleLogin}
+                >
+                  {isSignupMode ? 'Create Account' : 'Login'}
+                </button>
+                
+                <p style={{textAlign: 'center', fontSize: '14px', color: 'var(--text-secondary)'}}>
+                  {isSignupMode ? 'Already have an account?' : 'Don\'t have an account?'}
+                  <button
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--primary)',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      marginLeft: '5px',
+                      textDecoration: 'underline'
+                    }}
+                    onClick={() => {
+                      setIsSignupMode(!isSignupMode);
+                      setUsername('');
+                      setPassword('');
+                      setConfirmPassword('');
+                      setEmail('');
+                      setBio('');
+                    }}
+                  >
+                    {isSignupMode ? 'Login here' : 'Sign up here'}
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {/* Admin Panel Modal */}
+          {showAdminPanel && isAdmin && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 3000
+            }}>
+              <div style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: '20px',
+                padding: '30px',
+                maxWidth: '800px',
+                width: '95%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                border: '3px solid #dc2626'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                  paddingBottom: '15px',
+                  borderBottom: '2px solid #dc2626'
+                }}>
+                  <h2 style={{
+                    color: '#dc2626',
+                    margin: 0,
+                    fontSize: '24px',
+                    fontWeight: 'bold'
+                  }}>
+                    🛡️ Administrator Control Panel
+                  </h2>
+                  <button 
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text)',
+                      fontSize: '24px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setShowAdminPanel(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                {/* Admin Stats */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '15px',
+                  marginBottom: '25px'
+                }}>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: '24px', fontWeight: 'bold'}}>{posts.length}</div>
+                    <div style={{fontSize: '14px', opacity: 0.9}}>Total Posts</div>
+                  </div>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: '24px', fontWeight: 'bold'}}>{allUsers.length}</div>
+                    <div style={{fontSize: '14px', opacity: 0.9}}>Total Users</div>
+                  </div>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #059669, #10b981)',
+                    padding: '15px',
+                    borderRadius: '12px',
+                    color: 'white',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{fontSize: '24px', fontWeight: 'bold'}}>{onlineUsers.length}</div>
+                    <div style={{fontSize: '14px', opacity: 0.9}}>Online Users</div>
+                  </div>
+                </div>
+                
+                {/* Admin Actions */}
+                <div style={{marginBottom: '25px'}}>
+                  <h3 style={{color: 'var(--primary)', marginBottom: '15px'}}>📋 Management Actions</h3>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '10px'
+                  }}>
+                    <button
+                      style={{
+                        background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => {
+                        if (confirm('Delete all posts? This cannot be undone!')) {
+                          setPosts([]);
+                          addNotification('🗑️ All posts deleted by Administrator', 'success');
+                        }
+                      }}
+                    >
+                      🗑️ Delete All Posts
+                    </button>
+                    <button
+                      style={{
+                        background: 'linear-gradient(135deg, #7c3aed, #8b5cf6)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => {
+                        const newPosts = posts.map(post => ({...post, isAnonymous: true, username: 'Anonymous'}));
+                        setPosts(newPosts);
+                        addNotification('👤 All posts made anonymous', 'success');
+                      }}
+                    >
+                      👤 Make All Anonymous
+                    </button>
+                    <button
+                      style={{
+                        background: 'linear-gradient(135deg, #059669, #10b981)',
+                        border: 'none',
+                        color: 'white',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => {
+                        addNotification('📊 Analytics exported successfully', 'success');
+                      }}
+                    >
+                      📊 Export Analytics
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Posts Management */}
+                <div style={{marginBottom: '25px'}}>
+                  <h3 style={{color: 'var(--primary)', marginBottom: '15px'}}>📝 Posts Management</h3>
+                  <div style={{
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    padding: '10px'
+                  }}>
+                    {posts.slice(0, 10).map(post => (
+                      <div key={post.id} style={{
+                        background: 'var(--bg-primary)',
+                        padding: '15px',
+                        borderRadius: '10px',
+                        marginBottom: '10px',
+                        border: '2px solid #dc2626'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '10px'
+                        }}>
+                          <div>
+                            <strong style={{color: 'var(--primary)'}}>{post.username}</strong>
+                            <span style={{color: 'var(--text-secondary)', fontSize: '12px', marginLeft: '10px'}}>
+                              ID: {post.id}
+                            </span>
+                          </div>
+                          <div style={{display: 'flex', gap: '5px'}}>
+                            <button
+                              style={{
+                                background: '#dc2626',
+                                border: 'none',
+                                color: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                              onClick={() => adminDeletePost(post.id)}
+                            >
+                              🗑️ Delete
+                            </button>
+                            <button
+                              style={{
+                                background: '#7c3aed',
+                                border: 'none',
+                                color: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                              onClick={() => adminToggleAnonymity(post.id)}
+                            >
+                              👤 Toggle Anonymous
+                            </button>
+                            <button
+                              style={{
+                                background: '#059669',
+                                border: 'none',
+                                color: 'white',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                              onClick={() => {
+                                const newContent = prompt('Edit post content:', post.content);
+                                if (newContent !== null) adminEditPost(post.id, newContent);
+                              }}
+                            >
+                              ✏️ Edit
+                            </button>
+                          </div>
+                        </div>
+                        <p style={{
+                          color: 'var(--text)',
+                          margin: 0,
+                          fontSize: '14px',
+                          lineHeight: '1.4'
+                        }}>
+                          {post.content.substring(0, 100)}{post.content.length > 100 ? '...' : ''}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* System Info */}
+                <div style={{
+                  background: 'var(--bg-primary)',
+                  padding: '15px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <h4 style={{color: 'var(--primary)', margin: '0 0 10px 0'}}>🖥️ System Information</h4>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '10px',
+                    fontSize: '14px',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <div>📡 Backend: {API_BASE_URL.includes('localhost') ? 'Local' : 'Railway'}</div>
+                    <div>👤 Admin: {currentUser?.username}</div>
+                    <div>🕒 Status: Active</div>
+                    <div>🔒 Security: High</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Simple Navigation Bar */}
+          <nav className="nav-container">
+            <div className="nav-center">
+              <div className="logo-container">
+                <img src="logo.png" alt="NEEX Logo" className="logo-img" />
+                <span className="nav-logo">NEEX</span>
+              </div>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              {isLoggedIn ? (
+                <>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '14px'}}>
+                    <div className="user-avatar" style={{width: '24px', height: '24px', fontSize: '10px'}}>
+                      {currentUser?.avatar}
+                    </div>
+                    <span>{currentUser?.name}</span>
+                  </div>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => setShowAdminPanel(true)}
+                      style={{
+                        background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                        border: '3px solid #fca5a5',
+                        color: 'white',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.5)',
+                        animation: 'pulse 2s infinite',
+                        transform: 'scale(1.1)'
+                      }}
+                    >
+                      🛡️ ADMIN PANEL
+                    </button>
+                  )}
+                  <button 
+                    onClick={handleLogout}
+                    style={{
+                      background: 'none',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                      padding: '6px 12px',
+                      borderRadius: '15px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  style={{
+                    background: 'var(--primary)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '15px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Login
+                </button>
+              )}
+            </div>
+          </nav>
+
+          {/* Main Content based on active tab */}
+          {activeTab === 'home' && (
+            <>
+              {/* Notifications */}
+              {notifications.map(notification => (
+                <div key={notification.id} className={`notification ${notification.type} fade-in`}>
+                  {notification.message}
+                </div>
+              ))}
+
+          {/* Post Composer */}
+          <div className="composer fade-in">
+            {isLoggedIn ? (
+              <>
+                <div className="composer-header">
+                  <div className="user-avatar">{postMode === 'anonymous' ? '👤' : currentUser?.avatar}</div>
+                  <div>
+                    <h3>{postMode === 'anonymous' ? 'Anonymous' : currentUser?.name}</h3>
+                    <p style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                      {postMode === 'anonymous' ? '@anonymous' : currentUser?.username}
+                    </p>
+                  </div>
+                  <div style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                    <select
+                      value={postMode}
+                      onChange={(e) => setPostMode(e.target.value)}
+                      className={`post-mode-dropdown ${postMode === 'anonymous' ? 'anonymous' : ''}`}
+                      style={{
+                        background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--bg-primary)',
+                        border: `1px solid ${postMode === 'anonymous' ? '#9333ea' : 'var(--border)'}`,
+                        borderRadius: '20px',
+                        padding: '8px 12px',
+                        color: postMode === 'anonymous' ? 'white' : 'var(--text)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        minWidth: '120px'
+                      }}
+                    >
+                      <option value="regular" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                        👤 Regular
+                      </option>
+                      <option value="anonymous" style={{background: 'var(--bg-secondary)', color: 'var(--text)'}}>
+                        🔒 Anonymous
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div className="composer-main">
+                  <textarea
+                    placeholder={postMode === 'anonymous' ? "Share something anonymously..." : "What's happening on Neex?"}
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    maxLength="500"
+                  />
+                </div>
+              </>
+            ) : (
+              <div style={{textAlign: 'center', padding: '30px'}}>
+                <div style={{fontSize: '48px', marginBottom: '15px'}}>👋</div>
+                <h3 style={{marginBottom: '10px'}}>Welcome to NEEX!</h3>
+                <p style={{color: 'var(--text-secondary)', marginBottom: '20px'}}>
+                  Browse posts from the community or login to share your thoughts
+                </p>
+                <button 
+                  onClick={() => setShowLoginModal(true)}
+                  style={{
+                    background: 'var(--gradient)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  Login to Post
+                </button>
+              </div>
+            )}
+
+            {isLoggedIn && (
+              <>
+                {imagePreview && (
+                  <div className="file-preview">
+                    <img src={imagePreview} alt="Preview" />
+                    <button className="remove-preview" onClick={removePreview}>
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                )}
+
+                <div className="media-tools">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    style={{display: 'none'}}
+                    accept="image/*,video/*,audio/*"
+                    onChange={handleFileUpload}
+                  />
+                  <label htmlFor="file-upload" className="media-btn" title="Upload Photo">
+                    <i className="fas fa-image"></i>
+                  </label>
+                  
+                  <button className="media-btn" title="Upload Video">
+                    <i className="fas fa-video"></i>
+                  </button>
+                  
+                  <button className="media-btn" title="Upload Audio">
+                    <i className="fas fa-microphone"></i>
+                  </button>
+                  
+                  <div style={{position: 'relative'}}>
+                    <button 
+                      className="media-btn" 
+                      title="Add Emoji"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <i className="fas fa-smile"></i>
+                    </button>
+                    
+                    {showEmojiPicker && (
+                      <div className="emoji-picker">
+                        {emojis.map((emoji, index) => (
+                          <button
+                            key={index}
+                            className="emoji-btn"
+                            onClick={() => addEmoji(emoji)}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button className="media-btn" title="Add Poll">
+                    <i className="fas fa-poll"></i>
+                  </button>
+                  
+                  <button className="media-btn" title="Schedule Post">
+                    <i className="fas fa-calendar"></i>
+                  </button>
+                </div>
+
+                <div className="composer-footer">
+                  <div className={`char-counter ${isNearLimit ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
+                    {charCount}/280
+                  </div>
+                  <button 
+                    className="post-btn bounce"
+                    onClick={handlePost}
+                    disabled={isOverLimit || (!newPost.trim() && !selectedFile)}
+                    style={{
+                      background: postMode === 'anonymous' ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)'
+                    }}
+                  >
+                    <i className={`fas ${postMode === 'anonymous' ? 'fa-mask' : 'fa-paper-plane'}`} style={{marginRight: '8px'}}></i>
+                    {postMode === 'anonymous' ? 'Post Anonymously' : 'Post to Neex'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Feed */}
+          <div className="feed">
+            {posts.map(post => (
+              <div key={post.id} className={`post fade-in ${post.isAnonymous ? 'anonymous-post' : ''}`}>
+                <div className="post-header">
+                  <div className="post-avatar" style={{
+                    background: post.isAnonymous ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)',
+                    fontSize: post.isAnonymous ? '20px' : 'inherit'
+                  }}>
+                    {post.avatar}
+                  </div>
+                  <div className="post-info">
+                    <h4 style={{
+                      color: post.isAnonymous ? '#9333ea' : 'var(--text)'
+                    }}>
+                      {post.name}
+                      {post.isAnonymous && <i className="fas fa-mask" style={{marginLeft: '8px', fontSize: '12px'}}></i>}
+                    </h4>
+                    <span>@{post.username} • {post.timestamp}</span>
+                  </div>
+                </div>
+                
+                <div className="post-content">{post.content}</div>
+                
+                {post.image && (
+                  <img 
+                    src={post.image.startsWith('http') ? post.image : `${API_BASE_URL}${post.image}`} 
+                    alt="Post" 
+                    className="post-image" 
+                    onError={(e) => {
+                      console.log('Image load error:', post.image);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                )}
+                
+                <div className="post-actions">
+                  <button 
+                    className="action-btn"
+                    onClick={() => toggleComments(post.id)}
+                  >
+                    <i className="fas fa-comment"></i>
+                    <span>{post.comments}</span>
+                  </button>
+                  
+                  <button 
+                    className={`action-btn ${post.liked ? 'liked' : ''}`}
+                    onClick={() => toggleLike(post.id)}
+                  >
+                    <i className={`${post.liked ? 'fas' : 'far'} fa-heart`}></i>
+                    <span>{post.likes}</span>
+                  </button>
+                  
+                  <button className="action-btn">
+                    <i className="fas fa-share"></i>
+                    <span>{post.shares}</span>
+                  </button>
+                  
+                  <button className="action-btn">
+                    <i className="fas fa-bookmark"></i>
+                  </button>
+                </div>
+
+                {/* Admin Controls - Only visible to administrators */}
+                {isAdmin && (
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '12px',
+                    background: 'rgba(220, 38, 38, 0.1)',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(220, 38, 38, 0.3)'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px',
+                      fontSize: '12px',
+                      color: '#dc2626',
+                      fontWeight: 'bold'
+                    }}>
+                      <i className="fas fa-shield-alt"></i>
+                      Administrator Controls
+                    </div>
+                    <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+                      <button 
+                        style={{
+                          background: '#dc2626',
+                          color: 'white',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => adminDeletePost(post.id)}
+                        title="Delete Post"
+                      >
+                        🗑️ Delete
+                      </button>
+                      
+                      <button 
+                        style={{
+                          background: '#7c3aed',
+                          color: 'white',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => adminToggleAnonymity(post.id, !post.isAnonymous)}
+                        title={post.isAnonymous ? 'Reveal Identity' : 'Make Anonymous'}
+                      >
+                        🎭 {post.isAnonymous ? 'Reveal' : 'Anonymize'}
+                      </button>
+                      
+                      <button 
+                        style={{
+                          background: '#059669',
+                          color: 'white',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => adminToggleVisibility(post.id, !post.visible)}
+                        title={post.visible !== false ? 'Hide Post' : 'Show Post'}
+                      >
+                        👁️ {post.visible !== false ? 'Hide' : 'Show'}
+                      </button>
+                      
+                      <button 
+                        style={{
+                          background: '#ea580c',
+                          color: 'white',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => {
+                          const newContent = prompt('Edit post content:', post.content);
+                          if (newContent && newContent !== post.content) {
+                            adminEditPost(post.id, newContent);
+                          }
+                        }}
+                        title="Edit Post Content"
+                      >
+                        ✏️ Edit
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Comments Section */}
+                {showComments[post.id] && (
+                  <div className="comments-section" style={{
+                    marginTop: '16px',
+                    borderTop: '1px solid var(--border)',
+                    paddingTop: '16px'
+                  }}>
+                    {/* Comment Input */}
+                    {isLoggedIn && (
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginBottom: '16px',
+                        alignItems: 'center'
+                      }}>
+                        <div className="user-avatar" style={{fontSize: '12px'}}>
+                          {currentUser?.avatar}
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={newComment[post.id] || ''}
+                          onChange={(e) => setNewComment(prev => ({
+                            ...prev,
+                            [post.id]: e.target.value
+                          }))}
+                          onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                          className="comment-input"
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            border: '1px solid var(--border)',
+                            borderRadius: '20px',
+                            background: 'var(--bg-secondary)',
+                            color: 'var(--text)',
+                            outline: 'none'
+                          }}
+                        />
+                        <button
+                          onClick={() => addComment(post.id)}
+                          className="comment-send-btn"
+                          style={{
+                            background: 'var(--primary)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <i className="fas fa-paper-plane" style={{fontSize: '12px'}}></i>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Comments List */}
+                    <div className="comments-list">
+                      {comments[post.id]?.map(comment => (
+                        <div key={comment.id} className="comment-item" style={{
+                          display: 'flex',
+                          gap: '12px',
+                          marginBottom: '12px',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          background: 'var(--bg-tertiary)'
+                        }}>
+                          <div className="user-avatar" style={{fontSize: '10px'}}>
+                            {comment.username.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div style={{flex: 1}}>
+                            <div style={{
+                              fontWeight: 'bold',
+                              fontSize: '14px',
+                              marginBottom: '4px'
+                            }}>
+                              {comment.username}
+                            </div>
+                            <div style={{fontSize: '14px'}}>
+                              {comment.content}
+                            </div>
+                            <div style={{
+                              fontSize: '12px',
+                              color: 'var(--text-secondary)',
+                              marginTop: '4px'
+                            }}>
+                              {new Date(comment.date).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {comments[post.id]?.length === 0 && (
+                        <div style={{
+                          textAlign: 'center',
+                          color: 'var(--text-secondary)',
+                          padding: '20px'
+                        }}>
+                          No comments yet. Be the first to comment!
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+            </>
+          )}
+
+          {activeTab === 'search' && (
+            <div className="search-page">
+              <div style={{padding: '20px'}}>
+                <div style={{background: 'var(--bg-secondary)', padding: '20px', borderRadius: '12px', marginBottom: '20px', textAlign: 'center'}}>
+                  <i className="fas fa-search" style={{fontSize: '48px', color: 'var(--primary)', marginBottom: '16px'}}></i>
+                  <h3>Search NEEX</h3>
+                  <p style={{color: 'var(--text-secondary)', marginBottom: '20px'}}>Discover posts, people, and trending topics</p>
+                  <input 
+                    type="text" 
+                    placeholder="Search for posts, users, hashtags..." 
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text)',
+                      fontSize: '16px'
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      performEnhancedSearch(e.target.value);
+                    }}
+                  />
+                </div>
+                
+                {searchQuery && (
+                  <div>
+                    {isSearching ? (
+                      <div style={{textAlign: 'center', padding: '20px'}}>
+                        <div className="spinner"></div>
+                        <p style={{marginTop: '10px', color: 'var(--text-secondary)'}}>Searching...</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border)'}}>
+                          <button 
+                            onClick={() => setSearchType('all')}
+                            style={{
+                              padding: '8px 16px',
+                              background: searchType === 'all' ? 'var(--primary)' : 'transparent',
+                              color: searchType === 'all' ? 'white' : 'var(--text)',
+                              border: 'none',
+                              borderRadius: '20px',
+                              cursor: 'pointer',
+                              borderBottom: searchType === 'all' ? '2px solid var(--primary)' : 'none'
+                            }}
+                          >
+                            All ({(searchResults.posts?.length || 0) + (searchResults.users?.length || 0) + (searchResults.hashtags?.length || 0)})
+                          </button>
+                          <button 
+                            onClick={() => setSearchType('posts')}
+                            style={{
+                              padding: '8px 16px',
+                              background: searchType === 'posts' ? 'var(--primary)' : 'transparent',
+                              color: searchType === 'posts' ? 'white' : 'var(--text)',
+                              border: 'none',
+                              borderRadius: '20px',
+                              cursor: 'pointer',
+                              borderBottom: searchType === 'posts' ? '2px solid var(--primary)' : 'none'
+                            }}
+                          >
+                            Posts ({searchResults.posts?.length || 0})
+                          </button>
+                          <button 
+                            onClick={() => setSearchType('users')}
+                            style={{
+                              padding: '8px 16px',
+                              background: searchType === 'users' ? 'var(--primary)' : 'transparent',
+                              color: searchType === 'users' ? 'white' : 'var(--text)',
+                              border: 'none',
+                              borderRadius: '20px',
+                              cursor: 'pointer',
+                              borderBottom: searchType === 'users' ? '2px solid var(--primary)' : 'none'
+                            }}
+                          >
+                            People ({searchResults.users?.length || 0})
+                          </button>
+                          <button 
+                            onClick={() => setSearchType('hashtags')}
+                            style={{
+                              padding: '8px 16px',
+                              background: searchType === 'hashtags' ? 'var(--primary)' : 'transparent',
+                              color: searchType === 'hashtags' ? 'white' : 'var(--text)',
+                              border: 'none',
+                              borderRadius: '20px',
+                              cursor: 'pointer',
+                              borderBottom: searchType === 'hashtags' ? '2px solid var(--primary)' : 'none'
+                            }}
+                          >
+                            Hashtags ({searchResults.hashtags?.length || 0})
+                          </button>
+                        </div>
+
+                        {/* Posts Results */}
+                        {(searchType === 'all' || searchType === 'posts') && searchResults.posts && searchResults.posts.length > 0 && (
+                          <div style={{marginBottom: '20px'}}>
+                            <h4 style={{marginBottom: '12px', color: 'var(--text)'}}>Posts</h4>
+                            {searchResults.posts.map(post => (
+                              <div key={post.id} className={`post fade-in ${post.isAnonymous ? 'anonymous-post' : ''}`} style={{marginBottom: '16px'}}>
+                                <div className="post-header">
+                                  <div className="post-avatar" style={{
+                                    background: post.isAnonymous ? 'linear-gradient(135deg, #6b46c1, #9333ea)' : 'var(--gradient)',
+                                    fontSize: post.isAnonymous ? '20px' : 'inherit'
+                                  }}>
+                                    {post.avatar}
+                                  </div>
+                                  <div className="post-info">
+                                    <h4 style={{
+                                      color: post.isAnonymous ? '#9333ea' : 'var(--text)'
+                                    }}>
+                                      {post.name}
+                                      {post.isAnonymous && <i className="fas fa-mask" style={{marginLeft: '8px', fontSize: '12px'}}></i>}
+                                    </h4>
+                                    <span>@{post.username} • {post.timestamp}</span>
+                                  </div>
+                                </div>
+                                <div className="post-content">{post.content}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Users Results */}
+                        {(searchType === 'all' || searchType === 'users') && searchResults.users && searchResults.users.length > 0 && (
+                          <div style={{marginBottom: '20px'}}>
+                            <h4 style={{marginBottom: '12px', color: 'var(--text)'}}>People</h4>
+                            {searchResults.users.map(user => (
+                              <div key={user.id} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '16px',
+                                background: 'var(--bg-secondary)',
+                                borderRadius: '12px',
+                                marginBottom: '12px',
+                                border: '1px solid var(--border)'
+                              }}>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                                  <div style={{
+                                    width: '50px',
+                                    height: '50px',
+                                    borderRadius: '50%',
+                                    background: 'var(--gradient)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    fontSize: '18px'
+                                  }}>
+                                    {user.avatar}
+                                  </div>
+                                  <div>
+                                    <h4 style={{margin: 0, color: 'var(--text)'}}>{user.name}</h4>
+                                    <p style={{margin: 0, color: 'var(--text-secondary)', fontSize: '14px'}}>@{user.username}</p>
+                                    <p style={{margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '12px'}}>{user.followers} followers</p>
+                                    {user.bio && <p style={{margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px'}}>{user.bio}</p>}
+                                  </div>
+                                </div>
+                                <button style={{
+                                  padding: '8px 16px',
+                                  background: user.isFollowing ? 'var(--bg-primary)' : 'var(--primary)',
+                                  color: user.isFollowing ? 'var(--text)' : 'white',
+                                  border: user.isFollowing ? '1px solid var(--border)' : 'none',
+                                  borderRadius: '20px',
+                                  cursor: 'pointer',
+                                  fontSize: '14px',
+                                  fontWeight: '500'
+                                }}>
+                                  {user.isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Hashtags Results */}
+                        {(searchType === 'all' || searchType === 'hashtags') && searchResults.hashtags && searchResults.hashtags.length > 0 && (
+                          <div style={{marginBottom: '20px'}}>
+                            <h4 style={{marginBottom: '12px', color: 'var(--text)'}}>Hashtags</h4>
+                            {searchResults.hashtags.map(hashtag => (
+                              <div key={hashtag.id} style={{
+                                padding: '16px',
+                                background: 'var(--bg-secondary)',
+                                borderRadius: '12px',
+                                marginBottom: '12px',
+                                border: '1px solid var(--border)',
+                                cursor: 'pointer'
+                              }} onClick={() => setSearchQuery(hashtag.tag)}>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                                  <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '8px',
+                                    background: 'var(--primary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '18px'
+                                  }}>
+                                    #
+                                  </div>
+                                  <div>
+                                    <h4 style={{margin: 0, color: 'var(--text)'}}>{hashtag.tag}</h4>
+                                    <p style={{margin: 0, color: 'var(--text-secondary)', fontSize: '14px'}}>{hashtag.count} posts</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* No Results */}
+                        {searchResults.posts?.length === 0 && searchResults.users?.length === 0 && searchResults.hashtags?.length === 0 && (
+                          <div style={{textAlign: 'center', padding: '40px 20px'}}>
+                            <i className="fas fa-search" style={{fontSize: '48px', color: 'var(--text-secondary)', marginBottom: '16px'}}></i>
+                            <p style={{color: 'var(--text-secondary)', fontSize: '18px', marginBottom: '8px'}}>No results found</p>
+                            <p style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Try searching for something else</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {!searchQuery && (
+                  <div>
+                    <h4 style={{marginBottom: '16px'}}>Trending Topics</h4>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                      {['#NeexSocial', '#Anonymous', '#SocialMedia', '#TechNews', '#Trending', '#ReactJS'].map(tag => (
+                        <div key={tag} style={{
+                          background: 'var(--bg-secondary)',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          border: tag === '#Anonymous' ? '1px solid #9333ea' : '1px solid var(--border)'
+                        }} onClick={() => {
+                          setSearchQuery(tag);
+                          performEnhancedSearch(tag);
+                        }}>
+                          <strong style={{color: tag === '#Anonymous' ? '#9333ea' : 'var(--text)'}}>
+                            {tag === '#Anonymous' && <i className="fas fa-mask" style={{marginRight: '8px'}}></i>}
+                            {tag}
+                          </strong>
+                          <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                            {Math.floor(Math.random() * 1000) + 100} posts
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'messages' && (
+            <div className="ig-messaging-container">
+              {/* Header */}
+              <div className="ig-messaging-header">
+                <div className="ig-messaging-user">
+                  <div className="ig-user-avatar ig-active">
+                    {currentUser?.username?.substring(0, 2).toUpperCase() || 'ME'}
+                  </div>
+                  <h3>{currentUser?.username || 'Your Name'}</h3>
+                </div>
+                <button 
+                  className="ig-new-message-btn"
+                  onClick={() => setShowUserList(true)}
+                  title="New message"
+                >
+                  <i className="far fa-edit"></i>
+                </button>
+              </div>
+
+              {/* Main Content */}
+              <div className="ig-messaging-content">
+                {!selectedConversation ? (
+                  /* Conversations List */
+                  <div className="ig-conversations-list">
+                    {conversations.length === 0 ? (
+                      <div className="ig-empty-state">
+                        <div className="ig-empty-icon">
+                          <i className="far fa-paper-plane"></i>
+                        </div>
+                        <h4>Your Messages</h4>
+                        <p>Send private photos and messages to a friend or group.</p>
+                        <button 
+                          className="ig-send-message-btn"
+                          onClick={() => setShowUserList(true)}
+                        >
+                          Send Message
+                        </button>
+                      </div>
+                    ) : (
+                      conversations.map(conversation => (
+                        <div
+                          key={conversation.id}
+                          className="ig-conversation-item"
+                          onClick={() => {
+                            setSelectedConversation(conversation);
+                            loadMessages(conversation.id);
+                          }}
+                        >
+                          <div className={`ig-user-avatar ${onlineUsers.includes(conversation.username) ? 'online' : ''}`}>
+                            {conversation.avatar || conversation.username?.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="ig-conversation-info">
+                            <div className="ig-conversation-name">
+                              {conversation.name || conversation.username}
+                            </div>
+                            <div className="ig-conversation-preview">
+                              {conversation.lastMessage || 'Say hello!'}
+                              {conversation.timestamp && (
+                                <span className="ig-conversation-time">
+                                  • {new Date(conversation.timestamp).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {conversation.unreadCount > 0 && (
+                            <div className="ig-unread-badge">{conversation.unreadCount}</div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  /* Chat Interface */
+                  <div className="ig-chat-interface">
+                    {/* Chat Header */}
+                    <div className="ig-chat-header">
+                      <button 
+                        className="ig-back-btn"
+                        onClick={() => setSelectedConversation(null)}
+                      >
+                        <i className="fas fa-arrow-left"></i>
+                      </button>
+                      <div className={`ig-user-avatar ${onlineUsers.includes(selectedConversation.username) ? 'online' : ''}`}>
+                        {selectedConversation.avatar || selectedConversation.username?.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="ig-chat-user-info">
+                        <h4>{selectedConversation.name || selectedConversation.username}</h4>
+                        <span className="ig-user-status">
+                          {onlineUsers.includes(selectedConversation.username) ? 'Active now' : 'Offline'}
+                          {typingUsers[selectedConversation.username] && ' • typing...'}
+                        </span>
+                      </div>
+                      <div className="ig-chat-actions">
+                        <button className="ig-action-btn" title="Voice call">
+                          <i className="fas fa-phone"></i>
+                        </button>
+                        <button className="ig-action-btn" title="Video call">
+                          <i className="fas fa-video"></i>
+                        </button>
+                        <button className="ig-action-btn" title="Info">
+                          <i className="fas fa-info-circle"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Messages Area */}
+                    <div className="ig-messages-container" ref={messagesContainerRef}>
+                      {messages.length === 0 ? (
+                        <div className="ig-empty-messages">
+                          <div className={`ig-user-avatar ig-large ${onlineUsers.includes(selectedConversation.username) ? 'online' : ''}`}>
+                            {selectedConversation.avatar || selectedConversation.username?.substring(0, 2).toUpperCase()}
+                          </div>
+                          <h4>{selectedConversation.name || selectedConversation.username}</h4>
+                          <p>Instagram • {onlineUsers.includes(selectedConversation.username) ? 'Active now' : 'Offline'}</p>
+                          <button 
+                            className="ig-wave-btn"
+                            onClick={() => sendMessage('👋 Hello!')}
+                          >
+                            👋 Wave
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="ig-messages-list">
+                          {messages.map((message, index) => {
+                            const isOwn = message.from === currentUser?.username;
+                            const showAvatar = !isOwn && (index === 0 || messages[index - 1].from !== message.from);
+                            
+                            return (
+                              <div
+                                key={message.id || index}
+                                className={`ig-message ${isOwn ? 'own' : 'other'}`}
+                              >
+                                {showAvatar && (
+                                  <div className="ig-message-avatar">
+                                    {selectedConversation.avatar || selectedConversation.username?.substring(0, 1).toUpperCase()}
+                                  </div>
+                                )}
+                                <div className="ig-message-bubble">
+                                  {message.content}
+                                </div>
+                                <div className="ig-message-time">
+                                  {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {typingUsers[selectedConversation.username] && (
+                            <div className="ig-message other">
+                              <div className="ig-message-avatar">
+                                {selectedConversation.username?.substring(0, 1).toUpperCase()}
+                              </div>
+                              <div className="ig-typing-indicator">
+                                <div className="ig-typing-dots">
+                                  <span></span>
+                                  <span></span>
+                                  <span></span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Message Input */}
+                    <div className="ig-message-input-container">
+                      <div className="ig-message-input-wrapper">
+                        <button className="ig-emoji-btn" title="Emoji">
+                          <i className="far fa-smile"></i>
+                        </button>
+                        <input
+                          type="text"
+                          className="ig-message-input"
+                          placeholder="Message..."
+                          value={newMessage}
+                          onChange={(e) => {
+                            setNewMessage(e.target.value);
+                            handleTyping(true);
+                            setTimeout(() => handleTyping(false), 1000);
+                          }}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              sendMessage();
+                            }
+                          }}
+                        />
+                        <button className="ig-media-btn" title="Photo/Video">
+                          <i className="far fa-image"></i>
+                        </button>
+                        <button className="ig-like-btn" title="Like">
+                          <i className="far fa-heart"></i>
+                        </button>
+                        {newMessage.trim() && (
+                          <button 
+                            className="ig-send-btn"
+                            onClick={sendMessage}
+                          >
+                            Send
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* User List Modal */}
+              {showUserList && (
+                <div className="ig-modal-overlay">
+                  <div className="ig-modal">
+                    <div className="ig-modal-header">
+                      <h3>New message</h3>
+                      <button 
+                        className="ig-modal-close"
+                        onClick={() => setShowUserList(false)}
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <div className="ig-modal-content">
+                      <div className="ig-search-input-wrapper">
+                        <input
+                          type="text"
+                          className="ig-search-input"
+                          placeholder="Search..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </div>
+                      <div className="ig-user-list">
+                        <div className="ig-suggestions-header">
+                          <h4>Suggested</h4>
+                        </div>
+                        {allUsers.length === 0 ? (
+                          <div className="ig-no-users">
+                            <i className="fas fa-users"></i>
+                            <p>No other users found</p>
+                          </div>
+                        ) : (
+                          allUsers
+                            .filter(user => 
+                              !searchQuery || 
+                              user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                            )
+                            .map(user => (
+                              <button
+                                key={user.username}
+                                className="ig-user-item"
+                                onClick={() => startNewConversation(user)}
+                              >
+                                <div className={`ig-user-avatar ${onlineUsers.includes(user.username) ? 'online' : ''}`}>
+                                  {user.avatar || user.username?.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div className="ig-user-info">
+                                  <h4>{user.name || user.username}</h4>
+                                  <p>{user.username} • {onlineUsers.includes(user.username) ? 'Active now' : 'Offline'}</p>
+                                </div>
+                              </button>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className="notifications-page">
+              <div style={{padding: '20px'}}>
+                <h3 style={{marginBottom: '20px'}}>Notifications</h3>
+                {notifications.length > 0 ? (
+                  notifications.map(notification => (
+                    <div key={notification.id} style={{
+                      background: 'var(--bg-secondary)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      marginBottom: '12px',
+                      border: '1px solid var(--border)'
+                    }}>
+                      <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                        <i className="fas fa-bell" style={{color: 'var(--primary)'}}></i>
+                        <div>
+                          {notification.message}
+                          <div style={{fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px'}}>
+                            Just now
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{textAlign: 'center', padding: '40px 20px'}}>
+                    <i className="fas fa-bell" style={{fontSize: '48px', color: 'var(--primary)', marginBottom: '16px'}}></i>
+                    <h4>No notifications yet</h4>
+                    <p style={{color: 'var(--text-secondary)'}}>When you get notifications, they'll show up here</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="profile-page">
+              <div style={{padding: '20px'}}>
+                <div style={{
+                  background: 'var(--bg-secondary)',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{
+                    fontSize: '64px',
+                    marginBottom: '16px'
+                  }}>
+                    {currentUser?.avatar}
+                  </div>
+                  <h2>{currentUser?.name}</h2>
+                  <p style={{color: 'var(--text-secondary)', marginBottom: '16px'}}>@{currentUser?.username}</p>
+                  <p style={{marginBottom: '20px'}}>{currentUser?.bio}</p>
+                  <div style={{display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '20px'}}>
+                    <div>
+                      <strong>{posts.filter(p => p.username === currentUser?.username.substring(1) && !p.isAnonymous).length}</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Posts</div>
+                    </div>
+                    <div>
+                      <strong>156</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Following</div>
+                    </div>
+                    <div>
+                      <strong>1.2K</strong>
+                      <div style={{color: 'var(--text-secondary)', fontSize: '14px'}}>Followers</div>
+                    </div>
+                  </div>
+                  <button style={{
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginRight: '12px'
+                  }}>
+                    Edit Profile
+                  </button>
+                </div>
+
+                <div>
+                  <h4 style={{marginBottom: '16px'}}>My Posts</h4>
+                  {posts.filter(post => post.username === currentUser?.username.substring(1) && !post.isAnonymous).length > 0 ? (
+                    posts.filter(post => post.username === currentUser?.username.substring(1) && !post.isAnonymous).map(post => (
+                      <div key={post.id} className="post fade-in" style={{marginBottom: '16px'}}>
+                        <div className="post-content" style={{marginBottom: '12px'}}>{post.content}</div>
+                        <div style={{fontSize: '14px', color: 'var(--text-secondary)'}}>
+                          {post.likes} likes • {post.comments} comments • {post.timestamp}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{textAlign: 'center', padding: '20px', color: 'var(--text-secondary)'}}>
+                      <p>You haven't posted anything yet!</p>
+                      <button 
+                        style={{
+                          background: 'var(--primary)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '8px 16px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          marginTop: '10px'
+                        }}
+                        onClick={() => setActiveTab('home')}
+                      >
+                        Create Your First Post
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Navigation */}
+          <div className="bottom-nav">
+            <div 
+              className={`nav-item ${activeTab === 'home' ? 'active' : ''}`}
+              onClick={() => setActiveTab('home')}
+            >
+              <i className={activeTab === 'home' ? 'fas fa-home' : 'far fa-home'}></i>
+              <span>Home</span>
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
+              onClick={() => setActiveTab('search')}
+            >
+              <i className="fas fa-search"></i>
+              <span>Search</span>
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'messages' ? 'active' : ''}`}
+              onClick={() => setActiveTab('messages')}
+            >
+              <i className={activeTab === 'messages' ? 'fas fa-comment' : 'far fa-comment'}></i>
+              <span>Messages</span>
+              {unreadMessages > 0 && (
+                <div className="notification-badge">{unreadMessages}</div>
+              )}
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'notifications' ? 'active' : ''}`}
+              onClick={() => setActiveTab('notifications')}
+            >
+              <i className={activeTab === 'notifications' ? 'fas fa-bell' : 'far fa-bell'}></i>
+              <span>Notifications</span>
+              {notifications.length > 0 && (
+                <div className="notification-badge">{notifications.length}</div>
+              )}
+            </div>
+            
+            <div 
+              className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <i className={activeTab === 'profile' ? 'fas fa-user' : 'far fa-user'}></i>
+              <span>Profile</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
